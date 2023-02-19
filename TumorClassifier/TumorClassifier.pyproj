@@ -4,14 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>0ae176df-0dac-4a08-9077-208e17627930</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>TumorClassifier.py</StartupFile>
+    <StartupFile>Engine.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>TumorClassifier</Name>
     <RootNamespace>TumorClassifier</RootNamespace>
-    <InterpreterId>CondaEnv|CondaEnv|pipelineV2</InterpreterId>
+    <InterpreterId>CondaEnv|CondaEnv|classifierV1</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,10 +22,24 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="TumorClassifier.py" />
+    <Compile Include="ContrastEnhancmentUtils.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GeoJsonReader.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Engine.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DataLoader.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SlideSegmenter.py" />
   </ItemGroup>
   <ItemGroup>
+    <InterpreterReference Include="CondaEnv|CondaEnv|classifierV1" />
     <InterpreterReference Include="CondaEnv|CondaEnv|installTest" />
+    <InterpreterReference Include="CondaEnv|CondaEnv|pipeLineMaster" />
     <InterpreterReference Include="CondaEnv|CondaEnv|pipelineV2" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
