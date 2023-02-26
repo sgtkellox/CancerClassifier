@@ -90,6 +90,39 @@ class SlideSegmenter:
         return
 
 
+    def makeSlicesWithOverlapNoFilter(self,sizeOfSlice,overlap, scene):
+        contrastTools = ContrastEnhancmentUtils.ContrastEnhancmentUtils()
+
+        wsiWidth = scene.rect[2]
+        wsiHeight = scene.rect[3]
+        minX = 0
+        minY = 0
+        count = 1;
+        while minX+sizeOfSlice-overlap < wsiWidth:
+            while minY+sizeOfSlice-overlap < wsiHeight:
+            
+                image = scene.read_block((minX,minY,sizeOfSlice,sizeOfSlice), (sizeOfSlice,sizeOfSlice))
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+                minY += (sizeOfSlice-overlap)
+
+                #contrastEnhancedImage = contrastTools.histogramEqalisation(image)
+                outpath = r"C:\Users\felix\Desktop\eindri\tiles\tile" + str(count) + ".jpg"
+                #outpathHistogram = r"C:\Users\felix\Desktop\croppedImages2\crop_histogram" + str(count) + ".jpg"
+                cv2.imwrite(outpath, image)
+                #contrastTools.showColorHistogramm(contrastEnhancedImage,outpathHistogram)
+                #contrastEnhancedImage = histogramEqalisation(image)
+                #outpathEnhandced = r"C:\Users\felix\Desktop\eindri\contrastEnhancedTiles" + str(count) + ".jpg"
+                #cv2.imwrite(outpathEnhandced, contrastEnhancedImage)
+                    
+                count +=1
+                    
+                    
+            minX += (sizeOfSlice-overlap)
+            minY = 0
+        return
+
+
 
 
 

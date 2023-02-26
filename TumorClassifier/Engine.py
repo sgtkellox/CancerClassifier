@@ -1,7 +1,7 @@
 import SlideSegmenter 
 import slideio
 
-path = r"D:\Ramin_SS_Oligo_Astro\A2-N17-1152K.svs"
+path = r"C:\Users\felix\Desktop\eindri\28C9EA57-319D-481A-A722-D46F57109148.svs"
 
 slide = slideio.open_slide(path,'SVS')
 num_scenes = slide.num_scenes
@@ -12,4 +12,4 @@ print(scene.rect[3])
 
 segmenter = SlideSegmenter.SlideSegmenter()
 
-segmenter.makeSlicesWithOverlap(1000, 100, scene)
+segmenter.makeSlicesWithOverlapNoFilter(800, 100, scene)
