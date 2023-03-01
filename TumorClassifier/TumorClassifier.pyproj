@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>TumorClassifier</Name>
     <RootNamespace>TumorClassifier</RootNamespace>
-    <InterpreterId>CondaEnv|CondaEnv|classifierV1</InterpreterId>
+    <InterpreterId>CondaEnv|CondaEnv|openSlide1</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -39,6 +39,7 @@
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|classifierV1" />
     <InterpreterReference Include="CondaEnv|CondaEnv|installTest" />
+    <InterpreterReference Include="CondaEnv|CondaEnv|openSlide1" />
     <InterpreterReference Include="CondaEnv|CondaEnv|pipeLineMaster" />
     <InterpreterReference Include="CondaEnv|CondaEnv|pipelineV2" />
   </ItemGroup>

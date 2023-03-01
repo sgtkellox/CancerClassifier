@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     # learning_parameters 
     lr = 1e-3
-    epochs = args['epochs']
+    epochs = 1000
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Computation device: {device}\n")
     model = CNNModel().to(device)
@@ -109,8 +109,8 @@ if __name__ == '__main__':
         print('-'*50)
         time.sleep(5)
     
-    # save the trained model weights
-    save_model(epochs, model, optimizer, criterion)
+        # save the trained model weights
+        save_model(epochs, model, optimizer, criterion,epoch)
     # save the loss and accuracy plots
     save_plots(train_acc, valid_acc, train_loss, valid_loss)
     print('TRAINING COMPLETE')

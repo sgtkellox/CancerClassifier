@@ -6,8 +6,8 @@ import pickle
 from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
-SLIDEPATH= r"E:\Ramin_SS_GBM\GBM-N18-1942Q.svs"
-OUT_PATH= r"E:\AreebaTest"
+SLIDEPATH= r"D:\Ramin_SS_GBM\GBM-N18-1942Q.svs"
+OUT_PATH= r"D:\AreebaTest"
 
 BG_THR=40
 MASK_THR=50
@@ -232,8 +232,8 @@ def process_tiles(slidepath, mask,outPath):
             if masked == 101: nbg += 1
                 
             # save tiles name and % masked area
-            with open(OUT_PATH + get_slidename(slidepath) + "_tiles_stats.csv", "a") as f:
-                f.write(f"{tilename},{masked}\n")
+            #with open(OUT_PATH + get_slidename(slidepath) + "_tiles_stats.csv", "a") as f:
+                #f.write(f"{tilename},{masked}\n")
                 
             # save the tile if it passes
             if masked < MASK_THR:

@@ -4,6 +4,9 @@ import argparse
 from torchvision import models, transforms
 from torch.nn import functional as F
 from torch import topk
+from model import CNNModel
+import torch.nn as nn
+import torch
 
 # construct the argument parser
 parser = argparse.ArgumentParser()
@@ -35,29 +38,22 @@ def show_cam(CAMs, width, height, orig_image, class_idx, all_classes, save_name)
                     cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 2)
         cv2.imshow('CAM', result/255.)
         cv2.waitKey(0)
-        cv2.imwrite(f"outputs/CAM_{save_name}.jpg", result)
+        cv2.imwrite(r"C:\Users\felix\Desktop\Neuro\cams\CAM_"+save_name+".jpg", result)
 
-def load_synset_classes(file_path):
-    # load the synset text file for labels
-    all_classes = []
-    with open(file_path, 'r') as f:
-        all_lines = f.readlines()
-        labels = [line.split('\n') for line in all_lines]
-        for label_list in labels:
-            current_class = [name.split(',') for name in label_list][0][0][10:]
-            all_classes.append(current_class)
-    return all_classes
-# get all the classes in a list
-all_classes = load_synset_classes('LOC_synset_mapping.txt')
+
+all_classes = ["Astro", "GBM", "Oligo"]
 
 # read and visualize the image
-image = cv2.imread(args['input'])
+image = cv2.imread(r"C:\Users\felix\Desktop\Neuro\Images\test\GBM\GBM-N22-480Q_32001_38001.jpg")
 orig_image = image.copy()
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 height, width, _ = image.shape
 
 # load the model
-model = models.resnet18(pretrained=True).eval()
+model = CNNModel()
+model.load_state_dict(torch.load(r'C:\Users\felix\Desktop\Neuro\models\model286.pth')['model_state_dict'])
+model.eval()
+
 # hook the feature extractor
 # https://github.com/zhoubolei/CAM/blob/master/pytorch_CAM.py
 features_blobs = []
@@ -93,6 +89,6 @@ class_idx = topk(probs, 1)[1].int()
 # generate class activation mapping for the top1 prediction
 CAMs = returnCAM(features_blobs[0], weight_softmax, class_idx)
 # file name to save the resulting CAM image with
-save_name = f"{args['input'].split('/')[-1].split('.')[0]}"
+save_name = r"C:\Users\felix\Desktop\Neuro\cams\cam.jpg"
 # show and save the results
 show_cam(CAMs, width, height, orig_image, class_idx, all_classes, save_name)
