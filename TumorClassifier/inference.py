@@ -2,11 +2,11 @@ import torch
 import cv2
 import torchvision.transforms as transforms
 import argparse
-from model import CNNMOdel
+from model import CNNModel
 # construct the argument parser
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input', 
-    default='input/butterflies_rev2/test/adonis/1.jpg',
+    default=r'E:\models\Images\test\Oligo\O3-N21-463Q_10001_44001.jpg',
     help='path to the input image')
 args = vars(parser.parse_args())
 
@@ -14,12 +14,12 @@ args = vars(parser.parse_args())
 device = ('cuda' if torch.cuda.is_available() else 'cpu')
 # list containing all the class labels
 labels = [
-    'GBM', 'Astro'
+    'Astro', 'GBM', "Oligo"
     ]
 
 # initialize the model and load the trained weights
-model = CNNMOdel().to(device)
-checkpoint = torch.load('outputs/model.pth', map_location=device)
+model = CNNModel().to(device)
+checkpoint = torch.load(r'C:\Users\felix\Desktop\Neuro\models\model286.pth', map_location=device)
 model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 
@@ -35,7 +35,7 @@ transform = transforms.Compose([
 ])  # read and preprocess the image
 image = cv2.imread(args['input'])
 # get the ground truth class
-gt_class = args['input'].split('/')[-2]
+gt_class = 'Oligo'
 orig_image = image.copy()
 # convert to RGB format
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -61,6 +61,6 @@ cv2.putText(orig_image,
 print(f"GT: {gt_class}, pred: {pred_class}")
 cv2.imshow('Result', orig_image)
 cv2.waitKey(0)
-cv2.imwrite(f"outputs/{gt_class}{args['input'].split('/')[-1].split('.')[0]}.png",
+cv2.imwrite(r'E:\models\res.jpg',
     orig_image)
 

@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     # learning_parameters 
     lr = 1e-3
-    epochs = args['epochs']
+    epochs = 5
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Computation device: {device}\n")
     model = CNNModel().to(device)

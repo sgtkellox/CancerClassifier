@@ -10,9 +10,9 @@ from torch.utils.data.dataloader import DataLoader
 from torchvision import datasets
 from torchvision.datasets.utils import download_url
 from torch.utils.data import random_split
-from preprocessing_slides import process_tiles
-from preprocessing_slides import mask4
-from preprocessing_slides import SIZE
+#from preprocessing_slides import process_tiles
+#from preprocessing_slides import mask4
+#from preprocessing_slides import SIZE
 
 import matplotlib.pyplot as plt
 
@@ -72,53 +72,58 @@ def sortImagesByFileName(path):
 
 def makeTrainValTestSplit(path,trainPath,valPath,testPath):
     files = os.listdir(path)
-    trainSize = math.floor(0.7*len(files))
-    valSize = math.floor(0.15 * len(files))
+    trainSize = 11900
+    valSize = 2550
     
     for i in range(trainSize):
         chosenFile = random.choice(files)
-        shutil.copyfile(os.path.join(path,chosenFile),os.path.join(trainPath,chosenFile))
-        files.remove(chosenFile)
+        if chosenFile.endswith(".jpg"):
+            src = os.path.join(path,chosenFile)
+            dst = os.path.join(trainPath,chosenFile)
+            shutil.copy(src,dst)
+            files.remove(chosenFile)
     for j in range(valSize):
         chosenFile = random.choice(files)
-        shutil.copyfile(os.path.join(path,chosenFile),os.path.join(valPath,chosenFile))
-        files.remove(chosenFile)
-    for file in files:
-        shutil.copyfile(os.path.join(path,file),os.path.join(testPath,file))
+        if chosenFile.endswith(".jpg"):
+            shutil.copy(os.path.join(path,chosenFile),os.path.join(valPath,chosenFile))
+            files.remove(chosenFile)
+    for k in range(valSize):
+        chosenFile = random.choice(files)
+        if chosenFile.endswith(".jpg"):
+            shutil.copy(os.path.join(path,chosenFile),os.path.join(testPath,chosenFile))
     return
 
 def show_example(img, label):
     print('Label: ', dataset.classes[label], "("+str(label)+")")
     plt.imshow(img.permute(1, 2, 0))
 
-def loadData(trainDir, valDir):
-    train_directory = 'train'
-    valid_directory = 'test'
-    # Batch size
-    bs = 32
-    # Number of classes
-    num_classes = 10
-    # Load Data from folders
-    data = {
-        'train': datasets.ImageFolder(root=train_directory, transform=image_transforms['train']),
-        'valid': datasets.ImageFolder(root=valid_directory, transform=image_transforms['valid']),
-        
-    }
-    # Size of Data, to be used for calculating Average Loss and Accuracy
-    train_data_size = len(data['train'])
-    valid_data_size = len(data['valid'])
-    test_data_size = len(data['test'])
-    # Create iterators for the Data loaded using DataLoader module
-    train_data = DataLoader(data['train'], batch_size=bs, shuffle=True)
-    valid_data = DataLoader(data['valid'], batch_size=bs, shuffle=True)
-    test_data = DataLoader(data['test'], batch_size=bs, shuffle=True)
-    # Print the train, validation and test set data sizes
-    train_data_size, valid_data_size, test_data_size
-    return
 
-def loadData():
-    train_dataset = torchvision.datasets.ImageFolder(root='train')
-    valid_dataset = torchvision.datasets.ImageFolder(root='valid')
-
+def makeSampleDistributionHistogramm(rootPath):
+    trainPath = os.path.join(rootPath,"train")
+    result = {}
+    classes = os.listdir(trainPath)
+    for label in classes:
+        if label.is_dir():
+            currentClassPath = os.path.join(trainPath,label)
+            files = os.listdir(currentClassPath)
+            entry = {"train": len(files), "val": 0, "test":0}
+            result[label] = entry
+    valPath = os.path.join(rootPath,"val")
+    classes = os.listdir(valPath)
+    for label in classes:
+        if label.is_dir():
+            currentClassPath = os.path.join(trainPath,label)
+            files = os.listdir(currentClassPath)
+            result[label]["val"] = len(files)
+    testPath = os.path.join(rootPath,"test")
+    classes = os.listdir(testPath)
+    for label in classes:
+        if label.is_dir():
+            currentClassPath = os.path.join(testPath,label)
+            files = os.listdir(currentClassPath)
+            result[label]["test"] = len(files)
+           
+    return result
 
 
+makeTrainValTestSplit(r"E:\ClassifierImages\Oligo\Smear",r"E:\ClassifierSplit\train\Oligo",r"E:\ClassifierSplit\val\Oligo",r"E:\ClassifierSplit\test\Oligo")
