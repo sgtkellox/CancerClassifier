@@ -112,7 +112,7 @@ if __name__ == '__main__':
         # save the trained model weights
         save_model(epochs, model, optimizer, criterion,epoch)
     # save the loss and accuracy plots
-    save_plots(train_acc, valid_acc, train_loss, valid_loss)
+        save_plots(train_acc, valid_acc, train_loss, valid_loss)
     print('TRAINING COMPLETE')
 
 

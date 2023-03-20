@@ -2,7 +2,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 # batch size
-BATCH_SIZE = 128
+BATCH_SIZE = 16
 
 
 # the training transforms
@@ -30,12 +30,12 @@ valid_transform = transforms.Compose([
 
 # training dataset
 train_dataset = datasets.ImageFolder(
-    root=r'C:\Users\felix\Desktop\Neuro\Images\train',
+    root=r'C:\Users\felix\Desktop\Neuro\KryoSplit\train',
     transform=train_transform
 )
 # validation dataset
 valid_dataset = datasets.ImageFolder(
-    root=r'C:\Users\felix\Desktop\Neuro\Images\val',
+    root=r'C:\Users\felix\Desktop\Neuro\KryoSplit\val',
     transform=valid_transform
 )
 # training data loaders

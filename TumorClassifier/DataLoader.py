@@ -129,4 +129,4 @@ def show_example(img, label):
 
 
 
-sortLeftOverSlides(r"D:\SmearsForTest")
+sortLeftOverSlides(r"E:\KryoForTest")
