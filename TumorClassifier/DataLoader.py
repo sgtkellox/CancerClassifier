@@ -65,6 +65,30 @@ def sortImagesByFileName(path):
     return
 
 
+def sliceKryos(path):
+     files = os.listdir(path)
+     for file in files:
+            if file.startswith("GBM"):
+                
+                if "K" in file:
+                    #dst = os.path.join(GBMfolder,"Kryo",file)
+                    filePath = os.path.join(path,file)
+                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\GBM")
+            elif file.startswith("O"):
+                
+                if  "K" in file:
+                    filePath = os.path.join(path,file)
+                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\Oligo")
+
+            elif file.startswith("A"):
+                
+                if "K" in file:
+                    filePath = os.path.join(path,file)
+                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\Astro")
+     return   
+
+
+
 def sortLeftOverSlides(path):
     files = os.listdir(path)
     for file in files:
@@ -129,4 +153,4 @@ def show_example(img, label):
 
 
 
-sortLeftOverSlides(r"D:\SmearsForTest")
+makeTrainValTestSplit(r"D:\KryoTiles\Oligo",r"D:\KryoSplit\train\Oligo",r"D:\KryoSplit\val\Oligo",r"D:\KryoSplit\test\Oligo")
