@@ -24,7 +24,7 @@ def makeTestRun(path):
 
     # initialize the model and load the trained weights
     model = CNNModel().to(device)
-    checkpoint = torch.load(r'D:\ClassifierResults\resNet50Kryo\models\model115.pth', map_location=device)
+    checkpoint = torch.load(r'F:\fixedModel\model130.pth', map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 

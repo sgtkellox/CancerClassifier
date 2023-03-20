@@ -6,7 +6,7 @@ import pickle
 from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
-SLIDEPATH= r"D:\Ramin_SS_GBM\GBM-N18-1942Q.svs"
+SLIDEPATH= r"F:\N20-1488\BDC07DEC-F716-4746-B1C9-A318E55BAF57.svs"
 OUT_PATH= r"D:\AreebaTest"
 
 BG_THR=40
@@ -187,9 +187,7 @@ def process_tiles(slidepath, mask,outPath):
     mgn = get_magnification(slide)
     print(f"Magnification is {mgn}.", flush=True)
     
-    # for downsampling x40 to x20
-    if mgn == 40: sz = SIZE * 2
-    else: sz = SIZE
+    
 
     # initiate stats variables
     ntotal = 0
@@ -200,12 +198,7 @@ def process_tiles(slidepath, mask,outPath):
 
     pass_names = []
 
-   
-
-    path = os.path.join(outPath,get_slidename(slidepath) + "_tiles_stats.csv")
-    
-    with open(path, "w") as f:
-        f.write("Tilename,Masked\n")
+    sz = 500
         
     for x in range(1, w-sz-1, sz):
         for y in range(1, h-sz-1, sz):
@@ -243,9 +236,6 @@ def process_tiles(slidepath, mask,outPath):
 
     print("Done.", flush=True) 
     
-    # write names of the saved tiles to a file
-    with open(OUT_PATH + get_slidename(slidepath) + "_tiles_list.txt", "wb") as fp:
-        pickle.dump(pass_names, fp)
     
     return ntotal, npass, nbg
 
@@ -265,7 +255,7 @@ def main():
     print("Start processing the slide...", flush=True)
 
     # produce masked tiles and save counts
-    n_total, n_pass, n_bg = process_tiles(SLIDEPATH, mask4)
+    n_total, n_pass, n_bg = process_tiles(SLIDEPATH, mask4, outPath= r"E:\KryoForTest")
     
     # Print statistics
     print("------------------------------------------------", flush=True)

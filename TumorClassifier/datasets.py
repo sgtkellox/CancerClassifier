@@ -2,7 +2,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 # batch size
-BATCH_SIZE = 128
+BATCH_SIZE = 16
 
 
 # the training transforms

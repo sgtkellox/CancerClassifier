@@ -1,18 +1,15 @@
 import numpy as np
 import cv2
-import argparse
-from torchvision import models, transforms
+import torch
+import glob as glob
+from torchvision import transforms
 from torch.nn import functional as F
 from torch import topk
 from model import CNNModel
-import torch.nn as nn
-import torch
 
-# construct the argument parser
-parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--input', help='path to input image', 
-                    default='input/image_1.jpg')
-args = vars(parser.parse_args())
+import os
+
+
 
 # https://github.com/zhoubolei/CAM/blob/master/pytorch_CAM.py
 def returnCAM(feature_conv, weight_softmax, class_idx):
@@ -29,66 +26,94 @@ def returnCAM(feature_conv, weight_softmax, class_idx):
         output_cam.append(cv2.resize(cam_img, size_upsample))
     return output_cam
 
-def show_cam(CAMs, width, height, orig_image, class_idx, all_classes, save_name):
+def show_cam(CAMs, width, height, orig_image, class_idx, save_name):
     for i, cam in enumerate(CAMs):
         heatmap = cv2.applyColorMap(cv2.resize(cam,(width, height)), cv2.COLORMAP_JET)
-        result = heatmap * 0.3 + orig_image * 0.5
+        result = heatmap * 0.5 + orig_image * 0.5
         # put class label text on the result
-        cv2.putText(result, all_classes[class_idx[i]], (20, 40), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 2)
-        cv2.imshow('CAM', result/255.)
-        cv2.waitKey(0)
-        cv2.imwrite(r"C:\Users\felix\Desktop\Neuro\cams\CAM_"+save_name+".jpg", result)
+        cv2.putText(result, str(int(class_idx[i])), (20, 40), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        
+        cv2.imwrite(save_name, result)
 
-
-all_classes = ["Astro", "GBM", "Oligo"]
-
-# read and visualize the image
-image = cv2.imread(r"C:\Users\felix\Desktop\Neuro\Images\test\GBM\GBM-N22-480Q_32001_38001.jpg")
-orig_image = image.copy()
-image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-height, width, _ = image.shape
-
-# load the model
-model = CNNModel()
-model.load_state_dict(torch.load(r'C:\Users\felix\Desktop\Neuro\models\model286.pth')['model_state_dict'])
-model.eval()
-
-# hook the feature extractor
-# https://github.com/zhoubolei/CAM/blob/master/pytorch_CAM.py
-features_blobs = []
-def hook_feature(module, input, output):
-    features_blobs.append(output.data.cpu().numpy())
-model._modules.get('layer4').register_forward_hook(hook_feature)
-# get the softmax weight
-params = list(model.parameters())
-weight_softmax = np.squeeze(params[-2].data.numpy())
-
-# define the transforms, resize => tensor => normalize
-transforms = transforms.Compose(
-    [transforms.ToPILImage(),
-     transforms.Resize((224, 224)),
-     transforms.ToTensor(),
-     transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225]
-    )
+ 
+transform = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Resize(224),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5]
+        )
     ])
 
-# apply the image transforms
-image_tensor = transforms(image)
-# add batch dimension
-image_tensor = image_tensor.unsqueeze(0)
-# forward pass through model
-outputs = model(image_tensor)
-# get the softmax probabilities
-probs = F.softmax(outputs).data.squeeze()
-# get the class indices of top k probabilities
-class_idx = topk(probs, 1)[1].int()
 
-# generate class activation mapping for the top1 prediction
-CAMs = returnCAM(features_blobs[0], weight_softmax, class_idx)
-# file name to save the resulting CAM image with
-save_name = r"C:\Users\felix\Desktop\Neuro\cams\cam.jpg"
-# show and save the results
-show_cam(CAMs, width, height, orig_image, class_idx, all_classes, save_name)
+def makeGradCamForFolder(path):
+
+    labels = [
+        'Astro', 'GBM', 'Oligo'
+        ]
+
+
+    # define computation device
+    device = ('cuda' if torch.cuda.is_available() else 'cpu')
+    # initialize model, switch to eval model, load trained weights
+    model = CNNModel()
+    checkpoint = torch.load(r'F:\fixedModel\model130.pth', map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.to(device)
+    model.eval()
+
+    for file in os.listdir(path):
+        d = os.path.join(path, file)
+        if os.path.isdir(d):
+            
+            testImgs = os.listdir(d)
+            
+            for testImg in testImgs:
+                if not testImg.endswith(".jpg"):
+                    continue
+                # read the image
+                imgPath = os.path.join(d,testImg)
+                image = cv2.imread(imgPath)
+                orig_image = image.copy()
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                #image = np.expand_dims(image, axis=2)
+                height, width, _ = orig_image.shape
+                # apply the image transforms
+
+                image_tensor = transform(image)
+
+                features_blobs = []
+                def hook_feature(module, input, output):
+                    features_blobs.append(output.data.cpu().numpy())
+                model._modules.get('conv4').register_forward_hook(hook_feature)
+
+                # get the softmax weight
+                params = list(model.parameters())
+                weight_softmax = np.squeeze(params[-2].cpu().data.numpy())
+
+                # add batch dimension
+                image_tensor = image_tensor.unsqueeze(0)
+                image_tensor = image_tensor.to(device)
+                # forward pass through model
+                outputs = model(image_tensor)
+                # get the softmax probabilities
+                probs = F.softmax(outputs).data.squeeze()
+
+
+                # get the class indices of top k probabilities
+                class_idx = topk(probs, 1)[1].int()
+
+    
+                # generate class activation mapping for the top1 prediction
+                CAMs = returnCAM(features_blobs[0], weight_softmax, class_idx)
+                # file name to save the resulting CAM image with
+                imgName, file_extension = os.path.splitext(testImg)
+                save_name = os.path.join(r"E:\ClassifierResults\simpleKryo\cams",imgName+"cam.jpg")
+                # show and save the results
+                show_cam(CAMs, width, height, orig_image, class_idx, save_name)
+
+
+if __name__ == '__main__':
+    makeGradCamForFolder(r"C:\Users\felix\Desktop\Neuro\KryoSplit\test")
