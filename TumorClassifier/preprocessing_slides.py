@@ -6,11 +6,11 @@ import pickle
 from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
-SLIDEPATH= r"F:\N20-1488\BDC07DEC-F716-4746-B1C9-A318E55BAF57.svs"
+SLIDEPATH= r"E:\N20-1488\gbm.svs"
 OUT_PATH= r"D:\AreebaTest"
 
-BG_THR=40
-MASK_THR=50
+BG_THR=70
+MASK_THR=90
 SIZE=500
 
 def get_magnification(slide):
@@ -200,8 +200,8 @@ def process_tiles(slidepath, mask,outPath):
 
     sz = 500
         
-    for x in range(1, w-sz-1, sz):
-        for y in range(1, h-sz-1, sz):
+    for x in range(0, w-sz, sz):
+        for y in range(0, h-sz, sz):
             # count the tile
             ntotal += 1
 
@@ -255,7 +255,7 @@ def main():
     print("Start processing the slide...", flush=True)
 
     # produce masked tiles and save counts
-    n_total, n_pass, n_bg = process_tiles(SLIDEPATH, mask4, outPath= r"E:\KryoForTest")
+    n_total, n_pass, n_bg = process_tiles(SLIDEPATH, mask4, outPath= r"F:\split")
     
     # Print statistics
     print("------------------------------------------------", flush=True)

@@ -39,10 +39,7 @@ import cv2
 from matplotlib import pyplot as plt
 import os
 
-############### INPUT RGB IMAGE #######################
-#Using opencv to read images may bemore robust compared to using skimage
-#but need to remember to convert BGR to RGB.
-#Also, convert to float later on and normalize to between 0 and 1.
+
 
 #Image downloaded from:
 #https://pbs.twimg.com/media/C1MkrgQWQAASbdz.jpg
@@ -69,6 +66,19 @@ for file in os.listdir(imgFolder):
     maxCRef = np.array([1.9705, 1.0308])
 
 
+
+
+
+def nomalizeStainInFolder(path):
+
+    imgs = os.listdir(path)
+
+    for img in imgs:
+        filePath = os.path.join(path,img)
+        fileName = img.split(".")[0]
+        img=cv2.imread(filePath, 1)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
     # extract the height, width and num of channels of image
     h, w, c = img.shape
 
@@ -81,7 +91,7 @@ for file in os.listdir(imgFolder):
     #OD = -np.log10(img+0.004)  #Use this when reading images with skimage
     #Adding 0.004 just to avoid log of zero. 
 
-    OD = -np.log10((img.astype(float)+1)/Io) #Use this for opencv imread
+        OD = -np.log10((img.astype(np.float)+1)/Io) #Use this for opencv imread
     #Add 1 in case any pixels in the image have a value of 0 (log 0 is indeterminate)
 
     """
@@ -159,6 +169,11 @@ for file in os.listdir(imgFolder):
     E[E>255] = 254
     E = np.reshape(E.T, (h, w, 3)).astype(np.uint8)
 
-    plt.imsave(os.path.join(imgFolder,file+"_normalized.jpg"), Inorm)
-    plt.imsave(os.path.join(imgFolder,file+"_H.jpg"), H)
-    plt.imsave(os.path.join(imgFolder,file+"_E.jpg"), E)
+        plt.imsave(os.path.join(r"E:\macencoKryo\norm",fileName+"_norm.jpg"), Inorm)
+        plt.imsave(os.path.join(r"E:\macencoKryo\h",fileName+"_h.jpg"), H)
+        plt.imsave(os.path.join(r"E:\macencoKryo\e",fileName+"_e.jpg"), E)
+
+
+if __name__ == '__main__':
+    nomalizeStainInFolder(r"E:\KryoSplit\test\GBM")
+    
