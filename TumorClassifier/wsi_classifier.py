@@ -4,9 +4,9 @@ import random
 import math
 from sysconfig import get_path
 
-from preprocessing_slides import process_tiles
-from preprocessing_slides import mask4
-from preprocessing_slides import SIZE
+#from preprocessing_slides import process_tiles
+#from preprocessing_slides import mask4
+#from preprocessing_slides import SIZE
 
 import matplotlib.pyplot as plt
 
@@ -34,7 +34,11 @@ def calcPixelPosition(image):
     return x , y 
 
 
+
+
 def makeResultImage():
+
+   
 
     makeSplit(wsiPath)
 
@@ -92,10 +96,74 @@ def makeResultImage():
             result[y,x] = [0, 0, 255]
 
 
-                  
+
+def classifieWSIByMajorityVote(tileFolder):
+
+    result = [0] * 3
+    device = ('cuda' if torch.cuda.is_available() else 'cpu')
+    # list containing all the class labels
+    labels = [
+        'Astro', 'GBM', 'Oligo'
+        ]
+
+    # initialize the model and load the trained weights
+    model = CNNModel().to(device)
+    checkpoint = torch.load(r'C:\Users\felix\Desktop\Neuro\fixedModel\model130.pth', map_location=device)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.eval()
+
+    # define preprocess transforms
+    transform = transforms.Compose([
+        transforms.ToPILImage(),
+        transforms.Resize(224),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5]
+        )
+    ])
     
+   
+    testImgs = os.listdir(tileFolder)
+
+    
+    
+    for testImg in testImgs:
+        if not testImg.endswith(".jpg"):
+            continue
+        imgPath = os.path.join(tileFolder,testImg)
+        image = cv2.imread(imgPath)
+        
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = transform(image)
+        image = torch.unsqueeze(image, 0)
+        with torch.no_grad():
+            outputs = model(image.to(device))
+                    
+        output_label = torch.topk(outputs, 1)
+              
+        pred_class = labels[int(output_label.indices)]
+                  
+        if pred_class == 'Astro':
+            result[0] += 1
+        elif pred_class == 'GBM':
+             result[1] += 1
+        elif pred_class == 'Oligo':
+             result[2] += 1
+    print(result)    
 
 
+    if result[0] > result[1]  and result[0] > result[2]:
+        precentage = result[0]/(result[0]+result[1]+result[2])
+        print("Classified as Astro with certenty of " + str(precentage))
+    elif result[1] > result[0]  and result[1] > result[2]:
+        precentage = result[1]/(result[0]+result[1]+result[2])
+        print("Classified as GBM with certenty of " + str(precentage))
+    elif result[2] > result[0]  and result[2] > result[1]:
+        precentage = result[2]/(result[0]+result[1]+result[2])
+        print("Classified as oligo with certenty of " + str(precentage))
+
+    
 
 
 
@@ -166,7 +234,7 @@ def classifySplit(tilesFolder):
     return 
 
 
-
-
+if __name__ == '__main__': 
+    classifieWSIByMajorityVote(r'C:\Users\felix\Desktop\Neuro\GBM')
 
 

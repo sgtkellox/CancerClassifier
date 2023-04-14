@@ -59,7 +59,7 @@ def makeGradCamForFolder(path):
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
     # initialize model, switch to eval model, load trained weights
     model = CNNModel()
-    checkpoint = torch.load(r'F:\fixedModel\model130.pth', map_location=device)
+    checkpoint = torch.load(r'C:\Users\felix\Desktop\Neuro\fixedModel\model130.pth', map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.to(device)
     model.eval()
@@ -110,10 +110,10 @@ def makeGradCamForFolder(path):
                 CAMs = returnCAM(features_blobs[0], weight_softmax, class_idx)
                 # file name to save the resulting CAM image with
                 imgName, file_extension = os.path.splitext(testImg)
-                save_name = os.path.join(r"E:\ClassifierResults\simpleKryo\cams",imgName+"cam.jpg")
+                save_name = os.path.join(r"D:\CryoCams",imgName+"cam.jpg")
                 # show and save the results
                 show_cam(CAMs, width, height, orig_image, class_idx, save_name)
 
 
 if __name__ == '__main__':
-    makeGradCamForFolder(r"C:\Users\felix\Desktop\Neuro\KryoSplit\test")
+    makeGradCamForFolder(r"D:\KryoForTest")
