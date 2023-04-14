@@ -8,7 +8,7 @@ from model import CNNModel
 import numpy as np
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
-
+import matplotlib.pyplot as plt
 
 
 
@@ -60,7 +60,6 @@ def makeTestRun(path):
                 image = torch.unsqueeze(image, 0)
                 with torch.no_grad():
                     outputs = model(image.to(device))
-                    
                 output_label = torch.topk(outputs, 1)
               
                 pred_class = labels[int(output_label.indices)]
@@ -79,10 +78,10 @@ def makeTestRun(path):
                 )
                 
                 if int(output_label.indices) == count:
-                    outpath = os.path.join(r"E:\KryoRes\succes",testImg)
+                    outpath = os.path.join(r"D:\ClassifierResults\resNet50Kryo\succes",testImg)
                     
                 else:
-                    outpath = os.path.join(r"E:\KryoRes\fail",testImg)
+                    outpath = os.path.join(r"D:\ClassifierResults\resNet50Kryo\fail",testImg)
                 cv2.imwrite(outpath, orig_image)
                     
             count+=1
@@ -104,9 +103,10 @@ def calcMetric(res, gt):
     posRatio = right/len(res)
     return posRatio
 
-res , gt = makeTestRun(r"E:\KryoForTest")
+res , gt = makeTestRun(r"C:\Users\felix\Desktop\Neuro\KryoSplit\test")
 acc = calcMetric(res,gt)
-print(acc)
-cm = confusion_matrix(gt, res, labels=["Astro", "GBM", "Oligo"])
+cm = confusion_matrix(gt, res, labels=['Astro','GBM','Oligo'])
 cmd = ConfusionMatrixDisplay(cm, display_labels=['Astro','GBM','Oligo'])
 cmd.plot()
+plt.savefig(r'D:\ClassifierResults\resNet50Kryo\cf.jpg')
+plt.show()
