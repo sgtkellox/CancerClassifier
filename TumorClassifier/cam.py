@@ -6,8 +6,13 @@ from torchvision import transforms
 from torch.nn import functional as F
 from torch import topk
 from model import CNNModel
+import tifffile
+from wsi_utils import calcPixelPosition
+import matplotlib.pyplot as plt
 
 import os
+
+labels = ['Astro','GBM','Oligo']
 
 
 
@@ -110,10 +115,46 @@ def makeGradCamForFolder(path):
                 CAMs = returnCAM(features_blobs[0], weight_softmax, class_idx)
                 # file name to save the resulting CAM image with
                 imgName, file_extension = os.path.splitext(testImg)
-                save_name = os.path.join(r"E:\ClassifierResults\simpleKryo\cams",imgName+"cam.jpg")
+                save_name = os.path.join(r"E:\KryoTestCams",imgName+"cam.jpg")
                 # show and save the results
                 show_cam(CAMs, width, height, orig_image, class_idx, save_name)
 
+def drawCAMTiff(camFolder,slideWidth, slideHeight):
+
+    camMap = [["empty"for row in range(int(slideHeight/500))] for col in range(int(slideWidth/500))]
+    cams = os.listdir(camFolder)
+
+    for cam in cams:
+        x,y = calcPixelPosition(cam)
+        #print("X "+ str(x)+ " Y "+str(y))
+        camMap[x][y] = cam
+    filler = np.zeros((slideHeight, 1, 3), np.uint8)
+    for i in range(len(camMap)):
+        if camMap[i][0] == "empty":
+            row = np.zeros((500, 500, 3), np.uint8)
+        for j in range(1,len(camMap[0])):
+            if not camMap[i][j] == "empty":
+                camPath = os.path.join(camFolder,camMap[i][j])
+                image = cv2.imread(camPath)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                row = np.vstack((row,image)) 
+            else:
+               placeholder = np.zeros((500, 500, 3), np.uint8)
+               row = np.vstack((row,placeholder))
+        filler = np.hstack((filler,row))
+    
+    print(filler.shape)           
+    tifffile.imwrite(r'E:\StitchedCams\cams.tiff', filler,  photometric='rgb')
+    return 
+
+def showTiff(tifPath):
+    I = plt.imread(tifPath)
+    plt.imshow(I)
+    plt.show()
+
+    return
+
 
 if __name__ == '__main__':
-    makeGradCamForFolder(r"C:\Users\felix\Desktop\Neuro\KryoSplit\test")
+    drawCAMTiff(r"C:\Users\felix\Desktop\Neuro\KryoTestCams",85500,27000)
+    #showTiff(r"F:\N20-1488\cams.tiff")

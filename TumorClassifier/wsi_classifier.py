@@ -4,9 +4,9 @@ import random
 import math
 from sysconfig import get_path
 
-from preprocessing_slides import process_tiles
-from preprocessing_slides import mask4
-from preprocessing_slides import SIZE
+#from preprocessing_slides import process_tiles
+#from preprocessing_slides import mask4
+#from preprocessing_slides import SIZE
 
 import matplotlib.pyplot as plt
 
@@ -22,21 +22,23 @@ from sklearn.metrics import ConfusionMatrixDisplay
 wsiPath = ""
 tilesFolder = ""
 
+
+
 def makeSplit(wsiPath):
     process_tiles(wsiPath,mask4, tilesFolder)
     return
 
 def calcPixelPosition(image):
     splitP1 = image.split("_")
-    x = splitP1[1]/500
-    y = splitP1[2].split(".")[0]/500
+    x = int(splitP1[1])/500
+    y = int(splitP1[2].split(".")[0])/500
 
     return x , y 
 
 
-def makeResultImage():
+def calcSlideResultWithPositions(tilesFolder):
 
-    makeSplit(wsiPath)
+    
 
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
     # list containing all the class labels
@@ -46,7 +48,7 @@ def makeResultImage():
 
     # initialize the model and load the trained weights
     model = CNNModel().to(device)
-    checkpoint = torch.load(r'E:\ClassifierResults\simpleKryo\models\model128.pth', map_location=device)
+    checkpoint = torch.load(r'F:\fixedModel\model130.pth', map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 
@@ -64,12 +66,12 @@ def makeResultImage():
    
     testImgs = os.listdir(tilesFolder)
 
-    result = np.zeros([100, 200, 3], dtype=np.uint8)
-    
+    result = []
+
     for testImg in testImgs:
         if not testImg.endswith(".jpg"):
             continue
-        imgPath = os.path.join(d,testImg)
+        imgPath = os.path.join(tilesFolder,testImg)
         image = cv2.imread(imgPath)
         
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -83,22 +85,32 @@ def makeResultImage():
         pred_class = labels[int(output_label.indices)]
         
         x,y = calcPixelPosition(testImg)
-                
-        if pred_class=='Astro':
-            result[y,x] = [255, 0, 0]
-        elif pred_class=='GBM':
-            result[y,x] = [0, 255, 0]
-        elif pred_class=='Oligo':
-            result[y,x] = [0, 0, 255]
+
+        resEntry = [int(output_label.indices),y,x]
+
+        result.append(resEntry)
+
+    return result
+        
 
 
                   
-    
+def drawResultImage(resultsArray):
+     result = np.zeros((540, 1710, 3), np.uint8)
+     result.fill(255)
 
-
-
-
-
+     for entry in resultsArray:
+            if entry[0]==0:
+                result[int(entry[1])*10:int(entry[1])*10+10,int(entry[2])*10:int(entry[2])*10+10] = [255, 0, 0]
+            elif entry[0]==1:
+                result[int(entry[1])*10:int(entry[1])*10+10,int(entry[2])*10:int(entry[2])*10+10] = [0, 255, 0]
+            elif entry[0]==2:
+                result[int(entry[1])*10:int(entry[1])*10+10,int(entry[2])*10:int(entry[2])*10+10] = [0, 0, 255]
+     return result
+        
+       
+            
+            
 
 def classifySplit(tilesFolder):
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
@@ -165,7 +177,11 @@ def classifySplit(tilesFolder):
                     
     return 
 
-
+if __name__ == '__main__':
+    res = calcSlideResultWithPositions(r"E:\KryoForTest4")
+    print(res)
+    img = drawResultImage(res)
+    cv2.imwrite(r"F:\N20-1488\filename.png", img)
 
 
 
