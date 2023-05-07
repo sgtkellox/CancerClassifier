@@ -5,11 +5,13 @@ import torchvision
 import numpy as np
 import matplotlib.pyplot as plt
 
-sam = sam_model_registry["vit_h"](checkpoint=r"C:\Users\felix\Downloads\sam_vit_h_4b8939.pth")
+
+
+sam = sam_model_registry["vit_l"](checkpoint=r"C:\Users\felix\Downloads\sam_vit_l_0b3195.pth")
 device = "cuda"
 sam.to(device=device)
 mask_generator = SamAutomaticMaskGenerator(sam)
-image = cv2.imread(r"E:\ClassifierImages\Astro\Smear\A2-N17-1152Q_35001_24001.jpg")
+image = cv2.imread(r"C:\Users\felix\Desktop\Neuro\AugmentOutput\greyAfterHistEq\GBM-N21-217Q_58001_34001.jpg")
 
 def show_anns(anns):
     if len(anns) == 0:

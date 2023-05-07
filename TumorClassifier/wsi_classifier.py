@@ -48,7 +48,7 @@ def calcSlideResultWithPositions(tilesFolder):
 
     # initialize the model and load the trained weights
     model = CNNModel().to(device)
-    checkpoint = torch.load(r'F:\fixedModel\model130.pth', map_location=device)
+    checkpoint = torch.load(r'C:\Users\felix\Desktop\Neuro\testModelSmear\model100.pth', map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 
@@ -110,7 +110,7 @@ def drawResultImage(resultsArray):
         
        
             
-            
+def   blal():        
 
     if result[0] > result[1]  and result[0] > result[2]:
         precentage = result[0]/(result[0]+result[1]+result[2])
@@ -136,7 +136,7 @@ def classifySplit(tilesFolder):
 
     # initialize the model and load the trained weights
     model = CNNModel().to(device)
-    checkpoint = torch.load(r'E:\ClassifierResults\simpleKryo\models\model128.pth', map_location=device)
+    checkpoint = torch.load(r'C:\Users\felix\Desktop\Neuro\testModelSmear\model100.pth', map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 
@@ -193,7 +193,7 @@ def classifySplit(tilesFolder):
     return 
 
 if __name__ == '__main__':
-    res = calcSlideResultWithPositions(r"E:\KryoForTest4")
+    res = calcSlideResultWithPositions(r"C:\Users\felix\Desktop\Neuro\smearSplitHistNorm\val\Astro")
     print(res)
     img = drawResultImage(res)
     cv2.imwrite(r"F:\N20-1488\filename.png", img)
