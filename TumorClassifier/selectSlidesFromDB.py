@@ -18,16 +18,11 @@ def copySlides():
 
         uuid = row['uuid']
 
-        
-
         if " " in nNumber:
             #print(nNumber)
             continue
         if str(uuid) == 'nan':
             continue
-
-        
-        
 
         diagnosis = row['txt_TUMOR_450K_lang']
 

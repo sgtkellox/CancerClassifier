@@ -20,6 +20,28 @@ oligoFolder = ""
 astroFolder = ""
 
 
+def getPreparationFromFileName(fileName):
+    prepSting = filename.split("_")[3]
+    if not prepSting[-1].isdigit():
+        return prepSting[-1]
+    else:
+        return prepString[-2]
+
+def sortByPreparation(path):
+    smearSlides = []
+    kryoSlides = []
+    touchSlides = []
+    files = os.listdir(path)
+    for file in files:
+        if getPreparationFromFileName(fileName) == "Q":
+            smearSlides.append(file)
+        elif getPreparationFromFileName(fileName) == "K":
+            kryoSlides.append(file)
+        elif getPreparationFromFileName(fileName) == "T":
+            touchSlides.append(file)
+            
+
+def makeSplit(slides):
 
 
 
