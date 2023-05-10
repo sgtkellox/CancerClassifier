@@ -130,6 +130,33 @@ def checkForMissingFiles():
     print("existing slides : " + str(counterIn))
     print("missing slides : " + str(counterOut))
 
+
+def obtainMissingSlides(uuidList):
+
+    file = open('myfile.txt', 'r')
+    lines = file.readlines()
+
+    for line in lines:
+
+        uuid = line.split(";")[1].strip()
+        name = line.split(";")[0].strip()
+        name = name.replace(" ", "_")
+        slideName = str(uuid)+".svs"
+        slidePath = os.path.join(pathToDB,slideName)
+
+        if not os.path.isfile(slidePath):
+            
+            continue
+
+        slideDestName = name+".svs"
+        slideDestPath = os.path.join(pathOut,slideDestName)
+
+        if slideName in os.listdir(pathToDB):
+            print(str(uuid))
+        
+            shutil.copyfile(slidePath,slideDestPath)
+    
+
        
 
 
@@ -145,11 +172,11 @@ def checkForMissingFiles():
 
 if __name__ == '__main__':
     
-    pathTable1 = r"E:\script\DG.xlsx"
+    #pathTable1 = r"E:\script\DG.xlsx"
 
     pathToDB = r"E:\uuids"
     pathOut = r"E:\copyTest"
 
-    table1 = pd.read_excel(pathTable1)
+    #table1 = pd.read_excel(pathTable1)
 
-    checkForMissingFiles()
+    obtainMissingSlides()

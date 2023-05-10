@@ -7,7 +7,7 @@ from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
 SLIDEPATH= r"E:\N20-1488\gbm.svs"
-OUT_PATH= r"D:\AreebaTest"
+OUT_PATH= r"E:\tilesTest"
 
 BG_THR=70
 MASK_THR=90
@@ -255,7 +255,7 @@ def main():
     print("Start processing the slide...", flush=True)
 
     # produce masked tiles and save counts
-    n_total, n_pass, n_bg = process_tiles(SLIDEPATH, mask4, outPath= r"F:\split")
+    n_total, n_pass, n_bg = process_tiles(SLIDEPATH, mask4, OUT_PATH)
     
     # Print statistics
     print("------------------------------------------------", flush=True)

@@ -5,11 +5,11 @@ import random
 import math
 from sysconfig import get_path
 
-from preprocessing_slides import process_tiles
-from preprocessing_slides import mask4
-from preprocessing_slides import SIZE
+#from preprocessing_slides import process_tiles
+#from preprocessing_slides import mask4
+#from preprocessing_slides import SIZE
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 
@@ -21,30 +21,185 @@ astroFolder = ""
 
 
 def getPreparationFromFileName(fileName):
-    prepSting = filename.split("_")[3]
-    if not prepSting[-1].isdigit():
-        return prepSting[-1]
+    prepString = fileName.split("-")[3]
+    prepString = fileName.replace(".svs","")
+    if not prepString[-1].isdigit():
+        return prepString[-1]
     else:
         return prepString[-2]
 
-def sortByPreparation(path):
+
+def getDiagnosisFromFileName(fileName):
+    return fileName.split("-")[0]
+
+def sortByPreparation(files):
     smearSlides = []
     kryoSlides = []
     touchSlides = []
-    files = os.listdir(path)
+    
     for file in files:
-        if getPreparationFromFileName(fileName) == "Q":
+        if getPreparationFromFileName(file) == "Q":
             smearSlides.append(file)
-        elif getPreparationFromFileName(fileName) == "K":
+        elif getPreparationFromFileName(file) == "K":
             kryoSlides.append(file)
-        elif getPreparationFromFileName(fileName) == "T":
+        elif getPreparationFromFileName(file) == "T":
             touchSlides.append(file)
-            
+     
+    return kryoSlides, smearSlides, touchSlides
 
 def makeSplit(slides):
 
+    trainSize = math.floor(0.8*len(slides))
+    valSize = math.floor(0.15*len(slides))
+    testSize = math.floor(0.05*len(slides))
+
+    trainSet = []
+    valSet = []
+    testSet = []
+
+    print(slides)
+
+    for x in range(0,trainSize):
+        chosenFile = random.choice(slides)
+        trainSet.append(chosenFile)
+        slides.remove(chosenFile)
+    for x in range(0,valSize):
+        chosenFile = random.choice(slides)
+        valSet.append(chosenFile)
+        slides.remove(chosenFile)
+    for x in range(0,testSize):
+        chosenFile = random.choice(slides)
+        testSet.append(chosenFile)
+        slides.remove(chosenFile)
+    
+    return trainSet, valSet, testSet
 
 
+
+def sortByDiagnosis(splitPart,path,srcPath):
+    
+
+    astroPath = os.path.join(path,"Astro")
+    gbmPath = os.path.join(path,"GBM")
+    oligoPath = os.path.join(path,"Oligo")
+
+    for slide in splitPart:
+        if getDiagnosisFromFileName(slide) == "A":
+            shutil.move(os.path.join(srcPath,slide),os.path.join(astroPath,slide))
+        elif getDiagnosisFromFileName(slide) =="GBM":
+            shutil.move(os.path.join(srcPath,slide),os.path.join(gbmPath,slide))
+        elif getDiagnosisFromFileName(slide) =="O":
+            shutil.move(os.path.join(srcPath,slide),os.path.join(oligoPath,slide))
+
+
+def sortAndSplit(inPath,outPath):
+    slides = os.listdir(inPath)
+
+    kryoSet , smearSet, touchSet = sortByPreparation(slides)
+
+
+    kryoPath = os.path.join(outPath,"kryo")
+    smearPath = os.path.join(outPath,"smear")
+    touchPath = os.path.join(outPath,"touch")
+
+    kryoTrain , kryoVal, kryoTest = makeSplit(kryoSet)
+    
+    print("after kryo")
+
+    kryoTrainPath = os.path.join(kryoPath,"train")
+    kryoValPath = os.path.join(kryoPath,"val")
+    kryoTestPath = os.path.join(kryoPath,"test")
+
+    sortByDiagnosis(kryoTrain,kryoTrainPath,inPath)
+    sortByDiagnosis(kryoVal,kryoValPath,inPath)
+    sortByDiagnosis(kryoTest,kryoTestPath,inPath)
+
+    smearTrain, smearVal, smearTest = makeSplit(smearSet)
+
+    smearTrainPath = os.path.join(smearPath,"train")
+    smearValPath = os.path.join(smearPath,"val")
+    smearTestPath = os.path.join(smearPath,"test")
+
+    sortByDiagnosis(smearTrain,smearTrainPath,inPath)
+    sortByDiagnosis(smearVal,smearValPath,inPath)
+    sortByDiagnosis(smearTest,smearTestPath,inPath)
+
+    touchTrain, touchVal, touchTest = makeSplit(touchSet)
+
+    touchTrainPath = os.path.join(touchPath,"train")
+    touchValPath = os.path.join(touchPath,"val")
+    touchTestPath = os.path.join(touchPath,"test")
+
+    sortByDiagnosis(touchTrain,touchTrainPath,inPath)
+    sortByDiagnosis(touchVal,touchValPath,inPath)
+    sortByDiagnosis(touchTest,touchTestPath,inPath)
+
+    
+
+
+
+
+
+def makeDiagnosisFolderStructure(parent):
+    astroPath = os.path.join(parent,"Astro")
+    gbmPath = os.path.join(parent,"GBM")
+    oligoPath = os.path.join(parent,"Oligo")
+
+    diagPaths = []
+
+    diagPaths.append(astroPath)
+    diagPaths.append(gbmPath)
+    diagPaths.append(oligoPath)
+
+    for path in diagPaths:
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+
+def makeSplitFolderStructure(parent):
+    trainPath = os.path.join(parent,"train")
+    valPath = os.path.join(parent,"val")
+    testPath = os.path.join(parent,"test")
+
+    splitPaths = []
+
+    splitPaths.append(trainPath)
+    splitPaths.append(valPath)
+    splitPaths.append(testPath)
+
+    for path in splitPaths:
+        if not os.path.exists(path):
+            os.makedirs(path)
+        makeDiagnosisFolderStructure(path)
+
+
+
+def makePrepFolderStructure(path):
+    kryoPath = os.path.join(path,"smear")
+    smearPath = os.path.join(path,"kryo")
+    touchPath = os.path.join(path,"touch")
+
+    prepPaths = []
+
+    prepPaths.append(kryoPath)
+    prepPaths.append(smearPath)
+    prepPaths.append(touchPath)
+
+    for path in prepPaths:
+        if not os.path.exists(path):
+            os.makedirs(path)
+        makeSplitFolderStructure(path)
+
+
+
+def distributeLeftOverIntoTestSet(pathIn, pathOut):
+
+    for slide in os.listdir(pathIn):
+
+    
+
+    
+  
 
 
 def sortImagesByFileName(path):
@@ -108,8 +263,6 @@ def sliceKryos(path):
                     filePath = os.path.join(path,file)
                     process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\Astro")
      return   
-
-
 
 def sortLeftOverSlides(path):
     files = os.listdir(path)
@@ -301,4 +454,7 @@ def splitSortedTiles(inPath,outPath):
         
 
 if __name__ == '__main__':
-    splitSortedTiles(r"C:\Users\felix\Desktop\Neuro\AugmentOutput",r"C:\Users\felix\Desktop\Neuro\smearSplitHistNorm")
+    dataDirDest = r"E:\split"
+    dataDirSrc = r"E:\copyTest"
+
+    sortAndSplit(dataDirSrc,dataDirDest)
