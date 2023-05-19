@@ -9,7 +9,7 @@ from sysconfig import get_path
 #from preprocessing_slides import mask4
 #from preprocessing_slides import SIZE
 
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 
@@ -195,7 +195,7 @@ def makePrepFolderStructure(path):
 def distributeLeftOverIntoTestSet(pathIn, pathOut):
 
     for slide in os.listdir(pathIn):
-
+        print()
     
 
     
@@ -250,12 +250,12 @@ def sliceKryos(path):
                 if "K" in file:
                     #dst = os.path.join(GBMfolder,"Kryo",file)
                     filePath = os.path.join(path,file)
-                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\GBM")
+                    process_tiles(filePath,mask4, outPath=r"D:\splitTiles\kryo\test\GBM")
             elif file.startswith("O"):
                 
                 if  "K" in file:
                     filePath = os.path.join(path,file)
-                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\Oligo")
+                    process_tiles(filePath,mask4, outPath=r"D:\splitTiles\kryo\train\Oligo")
 
             elif file.startswith("A"):
                 
@@ -454,7 +454,4 @@ def splitSortedTiles(inPath,outPath):
         
 
 if __name__ == '__main__':
-    dataDirDest = r"E:\split"
-    dataDirSrc = r"E:\copyTest"
-
-    sortAndSplit(dataDirSrc,dataDirDest)
+    makePrepFolderStructure("/mnt/projects/neuropath_hd/data/split$")
