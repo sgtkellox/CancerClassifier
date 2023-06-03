@@ -9,7 +9,7 @@ from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 SLIDEPATH= r""
 OUT_PATH= r""
 
-BG_THR=40
+BG_THR=70
 MASK_THR=90
 SIZE=500
 
@@ -56,6 +56,7 @@ def get_slidename(slidepath):
     """
     slide_id = slidepath.split("\\")[-1].split(".")[0]
     return slide_id
+
 
 
 def get_tilename(slidepath, x, y):

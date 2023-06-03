@@ -285,12 +285,12 @@ def sliceKryos(path):
                 if "K" in file:
                     #dst = os.path.join(GBMfolder,"Kryo",file)
                     filePath = os.path.join(path,file)
-                    process_tiles(filePath,mask4, outPath="/mnt/projects/neuropath_hd/data/tilesSplit/kryo/train/GBM")
+                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\GBM")
             elif file.startswith("O"):
                 
                 if  "K" in file:
                     filePath = os.path.join(path,file)
-                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\Oligo")
+                    process_tiles(filePath,mask4, outPath=r"D:\splitTiles\kryo\train\Oligo")
 
             elif file.startswith("A"):
                 
