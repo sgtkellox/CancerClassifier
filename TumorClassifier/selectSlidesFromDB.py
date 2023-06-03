@@ -61,8 +61,6 @@ def extractNNumberFromSlide(slide):
     parts = slide.split("-")
     nNumber = parts[1] + "-" + parts[2]
 
-   
-
     return nNumber
 
 
@@ -99,7 +97,119 @@ def findFilesWithWrongConvention(path):
             print(slide)
 
 
-def checkForMissingFiles():
+
+def collectCaseNumbersInTable(tablePath):
+   
+    table = pd.read_excel(tablePath)
+
+    nNumberUUIDMap = {}
+    nNumberDiagMap = {}
+
+
+    for index, row in table.iterrows():
+        nNumber = row['txt_PATHOLOGIE_NUMMER']
+       
+        uuid = row['uuid']
+
+        diagnosis = str(row['max_class'])
+
+        if str(uuid) == 'nan':
+            continue
+
+        if "glioblastoma" in diagnosis:
+            diagnosisChar = "GBM"
+        elif "astrocytoma" in diagnosis:
+            diagnosisChar = "A"
+        elif "oligodendroglioma" in diagnosis:
+            diagnosisChar = "O"
+        
+        nNumber = nNumber.split(" ")[0]
+        nNumber = nNumber.strip(",")
+        nNumberDiagMap[nNumber] = diagnosisChar
+        if not nNumber in nNumberUUIDMap.keys():
+            uuids = []
+            uuids.append(uuid)
+            nNumberUUIDMap[nNumber] = uuids
+            nNumberDiagMap[nNumber] = diagnosisChar
+        else:
+            nNumberUUIDMap[nNumber].append(uuid)
+    
+    return nNumberUUIDMap, nNumberDiagMap
+
+
+                        
+def collectCaseNumbersFound(path):
+    caseNumbersFound = []
+    
+    for folder_path, folders, files in os.walk(path):
+        for slide in files:
+            nNumber = extractNNumberFromSlide(slide)
+            if not nNumber in caseNumbersFound:
+                caseNumbersFound.append(nNumber)
+    return caseNumbersFound
+
+
+
+def findMissingCases(slidePath, tablePath):
+
+    caseNumbersFound = collectCaseNumbersFound(slidePath)
+    caseNumbersInTable, caseDiagMap = collectCaseNumbersInTable(tablePath)
+
+   
+    diff = list(set(caseNumbersInTable.keys()) - set(caseNumbersFound))
+
+    for n in caseNumbersFound:
+        with open(r'C:\Users\felix\Desktop\dataSetInfo\found.txt', 'a') as found:
+                found.write(n)
+                found.write('\n')
+        found.close()
+    for m in caseNumbersInTable.keys():
+        with open(r'C:\Users\felix\Desktop\dataSetInfo\inTable.txt', 'a') as inTable:
+            for uuid in caseNumbersInTable[m]:
+                inTable.write(m +"     "  + str(uuid))
+                inTable.write('\n')
+        inTable.close()
+    for d in diff:
+        with open(r'C:\Users\felix\Desktop\dataSetInfo\diff.txt', 'a') as diff:
+            diff.write("-------------------------------------------------------------------")
+            diff.write('\n')
+            for uuid in caseNumbersInTable[d]:
+                diff.write(d+ "  ;  " +  str(uuid)+  "  ;  "+str(caseDiagMap[d]))
+                diff.write('\n')
+        diff.close()
+
+
+
+def cloneSlidesFromFile(pathToFile, outPath, dbPath):
+    file = open(pathToFile, 'r')
+    lines = file.readlines()
+
+    counter = 0
+
+    for line in lines:
+
+        split = line.split(";")
+
+        nNumber = split[0]
+
+        uuid = split[1]
+
+        diag = split[2]
+
+        dbFileName = os.path.join(dbPath, uuid+".svs")
+
+        safeFileName = os.path.join(outPath, diag + "-" + nNumber + "-" + str(counter) + ".svs")
+
+
+        shutil.copyfile(dbFileName,safeFileName)
+
+
+
+
+def findCaseNumbersWithoutUUID(tablePath):
+    return
+
+def findMissingSlidesUUIDs():
 
     caseNumbers = []
 
@@ -160,23 +270,6 @@ def obtainMissingSlides(uuidList):
        
 
 
-    
-
-        
-
-
-
-        
-
-
 
 if __name__ == '__main__':
-    
-    #pathTable1 = r"E:\script\DG.xlsx"
-
-    pathToDB = r"E:\uuids"
-    pathOut = r"E:\copyTest"
-
-    #table1 = pd.read_excel(pathTable1)
-
-    obtainMissingSlides()
+   findMissingCases(r"E:\split", r"C:\Users\felix\Downloads\data_Frischgewebe_methylation.xlsx")

@@ -38,8 +38,6 @@ def calcPixelPosition(image):
 
 def calcSlideResultWithPositions(tilesFolder):
 
-    
-
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
     # list containing all the class labels
     labels = [
@@ -109,22 +107,7 @@ def drawResultImage(resultsArray):
      return result
         
        
-            
-def   blal():        
-
-    if result[0] > result[1]  and result[0] > result[2]:
-        precentage = result[0]/(result[0]+result[1]+result[2])
-        print("Classified as Astro with certenty of " + str(precentage))
-    elif result[1] > result[0]  and result[1] > result[2]:
-        precentage = result[1]/(result[0]+result[1]+result[2])
-        print("Classified as GBM with certenty of " + str(precentage))
-    elif result[2] > result[0]  and result[2] > result[1]:
-        precentage = result[2]/(result[0]+result[1]+result[2])
-        print("Classified as oligo with certenty of " + str(precentage))
-
-    
-
-
+       
 
 
 def classifySplit(tilesFolder):
@@ -191,6 +174,7 @@ def classifySplit(tilesFolder):
         #cv2.imwrite(outpath, orig_image)
                     
     return 
+
 
 if __name__ == '__main__':
     res = calcSlideResultWithPositions(r"C:\Users\felix\Desktop\Neuro\smearSplitHistNorm\val\Astro")

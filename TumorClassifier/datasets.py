@@ -30,12 +30,12 @@ valid_transform = transforms.Compose([
 
 # training dataset
 train_dataset = datasets.ImageFolder(
-    root=r'C:\Users\felix\Desktop\Neuro\smearSplitHistNorm\train',
+    root=r'C:\Users\felix\Desktop\neuro\kryo\train',
     transform=train_transform
 )
 # validation dataset
 valid_dataset = datasets.ImageFolder(
-    root=r'C:\Users\felix\Desktop\Neuro\smearSplitHistNorm\val',
+    root=r'C:\Users\felix\Desktop\neuro\kryo\val',
     transform=valid_transform
 )
 # training data loaders

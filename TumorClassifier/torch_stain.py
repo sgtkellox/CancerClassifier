@@ -9,9 +9,9 @@ import matplotlib.image as mpimg
 
 
 if __name__ == '__main__':
-     path = r"C:\Users\felix\Desktop\Neuro\SmearImages"
+     path = r"D:\kyroSplit"
 
-     target = cv2.cvtColor(cv2.imread(r"C:\Users\felix\Desktop\Neuro\SmearImages\Astro\A2-N17-1152Q_45001_20001.jpg"), cv2.COLOR_BGR2RGB)
+     target = cv2.cvtColor(cv2.imread(r"D:\kyroSplit\GBM\GBM-N17-0592-K_62500_34500.jpg"), cv2.COLOR_BGR2RGB)
      T = transforms.Compose([
         transforms.ToTensor(),
         transforms.Lambda(lambda x: x*255)
@@ -24,7 +24,8 @@ if __name__ == '__main__':
      
      for file in os.listdir(path):
          d = os.path.join(path, file)
-         copiedFiles = os.listdir(os.path.join(r"C:\Users\felix\Desktop\Neuro\AugmentOutput",file,"torchstain","macenko"))
+         print(file)
+         copiedFiles = os.listdir(os.path.join(r"C:\Users\felix\Desktop\neuro\augmentOutput",file,"torchstain","macenko"))
          if os.path.isdir(d):
             
              testImgs = os.listdir(d)
@@ -41,9 +42,9 @@ if __name__ == '__main__':
                  t_to_transform = T(image)
                  norm, H, E = torch_normalizer.normalize(I=t_to_transform, stains=True)
 
-                 normOutPath = os.path.join(r"C:\Users\felix\Desktop\Neuro\AugmentOutput",file,"torchstain","macenko",testImg)
-                 hOutPath = os.path.join(r"C:\Users\felix\Desktop\Neuro\AugmentOutput",file,"torchstain","h",testImg)
-                 eOutPath = os.path.join(r"C:\Users\felix\Desktop\Neuro\AugmentOutput",file,"torchstain","e",testImg)
+                 normOutPath = os.path.join(r"C:\Users\felix\Desktop\neuro\augmentOutput",file,"torchstain","macenko",testImg)
+                 hOutPath = os.path.join(r"C:\Users\felix\Desktop\neuro\augmentOutput",file,"torchstain","h",testImg)
+                 eOutPath = os.path.join(r"C:\Users\felix\Desktop\neuro\augmentOutput",file,"torchstain","e",testImg)
                  
                  print(norm.size())
 

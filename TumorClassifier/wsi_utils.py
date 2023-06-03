@@ -3,11 +3,9 @@
 
 def calcPixelPosition(image):
     splitP1 = image.split("_")
-    x = int(int(splitP1[1])/500)
-    y = int(int(splitP1[2].split(".")[0].strip("cam"))/500)
-
-    #print("X "+ str(x)+ " Y " + str(y))
-
+    print(image)
+    x = int(splitP1[1])/500
+    y = int(splitP1[2].split(".")[0])/500
     return x , y 
 
 def calcGapBetweenTiles(tileA,tileB):
@@ -19,8 +17,30 @@ def calcGapBetweenTiles(tileA,tileB):
 
     return gapX, gapY
 
+
+
+
 def sortTilesByXPosition():
     return
+
+
+def extractNNumberFromSlide(slide):
+
+    parts = slide.split("-")
+    nNumber = parts[1] + "-" + parts[2]
+
+    return nNumber
+
+
+def extractIndetifierFromSlide(slide):
+
+    parts = slide.split("-")
+    nNumber = parts[1] + "-" + parts[2] + "-" +parts[3]
+
+    return nNumber
+
+
+
 
 
 

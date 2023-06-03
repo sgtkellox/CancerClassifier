@@ -9,11 +9,11 @@ import os
 
 
 if __name__ == '__main__':
-     path = r"C:\Users\felix\Desktop\Neuro\SmearImages"
+     path = r"D:\kyroSplit"
 
      for file in os.listdir(path):
         d = os.path.join(path, file)
-        copiedFiles = os.listdir(os.path.join(r"C:\Users\felix\Desktop\Neuro\AugmentOutput",file,"macenko","hematoxylin"))
+        copiedFiles = os.listdir(os.path.join(r"C:\Users\felix\Desktop\neuro\augmentOutput",file,"macenko","hematoxylin"))
         if os.path.isdir(d):
             
             testImgs = os.listdir(d)

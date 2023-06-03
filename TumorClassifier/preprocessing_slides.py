@@ -6,10 +6,10 @@ import pickle
 from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
-SLIDEPATH= r"E:\N20-1488\gbm.svs"
-OUT_PATH= r"E:\tilesTest"
+SLIDEPATH= r""
+OUT_PATH= r""
 
-BG_THR=70
+BG_THR=40
 MASK_THR=90
 SIZE=500
 
@@ -206,7 +206,6 @@ def process_tiles(slidepath, mask,outPath):
             ntotal += 1
 
             # read, resize and convert a tile to RGB
-            print("location X"+ str(x) +" Y" + str(y))
             try:
                 tile=slide.read_region(location=(x,y), level=0, size=(sz,sz))
             except:

@@ -2,8 +2,7 @@ import torch
 import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.style.use('ggplot')
-
-def save_model(epochs, model, optimizer, criterion,epoch):
+def save_model(epochs, model, optimizer, criterion, pretrained):
     """
     Function to save the trained model to disk.
     """
@@ -12,9 +11,9 @@ def save_model(epochs, model, optimizer, criterion,epoch):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': criterion,
-                }, r"C:\Users\felix\Desktop\neuro\models\model"+str(epoch)+".pth")
+                }, r"C:\Users\felix\Desktop\neuro\models\efficientNet\model_"+epochs+"_pretrained.pth")
 
-def save_plots(train_acc, valid_acc, train_loss, valid_loss):
+def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     """
     Function to save the loss and accuracy plots to disk.
     """
@@ -31,7 +30,7 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss):
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
-    plt.savefig(r'C:\Users\felix\Desktop\neuro\models\accuracy.png')
+    plt.savefig(r"C:\Users\felix\Desktop\neuro\models\efficientNetaccuracy_pretrained.png")
     
     # loss plots
     plt.figure(figsize=(10, 7))
@@ -46,5 +45,4 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(r'C:\Users\felix\Desktop\neuro\models\loss.png')
-
+    plt.savefig(r"C:\Users\felix\Desktop\neuro\models\loss_pretrained.png")

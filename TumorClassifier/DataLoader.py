@@ -5,11 +5,13 @@ import random
 import math
 from sysconfig import get_path
 
-#from preprocessing_slides import process_tiles
-#from preprocessing_slides import mask4
-#from preprocessing_slides import SIZE
+from preprocessing_slides import process_tiles
+from preprocessing_slides import mask4
+from preprocessing_slides import SIZE
 
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+
+import sys
 
 
 
@@ -30,7 +32,13 @@ def getPreparationFromFileName(fileName):
 
 
 def getDiagnosisFromFileName(fileName):
-    return fileName.split("-")[0]
+    diag = fileName.split("-")[0]
+    if diag.startswith('A'):
+        return 'A'
+    elif diag.startswith('GBM'):
+        return 'GBM'
+    elif diag.startswith('O'):
+        return 'O'
 
 def sortByPreparation(files):
     smearSlides = []
@@ -47,6 +55,16 @@ def sortByPreparation(files):
      
     return kryoSlides, smearSlides, touchSlides
 
+
+def multipleNNumber(fileName):
+    prepString = fileName.split("-")[3]
+    prepString = fileName.replace(".svs","")
+    if not prepString[-1].isdigit():
+        return False
+        
+    else:
+        return True
+
 def makeSplit(slides):
 
     trainSize = math.floor(0.8*len(slides))
@@ -57,24 +75,38 @@ def makeSplit(slides):
     valSet = []
     testSet = []
 
-    print(slides)
+    train = 0
+    val = 0
+    test = 0
 
-    for x in range(0,trainSize):
+    while test< testSize:
+        
         chosenFile = random.choice(slides)
-        trainSet.append(chosenFile)
-        slides.remove(chosenFile)
-    for x in range(0,valSize):
+        if not multipleNNumber(chosenFile):
+            testSet.append(chosenFile)
+            slides.remove(chosenFile)
+            test+=1
+        else:
+            trainSet.append(chosenFile)
+            slides.remove(chosenFile)
+            train+=1
+
+    while val< valSize:
+        
         chosenFile = random.choice(slides)
-        valSet.append(chosenFile)
-        slides.remove(chosenFile)
-    for x in range(0,testSize):
-        chosenFile = random.choice(slides)
-        testSet.append(chosenFile)
-        slides.remove(chosenFile)
-    
+        if not multipleNNumber(chosenFile):
+            valSet.append(chosenFile)
+            slides.remove(chosenFile)
+            val+=1
+        else:
+            trainSet.append(chosenFile)
+            slides.remove(chosenFile)
+            train+=1
+    trainSet.extend(slides)
+
     return trainSet, valSet, testSet
 
-
+ 
 
 def sortByDiagnosis(splitPart,path,srcPath):
     
@@ -97,12 +129,24 @@ def sortAndSplit(inPath,outPath):
 
     kryoSet , smearSet, touchSet = sortByPreparation(slides)
 
+    print("kryo "+str(len(kryoSet)))
+
+    print("smear "+str(len(smearSet)))
+
+    print("touch "+str(len(touchSet)))
+
 
     kryoPath = os.path.join(outPath,"kryo")
     smearPath = os.path.join(outPath,"smear")
     touchPath = os.path.join(outPath,"touch")
 
     kryoTrain , kryoVal, kryoTest = makeSplit(kryoSet)
+
+    print("train "+str(len(kryoTrain)))
+
+    print("val "+str(len(kryoVal)))
+
+    print("test "+str(len(kryoTest)))
     
     print("after kryo")
 
@@ -190,16 +234,7 @@ def makePrepFolderStructure(path):
             os.makedirs(path)
         makeSplitFolderStructure(path)
 
-
-
-def distributeLeftOverIntoTestSet(pathIn, pathOut):
-
-    for slide in os.listdir(pathIn):
-
-    
-
-    
-  
+ 
 
 
 def sortImagesByFileName(path):
@@ -250,7 +285,7 @@ def sliceKryos(path):
                 if "K" in file:
                     #dst = os.path.join(GBMfolder,"Kryo",file)
                     filePath = os.path.join(path,file)
-                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\GBM")
+                    process_tiles(filePath,mask4, outPath="/mnt/projects/neuropath_hd/data/tilesSplit/kryo/train/GBM")
             elif file.startswith("O"):
                 
                 if  "K" in file:
@@ -262,7 +297,68 @@ def sliceKryos(path):
                 if "K" in file:
                     filePath = os.path.join(path,file)
                     process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\Astro")
-     return   
+     return
+
+def documentSplit(path,outpath):
+    split = os.listdir(path)
+    outpath = os.path.join(outpath,"doc.txt")
+
+    for part in split:
+        partPath = os.path.join(path,part)
+        with open(outpath, 'a') as doc:
+            print(part)
+            doc.write(part)
+            doc.write('\n')
+            doc.write('------------------------')
+            doc.write('\n')
+            for folder_path, folders, slides in os.walk(partPath):
+                for slide in slides:
+                    doc.write(slide)
+                    doc.write('\n')
+            doc.write('------------------------')
+            doc.write('\n')
+        
+        
+
+
+def undoSplit(path, destPath):
+
+    for prep in os.listdir(path):
+        prepPath = os.path.join(path,prep)
+        for part in os.listdir(prepPath):
+            partPath = os.path.join(prepPath,part)
+            for diag in os.listdir(partPath):
+                diagPath = os.path.join(partPath,diag)           
+                for slide in os.listdir(diagPath):
+                    slidePath = os.path.join(diagPath,slide)
+                    shutil.move(slidePath,os.path.join(destPath,slide))
+                    
+    
+    
+ 
+
+
+def sliceTouch(path):
+    files = os.listdir(path)
+    for file in files:
+            if file.startswith("GBM"):
+                
+                if "T" in file:
+                    #dst = os.path.join(GBMfolder,"Kryo",file)
+                    filePath = os.path.join(path,file)
+                    process_tiles(filePath,mask4, outPath=r"D:\splitTiles\touch\train\GBM")
+            elif file.startswith("O"):
+                
+                if  "T" in file:
+                    filePath = os.path.join(path,file)
+                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\Oligo")
+
+            elif file.startswith("A"):
+                
+                if "T" in file:
+                    filePath = os.path.join(path,file)
+                    process_tiles(filePath,mask4, outPath=r"D:\KryoTiles\Astro")
+    return 
 
 def sortLeftOverSlides(path):
     files = os.listdir(path)
@@ -450,11 +546,56 @@ def splitSortedTiles(inPath,outPath):
             shutil.copyfile(imgPathSrc,imgPathDest)
         del wsisOligo[randomWsi]
 
+
+
+   
+    
+
+def collectNNumbersFromTileSet(path):
+    nNumbers = set()
+    slides = os.listdir(path)
+    for slide in slides:
+        slideBaseName = slide.split("_")[0]
+        
+        #print(slideBaseName)
+        nNumbers.add(slideBaseName)
+    return nNumbers
+        
+
+
+def checkForSuccesfullTiling(slidePath,tilePath):
+    nNumbersTileSet =  collectNNumbersFromTileSet(tilePath)
+    for slide in os.listdir(slidePath):
+        slideBaseName = slide.split(".")[0]
+
+        if not slideBaseName in nNumbersTileSet:
+            print("missing" + slideBaseName)
+
+
+def extractNNumberFromSlide(slide):
+
+    parts = slide.split("-")
+    nNumber = parts[1] + "-" + parts[2]
+
+    return nNumber
+            
+def findSlidesWithNNumberCounter(path):
+    for slide in os.listdir(path):
+        nNumber = extractNNumberFromSlide(slide)
+        if not nNumber[-1].isdigit():
+            os.remove(slide) 
+            print(slide)
+
+
+
+
     
         
 
 if __name__ == '__main__':
-    dataDirDest = r"E:\split"
-    dataDirSrc = r"E:\copyTest"
+    src = r"/mnt/projects/neuropath_hd/data/batch_2"
+    dest = r"/mnt/projects/neuropath_hd/data/split"
 
-    sortAndSplit(dataDirSrc,dataDirDest)
+    
+
+    sortAndSplit(src,dest)

@@ -56,7 +56,7 @@ def data_loader(batch_size):
 
 
 # CIFAR100 dataset 
-train_loader, valid_loader = data_loader(batch_size=1)
+train_loader, valid_loader = data_loader(batch_size=32)
 
 
 
