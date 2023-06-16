@@ -51,12 +51,12 @@ def get_datasets(pretrained):
     
 
     train_dataset = datasets.ImageFolder(
-        root=r'C:\Users\felix\Desktop\neuro\kryo\train',
+        root=r'C:\Users\felix\Desktop\kryo\train',
         transform=(get_train_transform(IMAGE_SIZE, pretrained))
     )
 # validation dataset
     valid_dataset = datasets.ImageFolder(
-        root=r'C:\Users\felix\Desktop\neuro\kryo\val',
+        root=r'C:\Users\felix\Desktop\kryo\val',
         transform=(get_valid_transform(IMAGE_SIZE, pretrained))
     )
     

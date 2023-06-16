@@ -9,11 +9,11 @@ import os
 
 
 if __name__ == '__main__':
-     path = r"D:\kyroSplit"
+     path = r"C:\Users\felix\Desktop\kryo\test"
 
      for file in os.listdir(path):
         d = os.path.join(path, file)
-        copiedFiles = os.listdir(os.path.join(r"C:\Users\felix\Desktop\neuro\augmentOutput",file,"macenko","hematoxylin"))
+        copiedFiles = os.listdir(os.path.join(r"C:\Users\felix\Desktop\Neuro\kryoAugment",file,"macenko","hematoxylin"))
         if os.path.isdir(d):
             
             testImgs = os.listdir(d)
@@ -35,7 +35,7 @@ if __name__ == '__main__':
                         # apply on example image
                         im = normalizer.F(image)
                         # plot results
-                        outPath = os.path.join(r"C:\Users\felix\Desktop\Neuro\AugmentOutput",file,method,target,testImg)
+                        outPath = os.path.join(r"C:\Users\felix\Desktop\Neuro\kryoAugment",file,method,target,testImg)
                         plt.imsave(outPath,im)
                         
 

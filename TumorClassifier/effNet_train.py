@@ -10,7 +10,7 @@ from effNet_utils import save_model, save_plots
 # construct the argument parser
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    '-e', '--epochs', type=int, default=20,
+    '-e', '--epochs', type=int, default=400,
     help='Number of epochs to train our network for'
 )
 parser.add_argument(
@@ -84,6 +84,12 @@ def validate(model, testloader, criterion):
     epoch_acc = 100. * (valid_running_correct / len(testloader.dataset))
     return epoch_loss, epoch_acc
 
+def load_ckp(modelPath, model, optimizer):
+    checkpoint = torch.load(modelPath)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    return model, optimizer, checkpoint['epoch']
+
 
 if __name__ == '__main__':
     # Load the training and validation datasets.
@@ -101,7 +107,7 @@ if __name__ == '__main__':
     print(f"Learning rate: {lr}")
     print(f"Epochs to train for: {epochs}\n")
     model = build_model(
-        pretrained=args['pretrained'], 
+        pretrained=True, 
         fine_tune=True, 
         num_classes=len(dataset_classes)
     ).to(device)
@@ -119,6 +125,8 @@ if __name__ == '__main__':
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
+
+    model, optimizer, start_epoch = load_ckp(r"C:\Users\felix\Desktop\models\model_14_pretrained.pth", model, optimizer)
     # Start the training.
     for epoch in range(epochs):
         print(f"[INFO]: Epoch {epoch+1} of {epochs}")
@@ -135,10 +143,10 @@ if __name__ == '__main__':
         print('-'*50)
         time.sleep(5)
         
-    # Save the trained model weights.
-    save_model(epochs, model, optimizer, criterion, args['pretrained'])
-    # Save the loss and accuracy plots.
-    save_plots(train_acc, valid_acc, train_loss, valid_loss, args['pretrained'])
+        # Save the trained model weights.
+        save_model(epoch, model, optimizer, criterion, args['pretrained'])
+        # Save the loss and accuracy plots.
+        save_plots(train_acc, valid_acc, train_loss, valid_loss, args['pretrained'])
     print('TRAINING COMPLETE')
 
 

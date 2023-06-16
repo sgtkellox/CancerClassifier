@@ -1,11 +1,13 @@
 import torchvision.models as models
 import torch.nn as nn
+
+import timm
 def build_model(pretrained=True, fine_tune=True, num_classes=3):
     if pretrained:
         print('[INFO]: Loading pre-trained weights')
     else:
         print('[INFO]: Not loading pre-trained weights')
-    model = models.efficientnet_b0(pretrained=pretrained)
+    model = models.efficientnet_b0(weights="EfficientNet_B0_Weights.DEFAULT")
     if fine_tune:
         print('[INFO]: Fine-tuning all layers...')
         for params in model.parameters():
