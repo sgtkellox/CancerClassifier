@@ -11,6 +11,8 @@ from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
 from wsi_utils import extractIndetifierFromSlide, calcPixelPosition
 
+import argparse
+
 
 
 
@@ -34,6 +36,8 @@ def calcSlideResultWithPositions(imgs):
 
     result = []
     for img in imgs:   
+        if ".ini" in img:
+            continue
         resultEntry = 1
         x,y = calcPixelPosition(img)
 
@@ -77,12 +81,14 @@ def tilingResultVisualisation(path, tileSize, slidePath, outpath):
     for slide in wsis:
         resultMap = calcSlideResultWithPositions(wsis[slide])
         w , h = getWsiDimensions(slide,slidePath)
+        if w == 0 or h == 0:
+            print("Warning: the slide "+ slide +" has dims 0 , 0")
+            continue
         w = math.floor(w/tileSize)*10
         h = math.floor(h/tileSize)*10
         resultImage = drawResultImage(resultMap,w,h)
 
         imgPath = os.path.join(outpath,slide+ ".jpg")
-        print(imgPath)
         cv2.imwrite(imgPath, resultImage)
 
 
@@ -90,21 +96,28 @@ def tilingResultVisualisation(path, tileSize, slidePath, outpath):
 
 if __name__ == '__main__':
 
-    split = "train"
-    diag = "Oligo"
 
-    tilebasePath = r"C:\Users\felix\Desktop\neuro\kryo"
-    tilePath = os.path.join(tilebasePath, split, diag)
+    argParser = argparse.ArgumentParser()
 
-    splitBasePath = r"E:\split\kryo"
-    splitPath = os.path.join(splitBasePath, split, diag)
+    argParser.add_argument("-w", "--slides", help="The path to the folder containing the slides")
+    argParser.add_argument("-t", "--tiles", help="The path to the folder containing the tiles")
+    argParser.add_argument("-s", "--size", type=int,default=500, help="The size of the tiles in pixels")
+    argParser.add_argument("-o", "--out", help="The path to where the resulting images go")
 
-    outBasePath = r"C:\Users\felix\Desktop\neuro\kryoResImgs"
-    outPath = os.path.join(outBasePath, split, diag)
+    args = argParser.parse_args()
+
+    tilesPath = args.tiles
+  
+    slidesPath = args.slides
+
+    size = args.size
+  
+    outPath = args.out
+   
 
 
 
-    tilingResultVisualisation(tilePath, 500,splitPath , outPath)
+    tilingResultVisualisation(tilesPath, size,slidesPath , outPath)
 
 
 

@@ -10,7 +10,7 @@ from effNet_utils import save_model, save_plots
 # construct the argument parser
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    '-e', '--epochs', type=int, default=20,
+    '-e', '--epochs', type=int, default=100,
     help='Number of epochs to train our network for'
 )
 parser.add_argument(
@@ -19,7 +19,7 @@ parser.add_argument(
 )
 parser.add_argument(
     '-lr', '--learning-rate', type=float,
-    dest='learning_rate', default=0.0001,
+    dest='learning_rate', default=0.001,
     help='Learning rate for training the model'
 )
 args = vars(parser.parse_args())
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     print(f"Learning rate: {lr}")
     print(f"Epochs to train for: {epochs}\n")
     model = build_model(
-        pretrained=args['pretrained'], 
+        pretrained=True, 
         fine_tune=True, 
         num_classes=len(dataset_classes)
     ).to(device)
@@ -135,10 +135,10 @@ if __name__ == '__main__':
         print('-'*50)
         time.sleep(5)
         
-    # Save the trained model weights.
-    save_model(epochs, model, optimizer, criterion, args['pretrained'])
-    # Save the loss and accuracy plots.
-    save_plots(train_acc, valid_acc, train_loss, valid_loss, args['pretrained'])
+        # Save the trained model weights.
+        save_model(epoch, model, optimizer, criterion, args['pretrained'])  
+        # Save the loss and accuracy plots.
+        save_plots(train_acc, valid_acc, train_loss, valid_loss, args['pretrained'])
     print('TRAINING COMPLETE')
 
 

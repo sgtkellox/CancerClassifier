@@ -11,7 +11,7 @@ def save_model(epochs, model, optimizer, criterion, pretrained):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': criterion,
-                }, r"C:\Users\felix\Desktop\neuro\models\efficientNet\model_"+epochs+"_pretrained.pth")
+                }, r"/mnt/projects/neuropath_hd/analysis/models/effNetRun1/model_"+epochs+"_pretrained.pth")
 
 def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     """
@@ -30,7 +30,7 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
-    plt.savefig(r"C:\Users\felix\Desktop\neuro\models\efficientNetaccuracy_pretrained.png")
+    plt.savefig(r"/mnt/projects/neuropath_hd/analysis/models/effNetRun1/accuracy_pretrained.png")
     
     # loss plots
     plt.figure(figsize=(10, 7))
@@ -45,4 +45,4 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(r"C:\Users\felix\Desktop\neuro\models\loss_pretrained.png")
+    plt.savefig(r"/mnt/projects/neuropath_hd/analysis/models/effNetRun1/loss_pretrained.png")
