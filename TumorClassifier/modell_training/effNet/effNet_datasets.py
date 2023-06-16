@@ -5,8 +5,8 @@ from torch.utils.data import DataLoader, Subset
 
 
 IMAGE_SIZE = 224 # Image size of resize when applying transforms.
-BATCH_SIZE = 32 
-NUM_WORKERS = 4 # Number of parallel processes for data preparation.
+BATCH_SIZE = 64
+NUM_WORKERS = 8 # Number of parallel processes for data preparation.
 
 # Training transforms
 def get_train_transform(IMAGE_SIZE, pretrained):

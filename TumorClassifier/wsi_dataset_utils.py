@@ -1,6 +1,4 @@
 
-
-
 def getPreparationFromFileName(fileName):
     prepString = fileName.split("-")[3]
     prepString = fileName.replace(".svs","")

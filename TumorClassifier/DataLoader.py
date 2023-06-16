@@ -15,13 +15,6 @@ import sys
 
 
 
-project_name='BrainCancerClassifier'
-
-GBMfolder = ""
-oligoFolder = ""
-astroFolder = ""
-
-
 def getPreparationFromFileName(fileName):
     prepString = fileName.split("-")[3]
     prepString = fileName.replace(".svs","")
@@ -317,9 +310,24 @@ def documentSplit(path,outpath):
                     doc.write('\n')
             doc.write('------------------------')
             doc.write('\n')
-        
-        
 
+def listAllFilesInSplit(path,outpath):
+    outpath = os.path.join(outpath,"doc.txt")
+    
+    for prep in os.listdir(path):
+        prepPath = os.path.join(path,prep)
+        for part in os.listdir(prepPath):
+            partPath = os.path.join(prepPath,part)
+            for diag in os.listdir(partPath):
+                diagPath = os.path.join(partPath,diag)           
+                for slide in os.listdir(diagPath):
+                    with open(outpath, 'a') as doc:
+                        doc.write(slide)
+                        doc.write('\n')
+
+                    
+        
+        
 
 def undoSplit(path, destPath):
 
@@ -334,10 +342,6 @@ def undoSplit(path, destPath):
                     shutil.move(slidePath,os.path.join(destPath,slide))
                     
     
-    
- 
-
-
 def sliceTouch(path):
     files = os.listdir(path)
     for file in files:
@@ -588,14 +592,12 @@ def findSlidesWithNNumberCounter(path):
 
 
 
-
-    
-        
-
 if __name__ == '__main__':
-    src = r"/mnt/projects/neuropath_hd/data/batch_2"
-    dest = r"/mnt/projects/neuropath_hd/data/split"
+    src = r"E:\split"
+
+    
+    dest = r"C:\Users\felix\Desktop\dataSetInfo"
 
     
 
-    sortAndSplit(src,dest)
+    listAllFilesInSplit(src,dest)

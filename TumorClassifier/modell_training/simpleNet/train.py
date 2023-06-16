@@ -66,6 +66,8 @@ def validate(model, testloader, criterion):
     epoch_loss = valid_running_loss / counter
     epoch_acc = 100. * (valid_running_correct / len(testloader.dataset))
     return epoch_loss, epoch_acc
+
+
 if __name__ == '__main__':
 # construct the argument parser
     parser = argparse.ArgumentParser()
