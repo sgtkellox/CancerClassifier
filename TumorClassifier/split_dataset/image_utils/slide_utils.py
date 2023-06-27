@@ -1,4 +1,3 @@
-
 def getPreparationFromFileName(fileName):
     prepString = fileName.split("-")[3]
     prepString = fileName.replace(".svs","")
@@ -16,3 +15,13 @@ def getDiagnosisFromFileName(fileName):
         return 'GBM'
     elif diag.startswith('O'):
         return 'O'
+
+
+def multipleNNumber(fileName):
+    prepString = fileName.split("-")[3]
+    prepString = fileName.replace(".svs","")
+    if not prepString[-1].isdigit():
+        return False
+        
+    else:
+        return True

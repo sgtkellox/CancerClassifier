@@ -9,7 +9,7 @@ import math
 from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
-from wsi_utils import extractIndetifierFromSlide, calcPixelPosition
+from tile_utils import  calcPixelPosition
 
 import argparse
 

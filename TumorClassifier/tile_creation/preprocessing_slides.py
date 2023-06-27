@@ -6,11 +6,9 @@ import pickle
 from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
-SLIDEPATH= r""
-OUT_PATH= r""
 
-BG_THR=70
-MASK_THR=90
+BG_THR=65
+MASK_THR=100
 SIZE=500
 
 def get_magnification(slide):
@@ -167,7 +165,7 @@ def mask_tile(tile, mask):
     return masked_tile, masked
 
 
-def process_tiles(slidepath, mask,outPath):
+def process_tiles(slidepath, mask,outPath,size):
     """
     Process a slide.
     Args:
@@ -199,7 +197,7 @@ def process_tiles(slidepath, mask,outPath):
 
     pass_names = []
 
-    sz = 500
+    sz = size
         
     for x in range(0, w-sz, sz):
         for y in range(0, h-sz, sz):
@@ -247,7 +245,9 @@ def save_tile(tile, tilename, outPath):
       tile: a tile.
       tilename: a tile name.
     """
+    
     path = os.path.join(outPath,tilename)
+    print(path)
     tile.save(path, "JPEG")
         
 
