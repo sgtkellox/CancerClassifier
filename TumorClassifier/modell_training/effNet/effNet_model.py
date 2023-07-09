@@ -1,7 +1,7 @@
 import torchvision.models as models
 import torch.nn as nn
 
-import timm
+
 def build_model(pretrained=True, fine_tune=True, num_classes=3):
     if pretrained:
         print('[INFO]: Loading pre-trained weights')

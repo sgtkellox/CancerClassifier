@@ -5,10 +5,29 @@ import matplotlib.pyplot as plt
 import os 
 
 
+def makeOutputFolders(outPath):
+   
+    nPath = os.path.join(outPath,"adjust")
+    if not os.path.isdir(nPath):
+        os.mkdir(nPath)
+    nPath = os.path.join(outPath,"minMaxStretch")
+    if not os.path.isdir(nPath):
+        os.mkdir(nPath)
+    nPath = os.path.join(outPath,"lut")
+    if not os.path.isdir(nPath):
+        os.mkdir(nPath)
+    nPath = os.path.join(outPath,"histEqOnV")
+    if not os.path.isdir(nPath):
+        os.mkdir(nPath)
+    nPath = os.path.join(outPath,"histEq")
+    if not os.path.isdir(nPath):
+        os.mkdir(nPath)
+    
 
+    
 
 #Brightness need be selected from [0,100], contrast from [1,3]       
-def ChangeBrightnessAndContrast(imgage, brightness , contrast,outpath ):
+def ChangeBrightnessAndContrast(image, brightness , contrast ):
     alteredImage = np.zeros(image.shape, image.dtype)
     for y in range(image.shape[0]):
         for x in range(image.shape[1]):
@@ -86,38 +105,28 @@ def showGreyScaleHistogramm(image,fileName):
     plt.close()
     return histogram
 
-def evalRun():
-    imgPath = r"C:\Users\felix\Desktop\Neuro\Images\test\Oligo"
-    greyHistPath = ""
-    rgbHistPath1 = ""
-    rgbHistPath2 = ""
-    rgbHistPath3 = ""
+def evalRun(inPath, outPath):
 
-    for img in os.listdir(imgPath):
+    makeOutputFolders(outPath)
+    
+    
+
+    for img in os.listdir(inPath):
         if not img.endswith("jpg"):
             continue
-        imagePath = os.path.join(imgPath,img)
+        imagePath = os.path.join(inPath,img)
         img_bgr = cv2.imread(imagePath)
         
 
-        gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+        
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-        histOutPath1 = os.path.join(r"C:\Users\felix\Desktop\Neuro\AugmentOutput\Oligo\rgbHistBeforeEq",img)
 
-        showColorHistogramm(img_rgb,histOutPath1)
+        lut = lutContrastEnhancement(img_rgb)
 
-        histEqImg = histogramEqalisation(img_rgb)
+        minMax = minMaxStretch(img_rgb)
 
-        histOutPath2 = os.path.join(r"C:\Users\felix\Desktop\Neuro\AugmentOutput\Oligo\rgbHistAfterEq",img)
 
-        showColorHistogramm(histEqImg,histOutPath2)
-
-        grayAfterHistEq = cv2.cvtColor(histEqImg, cv2.COLOR_RGB2GRAY)
-       # histoEqonV = histogramEqualisationOnVChannel(img_rgb)
-
-        #minMaxStretchImg = minMaxStretch(img_rgb)
-
-        #lut = lutContrastEnhancement(img_rgb)
+       
 
         
 

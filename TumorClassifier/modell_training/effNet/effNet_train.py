@@ -19,10 +19,16 @@ parser.add_argument(
 )
 parser.add_argument(
     '-lr', '--learning-rate', type=float,
-    dest='learning_rate', default=0.001,
+    dest='learning_rate', default=0.0001,
     help='Learning rate for training the model'
 )
 args = vars(parser.parse_args())
+
+import gc
+def report_gpu():
+   print(torch.cuda.list_gpu_processes())
+   gc.collect()
+   torch.cuda.empty_cache()
 
 # Training function.
 def train(model, trainloader, optimizer, criterion):
@@ -93,6 +99,7 @@ def load_ckp(modelPath, model, optimizer):
 
 if __name__ == '__main__':
     # Load the training and validation datasets.
+    report_gpu()
     dataset_train, dataset_valid, dataset_classes = get_datasets(args['pretrained'])
     print(f"[INFO]: Number of training images: {len(dataset_train)}")
     print(f"[INFO]: Number of validation images: {len(dataset_valid)}")
@@ -125,8 +132,9 @@ if __name__ == '__main__':
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
+    epoch = 0
 
-    #model, optimizer, epoch = load_ckp(r"C:\Users\felix\Desktop\models\model_15_pretrained.pth", model, optimizer)
+    #model, optimizer, start_epoch = load_ckp(r"C:\Users\felix\Desktop\models\model_14_pretrained.pth", model, optimizer)
     # Start the training.
     epoch = 0
     while epoch in range(epochs):

@@ -6,6 +6,7 @@ import os
 
 from effNet_model import build_model
 from torchvision import transforms
+# Constants.
 
 # Constants.
 DATA_PATH = r'C:\Users\felix\Desktop\kryo\test\GBM'
@@ -13,6 +14,7 @@ IMAGE_SIZE = 224
 DEVICE = 'cuda'
 
 # Class names.
+class_names = ['Astro','GBM', 'Oligo']
 class_names = ['Astro', 'GBM', 'Oligo']
 
 # Load the trained model.
@@ -20,21 +22,27 @@ model = build_model(pretrained=True, fine_tune=True, num_classes=3)
 checkpoint = torch.load(r"C:\Users\felix\Desktop\models\model_16_pretrained.pth", map_location=DEVICE)
 print('Loading trained model weights...')
 model.load_state_dict(checkpoint['model_state_dict'])
+model.to(DEVICE)
 
 model.to(DEVICE)
 all_image_paths = glob.glob(f"{DATA_PATH}/*")
 model.eval()
+
+# Get all the test image paths.
+path = r"C:\Users\felix\Desktop\neuro\kryo\test\Oligo"
 # Iterate over all the images and do forward pass.
-for image_path in all_image_paths:
-    # Get the ground truth class name from the image path.
-    split = image_path.split(os.path.sep)
-    
-    gt_class_name = split[-2]
-    imageName = split[-1].split(".")[0]
-    print(imageName)
-    
+
+right = 0
+wrong = 0
+images = os.listdir(path)
+for imgName in images:
+
+    gt_class_name = path.split(os.path.sep)[-1]
+
+    print(gt_class_name)
     # Read the image and create a copy.
-    image = cv2.imread(image_path)
+    imgPath = os.path.join(path,imgName)
+    image = cv2.imread(imgPath)
     orig_image = image.copy()
     
     # Preprocess the image
@@ -56,19 +64,18 @@ for image_path in all_image_paths:
     outputs = model(image)
     outputs = outputs.detach().cpu().numpy()
     pred_class_name = class_names[np.argmax(outputs[0])]
-    print(f"GT: {gt_class_name}, Pred: {pred_class_name.lower()}")
+    if pred_class_name == gt_class_name:
+        right +=1
+    
     # Annotate the image with ground truth.
-    cv2.putText(
-        orig_image, f"GT: {gt_class_name}",
-        (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
-        1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
-    )
-    # Annotate the image with prediction.
-    cv2.putText(
-        orig_image, f"Pred: {pred_class_name.lower()}",
-        (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
-        1.0, (100, 100, 225), 2, lineType=cv2.LINE_AA
-    ) 
+
+    acc = right/len(images)
+
+    print("acc "+ str(acc))
    
+
+
+    
+
     safepath = os.path.join(r"C:\Users\felix\Desktop\outPut",imageName+".jpg")
     cv2.imwrite(safepath, orig_image)
