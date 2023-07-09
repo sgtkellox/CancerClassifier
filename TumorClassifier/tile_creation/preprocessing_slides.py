@@ -7,7 +7,7 @@ from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
 
-BG_THR=65
+BG_THR=95
 MASK_THR=100
 SIZE=500
 

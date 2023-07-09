@@ -126,8 +126,9 @@ if __name__ == '__main__':
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
 
-    model, optimizer, epoch = load_ckp(r"C:\Users\felix\Desktop\models\model_15_pretrained.pth", model, optimizer)
+    #model, optimizer, epoch = load_ckp(r"C:\Users\felix\Desktop\models\model_15_pretrained.pth", model, optimizer)
     # Start the training.
+    epoch = 0
     while epoch in range(epochs):
         print(f"[INFO]: Epoch {epoch+1} of {epochs}")
         train_epoch_loss, train_epoch_acc = train(model, train_loader, 
