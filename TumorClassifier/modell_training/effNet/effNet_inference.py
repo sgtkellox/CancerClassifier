@@ -15,21 +15,21 @@ DEVICE = 'cuda'
 
 # Class names.
 class_names = ['Astro','GBM', 'Oligo']
-class_names = ['Astro', 'GBM', 'Oligo']
+
 
 # Load the trained model.
 model = build_model(pretrained=True, fine_tune=True, num_classes=3)
-checkpoint = torch.load(r"C:\Users\felix\Desktop\models\model_16_pretrained.pth", map_location=DEVICE)
+checkpoint = torch.load(r"C:\Users\felix\Desktop\models\model_14_pretrained.pth", map_location=DEVICE)
 print('Loading trained model weights...')
 model.load_state_dict(checkpoint['model_state_dict'])
 model.to(DEVICE)
 
-model.to(DEVICE)
-all_image_paths = glob.glob(f"{DATA_PATH}/*")
+
+
 model.eval()
 
 # Get all the test image paths.
-path = r"C:\Users\felix\Desktop\neuro\kryo\test\Oligo"
+path = r"C:\Users\felix\Desktop\kryo\test\Oligo"
 # Iterate over all the images and do forward pass.
 
 right = 0
@@ -77,5 +77,5 @@ for imgName in images:
 
     
 
-    safepath = os.path.join(r"C:\Users\felix\Desktop\outPut",imageName+".jpg")
-    cv2.imwrite(safepath, orig_image)
+    #safepath = os.path.join(r"C:\Users\felix\Desktop\outPut",imageName+".jpg")
+    #cv2.imwrite(safepath, orig_image)
