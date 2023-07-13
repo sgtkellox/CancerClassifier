@@ -3,25 +3,33 @@ import cv2
 import numpy as np
 import glob as glob
 import os
+
 from effNet_model import build_model
 from torchvision import transforms
 # Constants.
 
+# Constants.
+DATA_PATH = r'C:\Users\felix\Desktop\kryo\test\GBM'
 IMAGE_SIZE = 224
 DEVICE = 'cuda'
+
 # Class names.
 class_names = ['Astro','GBM', 'Oligo']
+
+
 # Load the trained model.
 model = build_model(pretrained=True, fine_tune=True, num_classes=3)
-checkpoint = torch.load(r'C:\Users\felix\Desktop\neuro\models\model_15_pretrained.pth', map_location=DEVICE)
+checkpoint = torch.load(r"C:\Users\felix\Desktop\models\model_14_pretrained.pth", map_location=DEVICE)
 print('Loading trained model weights...')
 model.load_state_dict(checkpoint['model_state_dict'])
 model.to(DEVICE)
 
+
+
 model.eval()
 
 # Get all the test image paths.
-path = r"C:\Users\felix\Desktop\neuro\kryo\test\Oligo"
+path = r"C:\Users\felix\Desktop\kryo\test\Oligo"
 # Iterate over all the images and do forward pass.
 
 right = 0
@@ -69,3 +77,5 @@ for imgName in images:
 
     
 
+    #safepath = os.path.join(r"C:\Users\felix\Desktop\outPut",imageName+".jpg")
+    #cv2.imwrite(safepath, orig_image)

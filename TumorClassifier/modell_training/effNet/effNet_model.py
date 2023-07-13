@@ -7,7 +7,7 @@ def build_model(pretrained=True, fine_tune=True, num_classes=3):
         print('[INFO]: Loading pre-trained weights')
     else:
         print('[INFO]: Not loading pre-trained weights')
-    model = models.efficientnet_b0(weights="EfficientNet_B0_Weights.DEFAULT")
+    model = models.efficientnet_b0(weights="EfficientNet_B0_Weights.IMAGENET1K_V1")
     if fine_tune:
         print('[INFO]: Fine-tuning all layers...')
         for params in model.parameters():

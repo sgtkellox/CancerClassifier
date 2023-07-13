@@ -12,7 +12,7 @@ def save_model(epochs, model, optimizer, criterion,epoch):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': criterion,
-                }, r"C:\Users\felix\Desktop\neuro\models\model"+str(epoch)+".pth")
+                }, r"C:\Users\felix\Desktop\simplkeModel\model"+str(epoch)+".pth")
 
 def save_plots(train_acc, valid_acc, train_loss, valid_loss):
     """
@@ -31,7 +31,7 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss):
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
-    plt.savefig(r'C:\Users\felix\Desktop\neuro\models\accuracy.png')
+    plt.savefig(r'C:\Users\felix\Desktop\simplkeModel\accuracy.png')
     
     # loss plots
     plt.figure(figsize=(10, 7))
@@ -46,5 +46,5 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(r'C:\Users\felix\Desktop\neuro\models\loss.png')
+    plt.savefig(r'C:\Users\felix\Desktop\simplkeModel\loss.png')
 
