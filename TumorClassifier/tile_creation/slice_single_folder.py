@@ -4,6 +4,8 @@ import os
 
 import argparse
 
+from make_tiles import make_tiles
+
 from preprocessing_slides import process_tiles
 from preprocessing_slides import mask4
 from preprocessing_slides import SIZE
@@ -14,7 +16,7 @@ def sliceSortedFolder(pathIn,pathOut,size):
      files = os.listdir(pathIn)
      for file in files:
          filePath = os.path.join(pathIn,file)
-         process_tiles(filePath,mask4, outPath=pathOut, size = size)
+         make_tiles(filePath, outPath=pathOut, size = size)
                            
      return
 

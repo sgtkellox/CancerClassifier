@@ -6,8 +6,10 @@ import pickle
 from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
+import os
 
-BG_THR=99
+
+BG_THR=90
 MASK_THR=100
 SIZE=500
 
@@ -222,9 +224,7 @@ def process_tiles(slidepath, mask,outPath,size):
             # count background tiles
             if masked == 101: nbg += 1
                 
-            # save tiles name and % masked area
-            #with open(OUT_PATH + get_slidename(slidepath) + "_tiles_stats.csv", "a") as f:
-                #f.write(f"{tilename},{masked}\n")
+           
                 
             # save the tile if it passes
             if masked < MASK_THR:
@@ -247,7 +247,7 @@ def save_tile(tile, tilename, outPath):
     """
     
     path = os.path.join(outPath,tilename)
-    print(path)
+    
     tile.save(path, "JPEG")
         
 

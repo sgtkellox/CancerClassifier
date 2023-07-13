@@ -12,7 +12,7 @@ DEVICE = 'cuda'
 # Class names.
 class_names = ['Astro','GBM', 'Oligo']
 # Load the trained model.
-model = build_model(pretrained=False, fine_tune=False, num_classes=3)
+model = build_model(pretrained=True, fine_tune=True, num_classes=3)
 checkpoint = torch.load(r'C:\Users\felix\Desktop\neuro\models\model_15_pretrained.pth', map_location=DEVICE)
 print('Loading trained model weights...')
 model.load_state_dict(checkpoint['model_state_dict'])

@@ -10,68 +10,55 @@ from sysconfig import get_path
 
 import matplotlib.pyplot as plt
 
+from tile_creation.filter_utils import open_slide
+
 import torch
 import cv2
 import torchvision.transforms as transforms
 import numpy as np
 
-from model import CNNModel
+from modell_training.effNet.effNet_model import build_model
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 
-wsiPath = ""
-tilesFolder = ""
+from tile_creation.tile_utils import calcPixelPosition
 
 
 
-def makeSplit(wsiPath):
-    process_tiles(wsiPath,mask4, tilesFolder)
-    return
+def sortTilesByWSI(path):
 
-def calcPixelPosition(image):
-    splitP1 = image.split("_")
-    x = int(splitP1[1])/500
-    y = int(splitP1[2].split(".")[0])/500
+    wsis = {}
 
-    return x , y 
+    for img in os.listdir(path):
 
+        wsiName = img.split("_")[0]
 
-def calcSlideResultWithPositions(tilesFolder):
+        if wsiName in wsis:
+            wsis[wsiName].append(img)
+        else:
+            wsis[wsiName] = []
+            wsis[wsiName].append(img)
+    print("finished sorting by wsi")
+    return wsis
 
-    device = ('cuda' if torch.cuda.is_available() else 'cpu')
-    # list containing all the class labels
-    labels = [
-        'Astro', 'GBM', 'Oligo'
-        ]
+def makeTileMap(tilePath, imgs,slideWidth, slideHeight, model, transform):
 
-    # initialize the model and load the trained weights
-    model = CNNModel().to(device)
-    checkpoint = torch.load(r'C:\Users\felix\Desktop\Neuro\testModelSmear\model100.pth', map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    model.eval()
-
-    # define preprocess transforms
-    transform = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize(224),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.5, 0.5, 0.5],
-            std=[0.5, 0.5, 0.5]
-        )
-    ])
-    
+    tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
    
-    testImgs = os.listdir(tilesFolder)
-
-    result = []
-
-    for testImg in testImgs:
-        if not testImg.endswith(".jpg"):
+  
+    for img in imgs:   
+        if ".ini" in img:
             continue
-        imgPath = os.path.join(tilesFolder,testImg)
-        image = cv2.imread(imgPath)
+
+
+        print("Classifying" + str(img))
         
+        x,y = calcPixelPosition(img)
+
+        x = int(x)
+        y = int(y)
+        img = os.path.join(tilePath,img)
+        image = cv2.imread(img)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = transform(image)
         image = torch.unsqueeze(image, 0)
@@ -79,52 +66,89 @@ def calcSlideResultWithPositions(tilesFolder):
             outputs = model(image.to(device))
                     
         output_label = torch.topk(outputs, 1)
+
+        pred_class = int(output_label.indices)
               
-        pred_class = labels[int(output_label.indices)]
+        tileMap[y][x] = pred_class +1
         
-        x,y = calcPixelPosition(testImg)
+    return tileMap
 
-        resEntry = [int(output_label.indices),y,x]
 
-        result.append(resEntry)
+def getWsiDimensions(nNumber, slidePath):
+    slides = os.listdir(slidePath)
+   
+    for wsi in slides:
+        wsiSplit = wsi.split(".")[0].split("-")
 
-    return result
+        wsiNumber = wsiSplit[0][0] + "-" + wsiSplit[1] + "-" + wsiSplit[2] + "-" + wsiSplit[3]
+
+      
         
+        if wsiNumber == nNumber:
+               
+            slidePath = os.path.join(slidePath,wsi)
+            
+            slide = open_slide(slidePath)
+            a = slide.dimensions
+            return a[0] , a[1]
+                    
+    return 0, 0
 
 
                   
-def drawResultImage(resultsArray):
-     result = np.zeros((540, 1710, 3), np.uint8)
+def drawResultImage(resultsArray, slideWidth, slideHeight):
+     result = np.zeros((slideHeight*10, slideWidth*10, 3), np.uint8)
      result.fill(255)
 
-     for entry in resultsArray:
-            if entry[0]==0:
-                result[int(entry[1])*10:int(entry[1])*10+10,int(entry[2])*10:int(entry[2])*10+10] = [255, 0, 0]
-            elif entry[0]==1:
-                result[int(entry[1])*10:int(entry[1])*10+10,int(entry[2])*10:int(entry[2])*10+10] = [0, 255, 0]
-            elif entry[0]==2:
-                result[int(entry[1])*10:int(entry[1])*10+10,int(entry[2])*10:int(entry[2])*10+10] = [0, 0, 255]
+     for x in range(len(resultsArray)):
+         for y in range(len(resultsArray[0])):
+             if resultsArray[x][y]==1:
+                result[x*10:x*10+10,y*10:y*10+10] = [255, 0, 0]
+             elif resultsArray[x][y]==2:
+                result[x*10:x*10+10,y*10:y*10+10] = [0, 255, 0]
+             elif resultsArray[x][y]==3:
+                result[x*10:x*10+10,y*10:y*10+10] = [0, 0, 255]
      return result
-        
+
+
+def makeClassificationRun(tilePath, slidePath, outPath, model, transform):
+    wsis = sortTilesByWSI(tilePath)
+    for slide in wsis:
+        slideWidth , slideHeight = getWsiDimensions(slide,slidePath)
+        print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
+        if slideWidth == 0 or slideHeight == 0:
+           print("Warning: the slide "+ slide +" has dims 0 , 0")
+           continue
+        slideWidth = int(slideWidth/500) 
+        slideHeight = int(slideHeight/500) 
+        #slideWidth = int(slideWidth - (slideWidth % 500))
+        #slideHeight = int(slideHeight - (slideHeight % 500))
+
+        tileMap = makeTileMap(tilePath,wsis[slide],slideWidth, slideHeight, model, transform)
        
+        resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
+
+        safePath = os.path.join(outPath,slide+".jpg")
+
+        cv2.imwrite(safePath, resultImg)
+
+
        
 
+if __name__ == '__main__':
 
-def classifySplit(tilesFolder):
-    device = ('cuda' if torch.cuda.is_available() else 'cpu')
-    # list containing all the class labels
-    labels = [
-        'Astro', 'GBM', 'Oligo'
-        ]
 
-    # initialize the model and load the trained weights
-    model = CNNModel().to(device)
-    checkpoint = torch.load(r'C:\Users\felix\Desktop\Neuro\testModelSmear\model100.pth', map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    model.eval()
+     tilePath = r"C:\Users\felix\Desktop\neuro\kryo\test\Astro"
 
-    # define preprocess transforms
-    transform = transforms.Compose([
+     slidePath =r"E:\split\kryo\test\Astro"
+
+     outPath = r"C:\Users\felix\Desktop\neuro\model_output"
+
+     labels = ['Astro', 'GBM', 'Oligo']
+
+     device = ('cuda' if torch.cuda.is_available() else 'cpu')
+
+     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize(224),
         transforms.ToTensor(),
@@ -133,54 +157,21 @@ def classifySplit(tilesFolder):
             std=[0.5, 0.5, 0.5]
         )
     ])
-    
-   
-    testImgs = os.listdir(tilesFolder)
-    
-    for testImg in testImgs:
-        if not testImg.endswith(".jpg"):
-            continue
-        imgPath = os.path.join(d,testImg)
-        image = cv2.imread(imgPath)
-        orig_image = image.copy()
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = transform(image)
-        image = torch.unsqueeze(image, 0)
-        with torch.no_grad():
-            outputs = model(image.to(device))
-                    
-        output_label = torch.topk(outputs, 1)
-              
-        pred_class = labels[int(output_label.indices)]
-        resOfCurrentClass.append(pred_class)
-        cv2.putText(orig_image, 
-        f"GT: {gt_class}",
-        (10, 25),
-        cv2.FONT_HERSHEY_SIMPLEX, 
-        0.6, (0, 255, 0), 2, cv2.LINE_AA
-        )
-        cv2.putText(orig_image, 
-            f"Pred: {pred_class}",
-            (10, 55),
-            cv2.FONT_HERSHEY_SIMPLEX, 
-            0.6, (0, 0, 255), 2, cv2.LINE_AA
-        )
-                
-        #if int(output_label.indices) == count:
-            #outpath = os.path.join(r"E:\models\results",testImg)
-                    
-        #else:
-            #outpath = os.path.join(r"E:\models\fails",testImg)
-        #cv2.imwrite(outpath, orig_image)
-                    
-    return 
+
+     model = build_model(pretrained=False, fine_tune=False, num_classes=3)
+     model = model.to(device)
+     
+     checkpoint = torch.load(r'C:\Users\felix\Desktop\neuro\models\model_15_pretrained.pth', map_location=device)
+     
+     model.load_state_dict(checkpoint['model_state_dict'])
+     model.eval()
+
+     makeClassificationRun(tilePath, slidePath, outPath, model, transform)
 
 
-if __name__ == '__main__':
-    res = calcSlideResultWithPositions(r"C:\Users\felix\Desktop\Neuro\smearSplitHistNorm\val\Astro")
-    print(res)
-    img = drawResultImage(res)
-    cv2.imwrite(r"F:\N20-1488\filename.png", img)
+
+
+    
 
 
 
