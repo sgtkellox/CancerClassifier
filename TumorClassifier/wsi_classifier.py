@@ -23,6 +23,8 @@ from sklearn.metrics import ConfusionMatrixDisplay
 
 from tile_creation.tile_utils import calcPixelPosition
 
+labels = ['Astro', 'GBM', 'Oligo']
+
 
 
 def sortTilesByWSI(path):
@@ -44,6 +46,10 @@ def sortTilesByWSI(path):
 def makeTileMap(tilePath, imgs,slideWidth, slideHeight, model, transform):
 
     tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
+
+    gt_class_name = tilePath.split(os.path.sep)[-1]
+
+    correct = 0
    
   
     for img in imgs:   
@@ -58,6 +64,8 @@ def makeTileMap(tilePath, imgs,slideWidth, slideHeight, model, transform):
         x = int(x)
         y = int(y)
         img = os.path.join(tilePath,img)
+
+        
         image = cv2.imread(img)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = transform(image)
@@ -68,10 +76,17 @@ def makeTileMap(tilePath, imgs,slideWidth, slideHeight, model, transform):
         output_label = torch.topk(outputs, 1)
 
         pred_class = int(output_label.indices)
+        predClassString = labels[pred_class]
+
+        if predClassString == gt_class_name:
+            correct +=1
+
               
         tileMap[y][x] = pred_class +1
+
+    acc = correct/len(imgs)    
         
-    return tileMap
+    return tileMap, acc
 
 
 def getWsiDimensions(nNumber, slidePath):
@@ -100,14 +115,38 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
      result = np.zeros((slideHeight*10, slideWidth*10, 3), np.uint8)
      result.fill(255)
 
+     nAstro = 0
+     nGBM = 0
+     nOligo =0
+
      for x in range(len(resultsArray)):
          for y in range(len(resultsArray[0])):
              if resultsArray[x][y]==1:
+                nAstro+=1
                 result[x*10:x*10+10,y*10:y*10+10] = [255, 0, 0]
              elif resultsArray[x][y]==2:
+                nGBM +=1
                 result[x*10:x*10+10,y*10:y*10+10] = [0, 255, 0]
              elif resultsArray[x][y]==3:
+                nOligo+=1
                 result[x*10:x*10+10,y*10:y*10+10] = [0, 0, 255]
+
+     cv2.putText(
+        result, "Astro" + str(nAstro),
+        (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
+        1.0, (255, 0, 0), 2, lineType=cv2.LINE_AA
+     )
+     
+     cv2.putText(
+        result, "GBM" + str(nGBM),
+        (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
+        1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
+     )
+     cv2.putText(
+        result, "Oligo" + str(nOligo),
+        (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
+        1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
+     )
      return result
 
 
