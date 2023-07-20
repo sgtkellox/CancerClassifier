@@ -33,8 +33,9 @@ path = r"C:\Users\felix\Desktop\kryo\test\Oligo"
 # Iterate over all the images and do forward pass.
 
 right = 0
-wrong = 0
+
 images = os.listdir(path)
+gt_class_name = path.split(os.path.sep)[-1]
 for imgName in images:
 
     gt_class_name = path.split(os.path.sep)[-1]

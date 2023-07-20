@@ -43,48 +43,69 @@ def sortTilesByWSI(path):
     print("finished sorting by wsi")
     return wsis
 
-def makeTileMap(tilePath, imgs,slideWidth, slideHeight, model, transform):
+def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, transform):
 
     tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
 
     gt_class_name = tilePath.split(os.path.sep)[-1]
-
-    correct = 0
    
+    right = 0;
   
     for img in imgs:   
         if ".ini" in img:
             continue
 
 
-        print("Classifying" + str(img))
+        print("Classifying " + str(img))
+
+        
         
         x,y = calcPixelPosition(img)
 
         x = int(x)
         y = int(y)
-        img = os.path.join(tilePath,img)
-
         
-        image = cv2.imread(img)
+        imgFullPath = os.path.join(tilePath,img)
+        image = cv2.imread(imgFullPath)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        orig_image = image.copy()
         image = transform(image)
+       
         image = torch.unsqueeze(image, 0)
-        with torch.no_grad():
-            outputs = model(image.to(device))
-                    
-        output_label = torch.topk(outputs, 1)
-
-        pred_class = int(output_label.indices)
-        predClassString = labels[pred_class]
-
-        if predClassString == gt_class_name:
-            correct +=1
-
-              
+        image = image.to(device)
+    
+        # Forward pass throught the image.
+        outputs = model(image)
+        outputs = outputs.detach().cpu().numpy()
+        pred_class =np.argmax(outputs[0])
+        pred_class_name = labels[pred_class]
         tileMap[y][x] = pred_class +1
+        if pred_class_name == gt_class_name:
+            right +=1
+        print(img+ " pred  "+ pred_class_name+ " gt "+ gt_class_name)
 
-    acc = correct/len(imgs)    
+        cv2.putText(
+            orig_image, f"GT: {gt_class_name}",
+            (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
+            1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
+        )
+    # Annotate the image with prediction.
+        cv2.putText(
+            orig_image, f"Pred: {pred_class_name.lower()}",
+            (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
+            1.0, (100, 100, 225), 2, lineType=cv2.LINE_AA
+        ) 
+        safepath = os.path.join(imagesOutPath,img)
+        print("safepath "+safepath)
+        orig_image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB)
+        cv2.imwrite(safepath, orig_image)
+        
+        
+    
+         
+
+    acc = right/len(imgs)
+
         
     return tileMap, acc
 
@@ -115,42 +136,45 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
      result = np.zeros((slideHeight*10, slideWidth*10, 3), np.uint8)
      result.fill(255)
 
-     nAstro = 0
-     nGBM = 0
-     nOligo =0
+     numAstro=0
+     numGBM = 0
+     numOligo= 0
 
      for x in range(len(resultsArray)):
          for y in range(len(resultsArray[0])):
+             
              if resultsArray[x][y]==1:
-                nAstro+=1
+                numAstro +=1
                 result[x*10:x*10+10,y*10:y*10+10] = [255, 0, 0]
              elif resultsArray[x][y]==2:
-                nGBM +=1
+                numGBM +=1
                 result[x*10:x*10+10,y*10:y*10+10] = [0, 255, 0]
              elif resultsArray[x][y]==3:
-                nOligo+=1
+                numOligo +=1
                 result[x*10:x*10+10,y*10:y*10+10] = [0, 0, 255]
 
      cv2.putText(
-        result, "Astro" + str(nAstro),
+        result, "Astro " + str(numAstro),
         (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
         1.0, (255, 0, 0), 2, lineType=cv2.LINE_AA
      )
+    # Annotate the image with prediction.
+     cv2.putText(
+        result, "GBM " + str(numGBM),
+        (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
+        1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
+     )
+     cv2.putText(
+        result, "Oligo " + str(numOligo),
+        (10, 75), cv2.FONT_HERSHEY_SIMPLEX,
+        1.0, (0, 0, 255), 2, lineType=cv2.LINE_AA
+      ) 
+    
      
-     cv2.putText(
-        result, "GBM" + str(nGBM),
-        (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
-        1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
-     )
-     cv2.putText(
-        result, "Oligo" + str(nOligo),
-        (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
-        1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
-     )
      return result
 
 
-def makeClassificationRun(tilePath, slidePath, outPath, model, transform):
+def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, transform):
     wsis = sortTilesByWSI(tilePath)
     for slide in wsis:
         slideWidth , slideHeight = getWsiDimensions(slide,slidePath)
@@ -163,11 +187,15 @@ def makeClassificationRun(tilePath, slidePath, outPath, model, transform):
         #slideWidth = int(slideWidth - (slideWidth % 500))
         #slideHeight = int(slideHeight - (slideHeight % 500))
 
-        tileMap = makeTileMap(tilePath,wsis[slide],slideWidth, slideHeight, model, transform)
+        tileMap, acc = makeTileMap(tilePath,wsis[slide],imagesOutPath,slideWidth, slideHeight, model, transform)
        
         resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
 
         safePath = os.path.join(outPath,slide+".jpg")
+
+        print(slide + str(acc))
+
+        resultImg = cv2.cvtColor(resultImg, cv2.COLOR_BGR2RGB)
 
         cv2.imwrite(safePath, resultImg)
 
@@ -177,13 +205,16 @@ def makeClassificationRun(tilePath, slidePath, outPath, model, transform):
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\neuro\kryo\test\Astro"
+     tilePath = r"C:\Users\felix\Desktop\neuro\kryo\test\Oligo"
 
-     slidePath =r"E:\split\kryo\test\Astro"
+     slidePath =r"C:\Users\felix\Desktop\Oligo"
 
-     outPath = r"C:\Users\felix\Desktop\neuro\model_output"
+     outPath = r"C:\Users\felix\Desktop\neuro\model_output\mapsOligo"
 
-     labels = ['Astro', 'GBM', 'Oligo']
+
+     imagesOutPath = r"C:\Users\felix\Desktop\neuro\model_output\imagesOligo"
+
+     
 
      device = ('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -192,20 +223,20 @@ if __name__ == '__main__':
         transforms.Resize(224),
         transforms.ToTensor(),
         transforms.Normalize(
-            mean=[0.5, 0.5, 0.5],
-            std=[0.5, 0.5, 0.5]
-        )
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+            )
     ])
 
      model = build_model(pretrained=False, fine_tune=False, num_classes=3)
      model = model.to(device)
      
-     checkpoint = torch.load(r'C:\Users\felix\Desktop\neuro\models\model_15_pretrained.pth', map_location=device)
+     checkpoint = torch.load(r'C:\Users\felix\Desktop\neuro\models\model_14_pretrained.pth', map_location=device)
      
      model.load_state_dict(checkpoint['model_state_dict'])
      model.eval()
 
-     makeClassificationRun(tilePath, slidePath, outPath, model, transform)
+     makeClassificationRun(tilePath, slidePath, outPath,imagesOutPath, model, transform)
 
 
 
