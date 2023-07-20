@@ -16,7 +16,7 @@ from stardist.plot import render_label
 from csbdeep.utils import normalize
 import matplotlib.pyplot as plt
 
-img = plt.imread(r"C:\Users\felix\Desktop\neuro\newTilingTest\th235\tiles\A2-N20-0874-K-Q2_40000_8500.jpg")
+img = plt.imread(r"C:\Users\felix\Desktop\AutoEncoder\val\good\A-N19-3097-K_5500_23000.jpg")
 
 labels, details = model.predict_instances(normalize(img))
 

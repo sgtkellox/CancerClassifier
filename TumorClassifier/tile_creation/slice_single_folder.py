@@ -15,8 +15,9 @@ import matplotlib.pyplot as plt
 def sliceSortedFolder(pathIn,pathOut,size):
      files = os.listdir(pathIn)
      for file in files:
-         filePath = os.path.join(pathIn,file)
-         make_tiles(filePath, outPath=pathOut, size = size)
+         if file.endswith(".svs"):
+            filePath = os.path.join(pathIn,file)
+            make_tiles(filePath, outPath=pathOut, size = size)
                            
      return
 
