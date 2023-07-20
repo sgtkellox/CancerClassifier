@@ -6,17 +6,15 @@ import argparse
 
 from make_tiles import make_tiles
 
-from preprocessing_slides import process_tiles
-from preprocessing_slides import mask4
-from preprocessing_slides import SIZE
 
-import matplotlib.pyplot as plt
+
 
 def sliceSortedFolder(pathIn,pathOut,size):
      files = os.listdir(pathIn)
      for file in files:
-         filePath = os.path.join(pathIn,file)
-         make_tiles(filePath, outPath=pathOut, size = size)
+         if file.endswith(".svs"):
+             filePath = os.path.join(pathIn,file)
+             make_tiles(filePath, outPath=pathOut, size = size)
                            
      return
 

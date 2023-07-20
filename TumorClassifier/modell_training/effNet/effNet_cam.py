@@ -29,7 +29,7 @@ transform = transforms.Compose(
 
 def returnCAM(feature_conv, weight_softmax, class_idx):
     # generate the class activation maps upsample to 256x256
-    size_upsample = (500, 500)
+    size_upsample = (224, 224)
     bz, nc, h, w = feature_conv.shape
     output_cam = []
     for idx in class_idx:
@@ -58,7 +58,7 @@ def hook_feature(module, input, output):
 
 if __name__ == "__main__":
 
-    imageFolderPath = r"C:\Users\felix\Desktop\kryo\test\Astro"
+    imageFolderPath = r"C:\Users\felix\Desktop\neuroImages\kryo\test\Astro"
 
     outpath = r"C:\Users\felix\Desktop\effNetB0Cams\Astro"
 
@@ -70,6 +70,8 @@ if __name__ == "__main__":
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
     model.to(DEVICE)
+
+    print(model)
 
 
     
