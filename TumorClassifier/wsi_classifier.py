@@ -26,6 +26,7 @@ from tile_creation.tile_utils import calcPixelPosition
 labels = ['Astro', 'GBM', 'Oligo']
 
 
+
 def sortTilesByWSI(path):
 
     wsis = {}

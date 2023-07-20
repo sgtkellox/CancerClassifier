@@ -30,11 +30,17 @@ if __name__ == '__main__':
 
     argParser.add_argument("-i", "--input", help="The path to the folder containing the slides")
     argParser.add_argument("-o", "--out", help="The path to the folder where u want the tiles")
+    argParser.add_argument("-s", "--size",type=int, default=500, help="size of the tiles in pixel")
+
+    
 
     args = argParser.parse_args()
 
     pathIn = args.input
   
     pathOut = args.out
+
+    size = args.size
+
     
-    sliceSortedFolder(pathIn,pathOut,500)
+    sliceSortedFolder(pathIn,pathOut,size)
