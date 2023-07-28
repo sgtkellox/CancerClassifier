@@ -19,7 +19,10 @@ from random import randint
 import pandas as pd
 import pickle
 
-path = r"C:\Users\felix\Desktop\neuro\kMeansInput"
+import shutil
+
+outPath = r"C:\Users\felix\Desktop\neuroImages\clustering\results\n10"
+path = r"C:\Users\felix\Desktop\neuroImages\clustering\Images"
 # change the working directory to the path where the images are located
 os.chdir(path)
 
@@ -87,7 +90,7 @@ pca.fit(feat)
 x = pca.transform(feat)
 
 # cluster feature vectors
-kmeans = KMeans(n_clusters=3,  init='k-means++', n_init=10, max_iter=300, tol=0.0001, verbose=0, random_state=None, copy_x=True, algorithm='auto')
+kmeans = KMeans(n_clusters=10,  init='k-means++', n_init=10, max_iter=300, tol=0.0001, verbose=0, random_state=None, copy_x=True, algorithm='auto')
 kmeans.fit(x)
 
 # holds the cluster id and the images { id: [images] }
@@ -117,8 +120,24 @@ def view_cluster(cluster):
         plt.axis('off')
     plt.show()
 
+
+def safeCluster(cluster, inPath, outPath):
+     files = groups[cluster]
+     for file in files:
+         imgPath = os.path.join(inPath,file)
+         safePath = os.path.join(outPath,file)
+         shutil.copy(imgPath, safePath)
+         
+
+
+count = 0
 for cluster in groups:
-    view_cluster(cluster)
+    clusterPath = os.path.join(outPath,"cluster"+str(count))
+    os.mkdir(clusterPath)
+    safeCluster(cluster, path, clusterPath)
+    count+=1
+
+    
 
         
 

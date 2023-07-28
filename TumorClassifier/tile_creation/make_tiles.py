@@ -2,7 +2,7 @@
 
 import sys
 import numpy as np
-import pickle
+
 from openslide import open_slide
 import openslide
 
