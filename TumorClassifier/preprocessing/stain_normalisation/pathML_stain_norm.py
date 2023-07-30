@@ -9,13 +9,13 @@ import os
 
 import argparse
 
+import multiprocessing
+
 def createOutPath(path):
     mPath = os.path.join(path,"macenko")
     if not os.path.isdir(mPath):
         os.mkdir(mPath)
-    vPath = os.path.join(path,"vahadane")
-    if not os.path.isdir(vPath):
-        os.mkdir(vPath)
+   
 
     toCreate = os.path.join(mPath,"normalize")
     if not os.path.isdir(toCreate):
@@ -29,54 +29,44 @@ def createOutPath(path):
     if not os.path.isdir(toCreate):
         os.mkdir(toCreate)
 
-    toCreate = os.path.join(vPath,"normalize")
-    if not os.path.isdir(toCreate):
-        os.mkdir(toCreate)
-
-    toCreate = os.path.join(vPath,"hematoxylin")
-    if not os.path.isdir(toCreate):
-        os.mkdir(toCreate)
-
-    toCreate = os.path.join(vPath,"eosin")
-    if not os.path.isdir(toCreate):
-        os.mkdir(toCreate)
-
-
-def normStainForFolder(pathIn,pathOut):
     
-    createOutPath(pathOut)
+
+
+def normStainForFolder(pathIn,pathOut, images):
+    
+    
     
     copiedFiles = os.listdir(os.path.join(pathOut,"macenko","hematoxylin"))
         
             
-    testImgs = os.listdir(pathIn)
-    testImgs.sort()
-
-    print(testImgs[0:50])
             
-    for testImg in testImgs:
-        if not testImg.endswith(".jpg"):
+    for imageName in images:
+        if not imageName.endswith(".jpg"):
             continue
-        if testImg in copiedFiles:
-            print("file " + testImg+ " allready copied")
+        if imageName in copiedFiles:
+            print("file " + imageName+ " allready copied")
             continue
-        imgPath = os.path.join(pathIn,testImg)
+        imgPath = os.path.join(pathIn,imageName)
         image = cv2.imread(imgPath)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        for i, method in enumerate(["macenko", "vahadane"]):
+        corrupted = False
+        for i, method in enumerate(["macenko"]):
             for j, target in enumerate(["normalize", "hematoxylin", "eosin"]):
                 # initialize stain normalization object
                 normalizer = StainNormalizationHE(target = target, stain_estimation_method = method)
                        
                 # apply on example image
-                im = normalizer.F(image)
+                try:
+                    im = normalizer.F(image)
+
+                except:
+                    corrupted = True
+                    break
                 # plot results
-                outPath = os.path.join(pathOut,method,target,testImg)
+                outPath = os.path.join(pathOut,method,target,imageName)
                 plt.imsave(outPath,im)
-
-
-
-
+            if corrupted:
+                break
 
 
 
@@ -95,7 +85,32 @@ if __name__ == '__main__':
   
     pathOut = args.out
 
-    normStainForFolder(pathIn,pathOut)
+    cpus = multiprocessing.cpu_count()/2
+
+    print("Number of cpu : ", cpus)
+
+    images = os.listdir(pathIn)
+
+    numImages = len(images)
+
+    procs = []
+    cpus = int(cpus)
+
+    createOutPath(pathOut)
+
+    for i in range(1,cpus):
+        subSet = images[int((i-1)*numImages/cpus):int(i*numImages/cpus)]
+        print("started processing subset" +str(i)+ " of " + str(cpus))
+        tilingProc = multiprocessing.Process(target=normStainForFolder,args=(pathIn,pathOut,subSet))
+        procs.append(tilingProc)
+        tilingProc.start()
+
+    for process in procs:
+        process.join()
+
+
+
+        
      
                         
 
