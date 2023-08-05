@@ -24,7 +24,8 @@ parser.add_argument(
 )
 args = vars(parser.parse_args())
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 import gc
 def report_gpu():
@@ -39,11 +40,8 @@ def train(model, trainloader, optimizer, criterion):
     train_running_loss = 0.0
     train_running_correct = 0
     counter = 0
-    for i, data in enumerate(trainloader):
+    for i, data in tqdm(enumerate(trainloader), total=len(trainloader)):
         counter += 1
-        if i%100 ==0:
-            print("step: " +str(i))
-
         image, labels = data
         image = image.to(device)
         labels = labels.to(device)
@@ -75,11 +73,7 @@ def validate(model, testloader, criterion):
     valid_running_correct = 0
     counter = 0
     with torch.no_grad():
-        for i, data in enumerate(testloader):
-
-            if i%100 == 0:
-                print("step " +str(i))
-
+        for i, data in tqdm(enumerate(testloader), total=len(testloader)):
             counter += 1
             
             image, labels = data
@@ -127,9 +121,11 @@ if __name__ == '__main__':
         fine_tune=True, 
         num_classes=len(dataset_classes)
     )
-    
-    
 
+    model = nn.DataParallel(model,device_ids = [0, 1])
+    model = model.to(device)
+
+    
     # Total parameters and trainable parameters.
     total_params = sum(p.numel() for p in model.parameters())
     print(f"{total_params:,} total parameters.")
@@ -145,10 +141,9 @@ if __name__ == '__main__':
     train_acc, valid_acc = [], []
     epoch = 0
 
-    model, optimizer, start_epoch = load_ckp(r"/mnt/scratch1/fkeller/modelsB5/model_5_pretrained.pth", model, optimizer)
-    model = model.to(device)
+    #model, optimizer, start_epoch = load_ckp(r"C:\Users\felix\Desktop\models\model_14_pretrained.pth", model, optimizer)
     # Start the training.
-    epoch = start_epoch
+    epoch = 0
     while epoch in range(epochs):
         print(f"[INFO]: Epoch {epoch+1} of {epochs}")
         train_epoch_loss, train_epoch_acc = train(model, train_loader, 

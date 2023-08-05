@@ -58,8 +58,8 @@ def stainNormAllImages(inPath, outPath):
 
 
      
-     for file in os.listdir(path):
-         d = os.path.join(path, file)
+     for file in os.listdir(inPath):
+         d = os.path.join(inPath, file)
          print(file)
          copiedFiles = os.listdir(os.path.join(r"C:\Users\felix\Desktop\Neuro\torchstainKryo",file,"macenko","normalize"))
          if os.path.isdir(d):

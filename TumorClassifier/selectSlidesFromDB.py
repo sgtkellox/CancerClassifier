@@ -411,15 +411,35 @@ def cloneSlidesFromDiffFile(pathToFile, outPath, dbPath):
     return
 
 
+def copyTMAFiles(exelFile,drivePath):
+    table = pd.read_excel(exelFile)
+
+    for index, row in table.iterrows():
+        slidePath = row['original_file']
+        if os.path.exists(slidePath):
+            slideName = slidePath.split("/")[-1]
+            destPath = os.path.join(drivePath,slideName)
+            shutil.copyfile(slidePath,destPath)
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
    #findMissingCases(r"E:\split", r"C:\Users\felix\Downloads\data_Frischgewebe_methylation.xlsx")
    
    
    
-   cloneSlidesFromDiffFile(r"/media/np-kirsten/INTENSO/dataSetInfo/diff.txt",r"/media/np-kirsten/INTENSO/a",r"/mnt/NAS4/aperio/data/")
+   #cloneSlidesFromDiffFile(r"/media/np-kirsten/INTENSO/dataSetInfo/diff.txt",r"/media/np-kirsten/INTENSO/a",r"/mnt/NAS4/aperio/data/")
    #cloneSlidesFromDiffFile(r"D:\dataSetInfo\diff.txt",r"D:\a",r"/mnt/NAS4/aperio/data/")
 
    #findSlidesWithUUIDAndMissingSVSFile(r"/media/np-dennis/INTENSO/dataSetInfo/data_Frischgewebe_methylation.xlsx",r"/mnt/NAS4/aperio/data/")
+
+   copyTMAFiles(r"/media/np-keller/Expansion/Ramin.xlsx", r"/media/np-keller/Expansion/Ramin")
 
 

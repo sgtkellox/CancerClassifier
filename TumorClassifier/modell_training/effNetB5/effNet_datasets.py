@@ -51,12 +51,12 @@ def get_datasets(pretrained):
     
 
     train_dataset = datasets.ImageFolder(
-        root=r'/mnt/scratch1/fkeller/tiles3/kryo/train',
+        root=r'/mnt/scratch1/fkeller/kryoStainNorm/kryo/train',
         transform=(get_train_transform(IMAGE_SIZE, pretrained))
     )
 # validation dataset
     valid_dataset = datasets.ImageFolder(
-        root=r'/mnt/scratch1/fkeller/tiles3/kryo/val',
+        root=r'/mnt/scratch1/fkeller/kryoStainNorm/kryo/val',
         transform=(get_valid_transform(IMAGE_SIZE, pretrained))
     )
     

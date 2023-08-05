@@ -128,7 +128,7 @@ if __name__ == '__main__':
         num_classes=len(dataset_classes)
     )
     
-    
+    model = model.to(device)
 
     # Total parameters and trainable parameters.
     total_params = sum(p.numel() for p in model.parameters())
@@ -145,10 +145,9 @@ if __name__ == '__main__':
     train_acc, valid_acc = [], []
     epoch = 0
 
-    model, optimizer, start_epoch = load_ckp(r"/mnt/scratch1/fkeller/modelsB5/model_5_pretrained.pth", model, optimizer)
-    model = model.to(device)
+    #model, optimizer, start_epoch = load_ckp(r"C:\Users\felix\Desktop\models\model_14_pretrained.pth", model, optimizer)
     # Start the training.
-    epoch = start_epoch
+    epoch = 0
     while epoch in range(epochs):
         print(f"[INFO]: Epoch {epoch+1} of {epochs}")
         train_epoch_loss, train_epoch_acc = train(model, train_loader, 

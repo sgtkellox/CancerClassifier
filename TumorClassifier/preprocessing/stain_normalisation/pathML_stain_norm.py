@@ -36,7 +36,7 @@ def normStainForFolder(pathIn,pathOut, images):
     
     
     
-    copiedFiles = os.listdir(os.path.join(pathOut,"macenko","hematoxylin"))
+    copiedFiles = os.listdir(pathOut)
         
             
             
@@ -51,20 +51,22 @@ def normStainForFolder(pathIn,pathOut, images):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         corrupted = False
         for i, method in enumerate(["macenko"]):
-            for j, target in enumerate(["normalize", "hematoxylin", "eosin"]):
+            for j, target in enumerate(["normalize"]):
                 # initialize stain normalization object
                 normalizer = StainNormalizationHE(target = target, stain_estimation_method = method)
                        
                 # apply on example image
                 try:
                     im = normalizer.F(image)
+                    outPath = os.path.join(pathOut,imageName)
+                    print("writing image to" + outPath)
+                    cv2.imwrite(outPath,im)
 
                 except:
                     corrupted = True
                     break
                 # plot results
-                outPath = os.path.join(pathOut,method,target,imageName)
-                plt.imsave(outPath,im)
+               
             if corrupted:
                 break
 
@@ -85,7 +87,7 @@ if __name__ == '__main__':
   
     pathOut = args.out
 
-    cpus = multiprocessing.cpu_count()/2
+    cpus = multiprocessing.cpu_count()-4
 
     print("Number of cpu : ", cpus)
 
@@ -96,7 +98,7 @@ if __name__ == '__main__':
     procs = []
     cpus = int(cpus)
 
-    createOutPath(pathOut)
+    #createOutPath(pathOut)
 
     for i in range(1,cpus):
         subSet = images[int((i-1)*numImages/cpus):int(i*numImages/cpus)]

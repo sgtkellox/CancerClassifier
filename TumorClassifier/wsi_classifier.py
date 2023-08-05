@@ -1,12 +1,6 @@
 import os
-import shutil
-import random
-import math
 from sysconfig import get_path
 
-#from preprocessing_slides import process_tiles
-#from preprocessing_slides import mask4
-#from preprocessing_slides import SIZE
 
 import matplotlib.pyplot as plt
 
@@ -22,6 +16,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 
 from tile_creation.tile_utils import calcPixelPosition
+
+from modell_training.simpleNet.model import CNNModel
 
 labels = ['Astro', 'GBM', 'Oligo']
 
@@ -47,7 +43,13 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
 
     tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
 
-    gt_class_name = tilePath.split(os.path.sep)[-1]
+    if imgs[0].split("-")[0].startswith("A"):
+        gt_class_name = "Astro"
+    elif imgs[0].split("-")[0].startswith("G"):
+        gt_class_name = "GBM"
+    elif imgs[0].split("-")[0].startswith("O"):
+        gt_class_name = "Oligo"
+
    
     right = 0;
   
@@ -116,7 +118,9 @@ def getWsiDimensions(nNumber, slidePath):
     for wsi in slides:
         wsiSplit = wsi.split(".")[0].split("-")
 
-        wsiNumber = wsiSplit[0][0] + "-" + wsiSplit[1] + "-" + wsiSplit[2] + "-" + wsiSplit[3]
+        wsiNumber = wsiSplit[0] + "-" + wsiSplit[1] + "-" + wsiSplit[2] + "-" + wsiSplit[3] + "-" + wsiSplit[4]
+
+        print("slide from slide folder "+ wsiNumber)
 
       
         
@@ -177,6 +181,7 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
 def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, transform):
     wsis = sortTilesByWSI(tilePath)
     for slide in wsis:
+        print("slide from tileName: "+slide)
         slideWidth , slideHeight = getWsiDimensions(slide,slidePath)
         print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
         if slideWidth == 0 or slideHeight == 0:
@@ -205,14 +210,14 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\neuro\kryo\test\Oligo"
+     tilePath = r"C:\Users\felix\Desktop\neuro\kryoTestTiles"
 
-     slidePath =r"C:\Users\felix\Desktop\Oligo"
+     slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
 
-     outPath = r"C:\Users\felix\Desktop\neuro\model_output\mapsOligo"
+     outPath = r"C:\Users\felix\Desktop\neuro\testing\maps"
 
 
-     imagesOutPath = r"C:\Users\felix\Desktop\neuro\model_output\imagesOligo"
+     imagesOutPath = r"C:\Users\felix\Desktop\neuro\testing\results"
 
      
 
@@ -228,13 +233,15 @@ if __name__ == '__main__':
             )
     ])
 
-     model = build_model(pretrained=False, fine_tune=False, num_classes=3)
-     model = model.to(device)
+     model = build_model(pretrained=True, fine_tune=True, num_classes=3)
+     
      
      checkpoint = torch.load(r'C:\Users\felix\Desktop\neuro\models\model_14_pretrained.pth', map_location=device)
-     
+
      model.load_state_dict(checkpoint['model_state_dict'])
+     
      model.eval()
+     model = model.to(device)
 
      makeClassificationRun(tilePath, slidePath, outPath,imagesOutPath, model, transform)
 
