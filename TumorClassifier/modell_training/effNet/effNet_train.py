@@ -126,7 +126,7 @@ if __name__ == '__main__':
         pretrained=True, 
         fine_tune=True, 
         num_classes=len(dataset_classes)
-    )
+    ).to(device)
     
     
 
