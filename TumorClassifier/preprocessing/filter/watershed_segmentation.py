@@ -19,7 +19,8 @@ import shutil
 def isOverThreshold(path,threshold):
     im = cv2.imread(path)
 
-    im_gray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
+    #im_gray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
+    im_gray = im[:,:,0]
     im1=im
 
 
@@ -79,7 +80,7 @@ def isOverThreshold(path,threshold):
         cell = markers[label_coords]
     
         # Check if the label size is too small
-        if np.product(cell.shape) < 500: 
+        if np.product(cell.shape) < 2000: 
             #print('Label {} is too small! Setting to 0.'.format(label_ind))
             mask = np.where(labels==label_ind+1, 0, mask)
 

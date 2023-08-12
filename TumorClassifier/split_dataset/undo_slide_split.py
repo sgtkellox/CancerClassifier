@@ -56,19 +56,19 @@ if __name__ == '__main__':
 
     argParser = argparse.ArgumentParser()
 
-    argParser.add_argument("-s", "--slides", help="The path to the folder containing the slides")
-    argParser.add_argument("-t", "--tiles", help="The path to the folder containing the split structure of the tiles")
+    argParser.add_argument("-i", "--inPath", help="The path to the folder containing the slides split")
+    argParser.add_argument("-o", "--outPath", help="The path to the folder containing the unsplit slides")
     argParser.add_argument("-d", "--doc", help="The path whre u want the doc file to be safed")
 
     
     args = argParser.parse_args()
 
-    inPath = args.slides
-    outPath = args.tiles
+    inPath = args.inPath
+    outPath = args.outPath
     docPath = args.doc
 
 
-    documentSplit(inPath,docPath)
+    #documentSplit(inPath,docPath)
     undoSplit(inPath,outPath)
 
 
