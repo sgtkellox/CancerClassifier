@@ -6,7 +6,7 @@ import imageio
 import cv2
 import skimage
 
-im = cv2.imread(r"C:\Users\felix\Desktop\neuro\thTestSmear\235\tiles\A2-N17-1152Q_1000_19000.jpg")#Read Images
+im = cv2.imread(r"C:\Users\felix\Desktop\neuro\thTestSmear\235\accWaterShed\A2-N17-1152Q_10500_31500.jpg")#Read Images
 
 
 im_gray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
@@ -14,31 +14,10 @@ im1=im
 
 #Plotting data for comparision of grayscale versus original image
 import matplotlib.pyplot as plt
-plt.figure(figsize=(8,8))
-plt.subplot(121)
-plt.imshow(im)
-plt.axis('off')
-plt.title('Original Image')
-plt.subplot(122)
-plt.imshow(im_gray, cmap='gray')
-plt.axis('off')
-plt.title('Grayscale Image')
-plt.tight_layout()
-plt.show()
+
 
 im_blur=cv2.GaussianBlur(im_gray,(5,5),0)
-import matplotlib.pyplot as plt
-plt.figure(figsize=(8,8))
-plt.subplot(121)
-plt.imshow(im)
-plt.axis('off')
-plt.title('Original Image')
-plt.subplot(122)
-plt.imshow(im_blur, cmap='gray')
-plt.axis('off')
-plt.title('Blurred Grayscale Image')
-plt.tight_layout()
-plt.show()
+
 
 #Using Watershed
 ret,th = cv2.threshold(im_blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -112,7 +91,7 @@ for label_ind, label_coords in enumerate(ndimage.find_objects(labels)):
     cell = markers[label_coords]
     
     # Check if the label size is too small
-    if np.product(cell.shape) < 1000: 
+    if np.product(cell.shape) < 1500: 
         #print('Label {} is too small! Setting to 0.'.format(label_ind))
         mask = np.where(labels==label_ind+1, 0, mask)
 

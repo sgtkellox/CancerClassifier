@@ -159,18 +159,18 @@ def findMissingCases(slidePath, tablePath):
     diff = list(set(caseNumbersInTable.keys()) - set(caseNumbersFound))
 
     for n in caseNumbersFound:
-        with open(r'C:\Users\felix\Desktop\dataSetInfo\found.txt', 'a') as found:
+        with open(r'C:\Users\felix\Desktop\testCopyScript\found.txt', 'a') as found:
                 found.write(n)
                 found.write('\n')
         found.close()
     for m in caseNumbersInTable.keys():
-        with open(r'C:\Users\felix\Desktop\dataSetInfo\inTable.txt', 'a') as inTable:
+        with open(r'C:\Users\felix\Desktop\testCopyScript\inTable.txt', 'a') as inTable:
             for uuid in caseNumbersInTable[m]:
                 inTable.write(m +"     "  + str(uuid))
                 inTable.write('\n')
         inTable.close()
     for d in diff:
-        with open(r'C:\Users\felix\Desktop\dataSetInfo\diff.txt', 'a') as diff:
+        with open(r'C:\Users\felix\Desktop\testCopyScript\diff.txt', 'a') as diff:
             diff.write("-------------------------------------------------------------------")
             diff.write('\n')
             uuid = caseNumbersInTable[d]
@@ -431,7 +431,7 @@ def copyTMAFiles(exelFile,drivePath):
 
 
 if __name__ == '__main__':
-   #findMissingCases(r"E:\split", r"C:\Users\felix\Downloads\data_Frischgewebe_methylation.xlsx")
+   findMissingCases(r"E:\split", r"C:\Users\felix\Downloads\data_Frischgewebe_methylation.xlsx")
    
    
    
@@ -440,6 +440,6 @@ if __name__ == '__main__':
 
    #findSlidesWithUUIDAndMissingSVSFile(r"/media/np-dennis/INTENSO/dataSetInfo/data_Frischgewebe_methylation.xlsx",r"/mnt/NAS4/aperio/data/")
 
-   copyTMAFiles(r"/media/np-keller/Expansion/Ramin.xlsx", r"/media/np-keller/Expansion/Ramin")
+   #copyTMAFiles(r"/media/np-keller/Expansion/Ramin.xlsx", r"/media/np-keller/Expansion/Ramin")
 
 
