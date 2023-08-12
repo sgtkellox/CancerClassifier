@@ -32,6 +32,7 @@ while x < out_image.shape[1]-500:
 
 
 
+
 print(out_image.shape)
 
 plt.imshow(out_image)
