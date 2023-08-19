@@ -1,3 +1,6 @@
+
+
+
 def calcPixelPosition(image):
     splitP1 = image.split("_")
     x = int(splitP1[1])/500
@@ -30,4 +33,28 @@ def extractIndetifierFromSlide(slide):
     identifier = parts[1] + "-" + parts[2] + "-" +parts[3]
 
     return identifier
+
+def getPreparation(slide):
+    identifier = slide.split("_")[0]
+    prep = slide.split("-")[3]
+    if prep[-1].isdigit():
+        prep = prep[0]
+    if prep =="K":
+        return "kryo"
+    elif prep =="Q":
+        return "smear"
+    else:
+        return "touch"
+
+def getDiagnosis(slide):
+     diag = slide.split("-")[0]
+     if "A" in diag:
+         return "Astro";
+     elif "GBM" in diag:
+         return "GBM";
+     else:
+         return "O"
+
+
+    
 
