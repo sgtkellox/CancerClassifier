@@ -123,7 +123,7 @@ if __name__ == '__main__':
     print(f"Learning rate: {lr}")
     print(f"Epochs to train for: {epochs}\n")
     model = build_model(
-        pretrained=False, 
+        pretrained=True, 
         fine_tune=True, 
         num_classes=len(dataset_classes)
     )
