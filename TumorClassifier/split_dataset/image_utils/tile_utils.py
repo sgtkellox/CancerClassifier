@@ -53,7 +53,7 @@ def getDiagnosis(slide):
      elif "GBM" in diag:
          return "GBM";
      else:
-         return "O"
+         return "Oligo"
 
 
     

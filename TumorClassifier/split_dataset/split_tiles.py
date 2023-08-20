@@ -1,10 +1,11 @@
-from ctypes.wintypes import SHORT
+
 import os
 import argparse
 import math
 import random
 from folder_structure_creation import makeFolderStructure
 from image_utils.tile_utils import getPreparation, getDiagnosis
+import shutil
 
 
 def sortTilesByWSI(path):
@@ -125,12 +126,19 @@ def makeTargetFolder(targetPath):
 
     return trainPath, valPath, testPath
 
-def copyTiles(tiles, destPath):
-    for tile in tiles:
-        destPath = os.path.join(destPath,getDiagnosis(tile))
-        destPath = os.path.join(destPath,tile)
+def copyTiles(tiles, inPath, destPath):
 
-        print(tile + " "+ destPath+"\n") 
+    for tile in tiles:
+        
+        diag = getDiagnosis(tile)
+        safePath = os.path.join(destPath,diag)
+        safePath = os.path.join(safePath,tile)
+        srcPath = os.path.join(inPath,tile)
+        #print(getDiagnosis(tile))
+        shutil.move(srcPath,safePath)
+        
+
+        #print(tile + " "+ destPath+"\n") 
 
 
 
@@ -143,9 +151,10 @@ def main(inPath, outPath):
     printSplit(trainSet , valSet , testSet)
 
     trainPath, valPath, testPath = makeTargetFolder(outPath)
-    copyTiles(trainSet,trainPath)
-    copyTiles(valSet,valPath)
-    copyTiles(testSet,testPath)
+   
+    copyTiles(trainSet,inPath,trainPath)
+    copyTiles(valSet,inPath,valPath)
+    copyTiles(testSet,inPath,testPath)
 
 
 
@@ -155,19 +164,23 @@ if __name__ == '__main__':
 
     argParser = argparse.ArgumentParser()
 
-    argParser.add_argument("-t", "--tilePath", help="The path to the folder containing the tiles")
-    argParser.add_argument("-f", "--filePath", help="The path to the result file")
+    argParser.add_argument("-i", "--tilePath", help="The path to the folder containing the tiles")
+    argParser.add_argument("-o", "--filePath", help="The path to the result file")
    
 
     
     args = argParser.parse_args()
 
-    imagePath = args.tilePath
-    filePath = args.filePath
+    inPath = args.tilePath
+    outPath = args.filePath
 
-    inPath = r"C:\Users\felix\Desktop\neuroImages\kryo\train\GBM"
+    #inPath= r"C:\Users\felix\Desktop\neuroImages\kryo\train\GBM"
 
-    outPath = r"C:\Users\felix\Desktop\neuroImages\folder"
+    #outPath = r"C:\Users\felix\Desktop\featureMap"
+
+   
+
+    
 
     main(inPath,outPath)
 
