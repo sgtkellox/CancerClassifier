@@ -112,6 +112,13 @@ def validate(model, testloader, criterion):
     return epoch_loss, epoch_acc, f1_score
 
 
+def load_ckp(modelPath, model, optimizer):
+    checkpoint = torch.load(modelPath)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    return model, optimizer, checkpoint['epoch']
+
+
 if __name__ == '__main__':
     
     
@@ -145,12 +152,14 @@ if __name__ == '__main__':
         T_mult=1,
         verbose=True
     )
+    model, optimizer, epoch = load_ckp(r"C:\Users\felix\Desktop\AutoEncoder\models\model73.pth", model, optimizer)
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
     train_f1_score, valid_f1_score = [], []
     # Start the training.
-    for epoch in range(epochs):
+    while epoch in range(epochs):
+        epoch+=1
         print(f"[INFO]: Epoch {epoch+1} of {epochs}")
         train_epoch_loss, train_epoch_acc, train_epoch_f1_score = train(
             model, train_loader, 

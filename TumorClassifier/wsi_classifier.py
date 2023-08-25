@@ -1,6 +1,4 @@
 import os
-from sysconfig import get_path
-
 
 import matplotlib.pyplot as plt
 

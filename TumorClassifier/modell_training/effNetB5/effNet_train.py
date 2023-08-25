@@ -143,7 +143,6 @@ if __name__ == '__main__':
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
-    epoch = 0
 
     #model, optimizer, start_epoch = load_ckp(r"C:\Users\felix\Desktop\models\model_14_pretrained.pth", model, optimizer)
     # Start the training.
