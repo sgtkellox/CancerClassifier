@@ -63,6 +63,6 @@ if __name__ == "__main__":
 
     for process in procs:
         process.join()
-        print("folder finished")
+    print("folder finished")
 
     

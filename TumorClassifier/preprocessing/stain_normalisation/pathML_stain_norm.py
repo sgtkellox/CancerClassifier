@@ -59,6 +59,7 @@ def normStainForFolder(pathIn,pathOut, images):
                 try:
                     im = normalizer.F(image)
                     outPath = os.path.join(pathOut,imageName)
+                    im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
                     print("writing image to" + outPath)
                     cv2.imwrite(outPath,im)
 

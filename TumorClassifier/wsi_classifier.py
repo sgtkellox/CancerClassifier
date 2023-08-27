@@ -9,7 +9,7 @@ import cv2
 import torchvision.transforms as transforms
 import numpy as np
 
-from modell_training.effNet.effNet_model import build_model
+from modell_training.effNet_v2.effNet_model import build_model
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 
@@ -37,7 +37,7 @@ def sortTilesByWSI(path):
     print("finished sorting by wsi")
     return wsis
 
-def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, transform):
+def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, transform,showImages=False):
 
     tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
 
@@ -68,7 +68,8 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
         imgFullPath = os.path.join(tilePath,img)
         image = cv2.imread(imgFullPath)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        orig_image = image.copy()
+        if showImages:
+            orig_image = image.copy()
         image = transform(image)
        
         image = torch.unsqueeze(image, 0)
@@ -84,21 +85,23 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
             right +=1
         print(img+ " pred  "+ pred_class_name+ " gt "+ gt_class_name)
 
-        cv2.putText(
-            orig_image, f"GT: {gt_class_name}",
-            (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
-            1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
-        )
-    # Annotate the image with prediction.
-        cv2.putText(
-            orig_image, f"Pred: {pred_class_name.lower()}",
-            (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
-            1.0, (100, 100, 225), 2, lineType=cv2.LINE_AA
-        ) 
-        safepath = os.path.join(imagesOutPath,img)
-        print("safepath "+safepath)
-        orig_image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB)
-        cv2.imwrite(safepath, orig_image)
+        if showImages:
+
+            cv2.putText(
+                orig_image, f"GT: {gt_class_name}",
+                (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
+                1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
+            )
+        # Annotate the image with prediction.
+            cv2.putText(
+                orig_image, f"Pred: {pred_class_name.lower()}",
+                (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
+                1.0, (100, 100, 225), 2, lineType=cv2.LINE_AA
+            ) 
+            safepath = os.path.join(imagesOutPath,img)
+            print("safepath "+safepath)
+            orig_image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB)
+            cv2.imwrite(safepath, orig_image)
         
         
     
@@ -190,7 +193,7 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
         #slideWidth = int(slideWidth - (slideWidth % 500))
         #slideHeight = int(slideHeight - (slideHeight % 500))
 
-        tileMap, acc = makeTileMap(tilePath,wsis[slide],imagesOutPath,slideWidth, slideHeight, model, transform)
+        tileMap, acc = makeTileMap(tilePath,wsis[slide],imagesOutPath,slideWidth, slideHeight, model, transform,showImages=False)
        
         resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
 
@@ -208,11 +211,11 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\neuro\kryoTestTiles"
+     tilePath = r"C:\Users\felix\Desktop\fixedKryoTest\tiles"
 
-     slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
+     slidePath =r"C:\Users\felix\Desktop\fixedKryoTest\kryoTest"
 
-     outPath = r"C:\Users\felix\Desktop\neuro\testing\maps"
+     outPath = r"C:\Users\felix\Desktop\fixedKryoTest\mapsM9"
 
 
      imagesOutPath = r"C:\Users\felix\Desktop\neuro\testing\results"
@@ -223,7 +226,7 @@ if __name__ == '__main__':
 
      transform = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize(224),
+        transforms.Resize(384),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -234,7 +237,7 @@ if __name__ == '__main__':
      model = build_model(pretrained=True, fine_tune=True, num_classes=3)
      
      
-     checkpoint = torch.load(r'C:\Users\felix\Desktop\neuro\models\model_14_pretrained.pth', map_location=device)
+     checkpoint = torch.load(r'C:\Users\felix\Desktop\modelCollection\kryo\effNet\v2_500\model_9.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      
