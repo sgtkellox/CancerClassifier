@@ -1,6 +1,9 @@
-import os
+
 from tqdm import tqdm
 
+import numpy as np
+
+import os
 add_dll_dir = getattr(os, "add_dll_directory", None)
 vipsbin = r"C:\AI\vips-dev-8.14\bin"
 if callable(add_dll_dir):
@@ -10,6 +13,33 @@ else:
     os.environ["PATH"] = os.pathsep.join((vipsbin, os.environ["PATH"]))
     print("added path")
 
+format_to_dtype = {
+    'uchar': np.uint8,
+    'char': np.int8,
+    'ushort': np.uint16,
+    'short': np.int16,
+    'uint': np.uint32,
+    'int': np.int32,
+    'float': np.float32,
+    'double': np.float64,
+    'complex': np.complex64,
+    'dpcomplex': np.complex128,
+}
+
+# map np dtypes to vips
+dtype_to_format = {
+    'uint8': 'uchar',
+    'int8': 'char',
+    'uint16': 'ushort',
+    'int16': 'short',
+    'uint32': 'uint',
+    'int32': 'int',
+    'float32': 'float',
+    'float64': 'double',
+    'complex64': 'complex',
+    'complex128': 'dpcomplex',
+}
+
 
     
 
@@ -18,6 +48,8 @@ import random
 import pyvips
 
 # this makes a 8-bit, mono image of 100,000 x 100,000 pixels, each pixel zero
+
+# map vips formats to np dtypes
 
 
 
@@ -60,17 +92,31 @@ def stitchFolder(path,result):
 
         tile = pyvips.Image.new_from_file(imagePath, access='sequential')
 
+        
+
+        mem_img = tile.write_to_memory()
+
+        np_3d = np.ndarray(buffer=mem_img,dtype=format_to_dtype[tile.format],shape=[tile.height, tile.width, tile.bands])
+
+        #greenOverLay = 
+
+
         if isEven == True:
-            tile *= [1, 1.2, 1]
+            np_3d[:,:,0] = 255
             isEven = False
         else:
-            tile *= [1.2, 1, 1]
+            np_3d[:,:,1] = 255
             isEven = True
+
+        height, width, bands = np_3d.shape
+        linear = np_3d.reshape(width * height * bands)
+        vi = pyvips.Image.new_from_memory(linear.data, width, height, bands,
+                                          dtype_to_format[str(np_3d.dtype)])
 
 
         x,y = calcPixelPosition(image)
 
-        result = result.insert(tile,x,y)
+        result = result.insert(vi,x,y)
     return result
 
 def main(tilePath,safePath):
