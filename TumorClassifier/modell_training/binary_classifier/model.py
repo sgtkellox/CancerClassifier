@@ -19,7 +19,7 @@ class CustomCNN(nn.Module):
         )
         self.classifier = nn.Sequential(
             nn.Linear(in_features=256, out_features=128),
-            nn.Dropout2d(p=0.4),
+            nn.Dropout(p=0.4),
             nn.Linear(in_features=128, out_features=num_classes)
         )
     def forward(self, x):

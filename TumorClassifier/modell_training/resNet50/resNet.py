@@ -17,6 +17,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
+from torchvision.models import resnet50, ResNet50_Weights
+
 
 
 
@@ -27,7 +29,7 @@ import cv2
 
 
 def trainResNet():
-    data_dir = '/data/train'
+    
 
 
     train_transforms = transforms.Compose([transforms.Resize(224),
@@ -52,6 +54,9 @@ def trainResNet():
 
     device = torch.device("cuda" if torch.cuda.is_available() 
                                       else "cpu")
+
+
+    model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
 
     print(model)
 
@@ -294,4 +299,4 @@ def makeGradCam():
     visualization = show_cam_on_image(rgb_img, grayscale_cam, use_rgb=True)
        
 if __name__ == '__main__':
-    makeGradCam()
+   

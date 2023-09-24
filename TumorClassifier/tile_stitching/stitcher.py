@@ -127,11 +127,21 @@ def main(tilePath,safePath):
 
     im = stitchFolder(tilePath,im)
 
-    im.write_to_file(safePath)
 
+    #im.tiffsave(safePath, tile=True, compression='lzw', bigtiff=True, pyramid=True, Q=80)
+
+    im.tiffsave(safePath, compression=pyvips.enums.ForeignTiffCompression.DEFLATE,
+                 tile=True, tile_width=512, tile_height=512, #rgbjpeg=True,
+                 pyramid=True,  bigtiff=True)
+
+    #im.write_to_file(safePath)
 
 
 
     
-main(r"C:\Users\felix\Desktop\fixedKryoTest\stitcherTest",r"C:\Users\felix\Desktop\fixedKryoTest\stitcherRes\res.tif")
+main(r"C:\Users\felix\Desktop\neuro\stitcherTest",r"C:\Users\felix\Desktop\neuro\stitcherRes\res.tif")
+
+
+
+
 

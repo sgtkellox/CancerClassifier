@@ -9,11 +9,11 @@ import cv2
 
 import os
 
-slidePath= r"E:\split\kryo\train\GBM\GBM-N17-2769-K-Q1.svs"
+slidePath= r"C:\Users\felix\Desktop\AutoEncoder\slide\GBM-N21-0329-K-Q1.svs"
 
-tilePath = r"C:\Users\felix\Desktop\neuro\maskTiles\tiles"
+tilePath = r"C:\Users\felix\Desktop\AutoEncoder\gtTiles"
 
-with fiona.open(r"C:\Users\felix\Documents\GBM-N17-2769-K-Q1.geojson", "r") as geojson:
+with fiona.open(r"C:\Users\felix\Desktop\AutoEncoder\goodTissueJsons\GBM-N21-0329-K-Q1.geojson", "r") as geojson:
    features = [feature["geometry"] for feature in geojson]
 
 with rasterio.open(slidePath) as src:
@@ -29,18 +29,28 @@ x = 0
 y = 0
 
 print("x : "+ str(out_image.shape[1]))
+print("y : "+ str(out_image.shape[0]))
 
 while x < out_image.shape[1]-500:
+    y = 0
     while y < out_image.shape[0]-500:
 
+        print("X " +str(x))
+        print("Y " +str(y))
+
         tile = out_image[y:y+500,x:x+500]
+
+        #tile = cv2.cvtColor(tile, cv2.COLOR_BGR2GRAY)
+
+        #number_of_black_pix = cv2.countNonZero(tile)
         
-        number_of_black_pix = np.sum(tile == [0,0,0])
+        number_of_black_pix  = np.sum(tile == (0,0,0))
 
         print(number_of_black_pix)
 
         if not number_of_black_pix>10000:
             safePath = os.path.join(tilePath,imageName+"_"+str(x)+"_"+str(y)+".jpg")
+            tile = cv2.cvtColor(tile, cv2.COLOR_BGR2RGB)
             cv2.imwrite(safePath,tile)
         y+=500
     x+=500

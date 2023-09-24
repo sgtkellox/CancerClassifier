@@ -3,12 +3,25 @@ import argparse
 import shutil
 
 
+def sortTilesByWSI(path):
 
+    wsis = {}
+
+    for img in os.listdir(path):
+
+        wsiName = img.split("_")[0]
+
+        if wsiName in wsis:
+            wsis[wsiName].append(img)
+        else:
+            wsis[wsiName] = []
+            wsis[wsiName].append(img)
+    print("finished sorting by wsi")
+    return wsis
 
 def extractNNumberFromWsi(wsi):
-    wsi = wsi.split(".")[0]
     split = wsi.split("-")
-    nNumber = split[1]+"-"+split[2]
+    nNumber = split[1]+"-"+split[2]+"-"+split[3]
     return nNumber
 
 
@@ -17,42 +30,33 @@ def extractNNumbersFromFile(path):
     with open(path,"r") as f:
         lines = f.readlines()
     lines = [x.rstrip() for x in lines]
-    lines = [x.replace("-"+x.split("-")[2],"") for x in lines]
-    
-    
+    lines = [x[1:] for x in lines]
     f.close()
-
-    
 
     return lines
 
 
-def filterTiles(slidePath, filepath, outpath):
+def filterTiles(imagePath, filepath, outpath):
 
-    
+    wsis = sortTilesByWSI(imagePath)
     toRemove = extractNNumbersFromFile(filepath)
  
     counter = 0
 
   
-    for wsi in os.listdir(slidePath): 
+    for wsi in wsis: 
         
         nNumber = extractNNumberFromWsi(wsi)
-        #print(nNumber)
- 
+
+        number = nNumber[1:]
+        
                
-        if nNumber in toRemove:
-            #print("wsi " + wsi)
-            pathToSingleImage = os.path.join(imagePath,wsi)
-            #print(pathToSingleImage)
-            pathToImgDest = os.path.join(outpath,wsi)
-
-            print(pathToImgDest)
-
-            
-            shutil.move(pathToSingleImage,pathToImgDest)
-            
-                
+        if number in toRemove:
+            print("wsi " + wsi + " with "+ str(len(wsis[wsi]))+" tiles")
+            for image in wsis[wsi]:
+                pathToSingleImage = os.path.join(imagePath,image)
+                pathToImgDest = os.path.join(outpath,image)
+                shutil.move(pathToSingleImage,pathToImgDest)
            
             counter+=1
     print("total: " +str(counter))
@@ -79,3 +83,7 @@ if __name__ == '__main__':
 
  
     filterTiles(imagePath, filePath, outPath)
+
+
+    
+

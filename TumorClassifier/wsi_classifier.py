@@ -211,11 +211,11 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\fixedKryoTest\tiles"
+     tilePath = r"E:\fixedKryoTest\SN"
 
-     slidePath =r"C:\Users\felix\Desktop\fixedKryoTest\kryoTest"
+     slidePath =r"E:\fixedKryoTest\kryoTestSn"
 
-     outPath = r"C:\Users\felix\Desktop\fixedKryoTest\mapsM9"
+     outPath = r"E:\fixedKryoTest\mapsM9"
 
 
      imagesOutPath = r"C:\Users\felix\Desktop\neuro\testing\results"
@@ -237,7 +237,7 @@ if __name__ == '__main__':
      model = build_model(pretrained=True, fine_tune=True, num_classes=3)
      
      
-     checkpoint = torch.load(r'C:\Users\felix\Desktop\modelCollection\kryo\effNet\v2_500\model_9.pth', map_location=device)
+     checkpoint = torch.load(r'E:\modelCollection\kryo\effNet\v2_500_sn\model_15.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      

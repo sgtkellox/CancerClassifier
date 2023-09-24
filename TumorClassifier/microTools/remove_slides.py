@@ -1,15 +1,7 @@
 import os
 import argparse
+
 import shutil
-
-
-
-
-def extractNNumberFromWsi(wsi):
-    wsi = wsi.split(".")[0]
-    split = wsi.split("-")
-    nNumber = split[1]+"-"+split[2]
-    return nNumber
 
 
 def extractNNumbersFromFile(path):
@@ -17,17 +9,20 @@ def extractNNumbersFromFile(path):
     with open(path,"r") as f:
         lines = f.readlines()
     lines = [x.rstrip() for x in lines]
-    lines = [x.replace("-"+x.split("-")[2],"") for x in lines]
-    
-    
+    #lines = [x[1:] for x in lines]
     f.close()
-
-    
 
     return lines
 
 
-def filterTiles(slidePath, filepath, outpath):
+def extractNNumberFromWsi(wsi):
+    split = wsi.split("-")
+    nNumber = split[1]+"-"+split[2]
+    
+    return nNumber
+
+
+def filterTiles(slidePath, filepath,outPath):
 
     
     toRemove = extractNNumbersFromFile(filepath)
@@ -38,15 +33,13 @@ def filterTiles(slidePath, filepath, outpath):
     for wsi in os.listdir(slidePath): 
         
         nNumber = extractNNumberFromWsi(wsi)
-        #print(nNumber)
  
                
         if nNumber in toRemove:
             #print("wsi " + wsi)
             pathToSingleImage = os.path.join(imagePath,wsi)
             #print(pathToSingleImage)
-            pathToImgDest = os.path.join(outpath,wsi)
-
+            pathToImgDest = os.path.join(outPath,wsi)
             print(pathToImgDest)
 
             
@@ -78,4 +71,4 @@ if __name__ == '__main__':
     outPath = args.outPath
 
  
-    filterTiles(imagePath, filePath, outPath)
+    filterTiles(imagePath, filePath,outPath)

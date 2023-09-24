@@ -12,9 +12,55 @@ import torchvision.transforms as transforms
 
 from tile_creation.tile_utils import calcPixelPosition
 
-from tile_creation.filter_utils import open_slide
+import tqdm
+
+#from tile_creation.filter_utils import open_slide
 
 from modell_training.binary_classifier.model import CustomCNN
+
+
+add_dll_dir = getattr(os, "add_dll_directory", None)
+vipsbin = r"C:\AI\vips-dev-8.14\bin"
+if callable(add_dll_dir):
+    add_dll_dir(vipsbin)
+    print("added dir")
+else:
+    os.environ["PATH"] = os.pathsep.join((vipsbin, os.environ["PATH"]))
+    print("added path")
+
+format_to_dtype = {
+    'uchar': np.uint8,
+    'char': np.int8,
+    'ushort': np.uint16,
+    'short': np.int16,
+    'uint': np.uint32,
+    'int': np.int32,
+    'float': np.float32,
+    'double': np.float64,
+    'complex': np.complex64,
+    'dpcomplex': np.complex128,
+}
+
+# map np dtypes to vips
+dtype_to_format = {
+    'uint8': 'uchar',
+    'int8': 'char',
+    'uint16': 'ushort',
+    'int16': 'short',
+    'uint32': 'uint',
+    'int32': 'int',
+    'float32': 'float',
+    'float64': 'double',
+    'complex64': 'complex',
+    'complex128': 'dpcomplex',
+}
+
+
+    
+
+import sys
+import random
+import pyvips
 
 labels = ['Artifact', 'HQ-Tissue']
 
@@ -35,6 +81,14 @@ def sortTilesByWSI(path):
             wsis[wsiName].append(img)
     print("finished sorting by wsi")
     return wsis
+
+
+def extractTileCoordinates(image):
+
+    splitP1 = image.split("_")
+    x = int(splitP1[1])
+    y = int(splitP1[2].split(".")[0])
+    return x , y
 
 
 def getWsiDimensions(nNumber, slidePath):
@@ -63,24 +117,79 @@ def getWsiDimensions(nNumber, slidePath):
                     
     return 0, 0
 
-def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, transform):
 
-    tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
+def findWidhHeight(images):
+    minX = 0
+    maxX = 0
+    minY = 0
+    maxY = 0
+    for image in images:
+   
+        x,y = extractTileCoordinates(image)
 
-    aPath = os.path.join(imagesOutPath,"artefact")
+        minX = min(minX,x)
+        maxX = max(maxX,x)
+        minY = min(minY,y)
+        maxY = max(maxY,y)
+
+    width = maxX+500-minX
+    height = maxY + 500 - minY
+
+    return width, height
+
+
+
+
+
+def makeResultFolder(outPath):
+
+    aPath = os.path.join(outPath,"artefact")
     if not os.path.isdir(aPath):
         os.mkdir(aPath)
 
-    gPath = os.path.join(imagesOutPath,"good")
+    gPath = os.path.join(outPath,"good")
     if not os.path.isdir(gPath):
         os.mkdir(gPath)
 
-    diffPath = os.path.join(imagesOutPath,"difficult")
+    diffPath = os.path.join(outPath,"difficult")
     if not os.path.isdir(diffPath):
         os.mkdir(diffPath)
 
-  
+    mapPath = os.path.join(outPath,"maps")
+    if not os.path.isdir(mapPath):
+        os.mkdir(mapPath)
+
+    wsiPath  = os.path.join(outPath,"wsis")
+    if not os.path.isdir(wsiPath):
+        os.mkdir(wsiPath)
+
+
+
+    return aPath,gPath,diffPath,mapPath,wsiPath
+
+
+def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transform):
+
+
+    result = pyvips.Image.black(slideWidth,slideHeight,bands=3)
+
+    slideWidth = int(slideWidth/500)
+    slideHeight = int(slideHeight/500)
+
+    tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
+
+    
+
+
+    aPath = os.path.join(outPath,"artefact")
+    gPath = os.path.join(outPath,"good")
+    diffPath = os.path.join(outPath,"difficult")
+   
+
     for img in imgs:   
+
+
+
         if ".ini" in img:
             continue
 
@@ -91,10 +200,15 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
         
         x,y = calcPixelPosition(img)
 
-        x = int(x)
-        y = int(y)
+       
         
         imgFullPath = os.path.join(tilePath,img)
+        tile = pyvips.Image.new_from_file(imgFullPath, access='sequential')
+
+        mem_img = tile.write_to_memory()
+
+        np_3d = np.ndarray(buffer=mem_img,dtype=format_to_dtype[tile.format],shape=[tile.height, tile.width, tile.bands])
+
         image = cv2.imread(imgFullPath)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -110,13 +224,16 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
         output_sigmoid = torch.sigmoid(outputs)
 
 
-        if output_sigmoid<0.02:
+        if output_sigmoid<0.5:
             safePath = os.path.join(aPath,img)
+            np_3d[:,:,0] = 255
             #print(safePath)
             #print(output_sigmoid)
             tileMap[y][x]= 1
-        elif output_sigmoid>0.8:
+        elif output_sigmoid>0.5:
             safePath = os.path.join(gPath,img)
+            np_3d[:,:,1] = 255
+            
             #print(safePath)
             #print(output_sigmoid)
             tileMap[y][x]= 2
@@ -126,15 +243,35 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
             
 
         orig_image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB)
+
+        height, width, bands = np_3d.shape
+
+        linear = np_3d.reshape(width * height * bands)
+
+        vi = pyvips.Image.new_from_memory(linear.data, width, height, bands,
+                                          dtype_to_format[str(np_3d.dtype)])
+
+
+        absX,absY = extractTileCoordinates(img)
+
+        result = result.insert(vi,absX,absY)
         
       
         cv2.imwrite(safePath,orig_image)
-    
+
+
+       
+
+   
+        
         
                
-    return tileMap
+    return tileMap, result
 
 def drawResultImage(resultsArray, slideWidth, slideHeight):
+
+     slideWidth = int(slideWidth/500)
+     slideHeight = int(slideHeight/500)
      result = np.zeros((slideHeight*10, slideWidth*10, 3), np.uint8)
      result.fill(255)
 
@@ -173,28 +310,44 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
 
 
 
-def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, transform):
+def makeClassificationRun(tilePath, outPath, model, transform):
     wsis = sortTilesByWSI(tilePath)
+
+    aPath, gPath , diffPath, mapPath,wsiPath  = makeResultFolder(outPath)
     for slide in wsis:
         #print("slide from tileName: "+slide)
-        slideWidth , slideHeight = getWsiDimensions(slide,slidePath)
+        #slideWidth , slideHeight = getWsiDimensions(slide,slidePath)
+
+        slideWidth , slideHeight = findWidhHeight(wsis[slide])
 
         print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
+
+        w = int(slideWidth/500)
+        h = int(slideHeight/500)
+
+        print("dims of out image w: " + str(w)+ "h: " + str(h))
+
         if slideWidth == 0 or slideHeight == 0:
            print("Warning: the slide "+ slide +" has dims 0 , 0")
            continue
-        slideWidth = int(slideWidth/500) 
-        slideHeight = int(slideHeight/500) 
-        #slideWidth = int(slideWidth - (slideWidth % 500))
-        #slideHeight = int(slideHeight - (slideHeight % 500))
+       
+       
 
-        tileMap = makeTileMap(tilePath,wsis[slide],imagesOutPath,slideWidth, slideHeight, model, transform)
+        tileMap, result = makeTileMap(tilePath,wsis[slide],outPath,slideWidth, slideHeight, model, transform)
+
+        
+
+        tifPath = os.path.join(wsiPath,slide+".tif")
+
+        result.tiffsave(tifPath, compression=pyvips.enums.ForeignTiffCompression.DEFLATE,
+                 tile=True, tile_width=512, tile_height=512, #rgbjpeg=True,
+                 pyramid=True,  bigtiff=True)
        
         resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
 
-        safePath = os.path.join(outPath,slide+".jpg")
+        safePath = os.path.join(mapPath,slide+".jpg")
 
-        resultImg = cv2.cvtColor(resultImg, cv2.COLOR_BGR2RGB)
+        resultImg = cv2.cvtColor(resultImg, cv2.COLOR_BGR2RGB)  
 
         cv2.imwrite(safePath, resultImg)
 
@@ -204,14 +357,12 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\AutoEncoder\tiles"
+     tilePath = r"C:\Users\felix\Desktop\neuro\kryoTestTiles"
 
-     slidePath =r"C:\Users\felix\Desktop\AutoEncoder\slide"
+     slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
 
-     outPath = r"C:\Users\felix\Desktop\AutoEncoder\map2"
+     outPath = r"C:\Users\felix\Desktop\neuro\result"
 
-
-     imagesOutPath = r"C:\Users\felix\Desktop\AutoEncoder\classified2"
 
      
 
@@ -235,4 +386,4 @@ if __name__ == '__main__':
      model.eval()
      model = model.to(device)
 
-     makeClassificationRun(tilePath, slidePath, outPath,imagesOutPath, model, transform)
+     makeClassificationRun(tilePath, outPath, model, transform)

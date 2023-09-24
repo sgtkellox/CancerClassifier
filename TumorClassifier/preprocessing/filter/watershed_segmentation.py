@@ -74,7 +74,7 @@ def isOverThreshold(path,threshold):
         label_mask = np.where(labels == label_num, 1, 0)
         label_arrays.append(label_mask)
     
-    print('There are {} separate components / objects detected.'.format(nlabels))
+    #print('There are {} separate components / objects detected.'.format(nlabels))
 
     for label_ind, label_coords in enumerate(ndimage.find_objects(labels)):
         cell = markers[label_coords]
@@ -95,8 +95,10 @@ def isOverThreshold(path,threshold):
     print('There are now {} separate components / objects detected.'.format(nlabels))
 
     if nlabels>=threshold:
+        print("th "+ str(threshold) +" labels :" + str(nlabels) + "   accepted")
         return True
     else:
+        print("th "+ str(threshold) +" labels :" + str(nlabels) + "   declined")
         return False
 
 

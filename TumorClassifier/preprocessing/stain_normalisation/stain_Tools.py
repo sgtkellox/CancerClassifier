@@ -8,7 +8,7 @@ import argparse
 def normStainForFolder(imagePath,outPath):
     images = os.listdir(imagePath)
 
-    target = staintools.read_image(r"C:\Users\felix\Desktop\neuro\stainTest\stainTools\outputRun2\O2-N17-1215-K-Q2_119000_16500.jpg")
+    target = staintools.read_image(r"C:\Users\felix\Desktop\isa\GBM-N16-2056-K_24500_16500.jpg")
 
     for image in images:
         print(image)
@@ -28,6 +28,7 @@ def normStainForFolder(imagePath,outPath):
 
         safePath =  os.path.join(outPath,image)
         print(safePath)
+        transformed = cv2.cvtColor(transformed, cv2.COLOR_BGR2RGB)
         cv2.imwrite(safePath, transformed)
 
 if __name__ == '__main__':
@@ -43,7 +44,7 @@ if __name__ == '__main__':
   
     #pathOut = args.out
 
-    pathIn = r"C:\Users\felix\Desktop\neuro\stainTestIn"
-    pathOut = r"C:\Users\felix\Desktop\neuro\stainTest\stainTools\outputRun2\result"
+    pathIn = r"C:\Users\felix\Desktop\isa\in"
+    pathOut = r"C:\Users\felix\Desktop\isa\out"
 
     normStainForFolder(pathIn,pathOut)

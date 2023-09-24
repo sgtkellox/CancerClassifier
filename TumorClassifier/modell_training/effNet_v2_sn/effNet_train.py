@@ -3,7 +3,7 @@ import argparse
 import torch.nn as nn
 import torch.optim as optim
 import time
-from tqdm.auto import tqdm
+
 from effNet_model import build_model
 from effNet_datasets import get_datasets, get_data_loaders
 from effNet_utils import save_model, save_plots
@@ -19,7 +19,7 @@ parser.add_argument(
 )
 parser.add_argument(
     '-lr', '--learning-rate', type=float,
-    dest='learning_rate', default=0.000001,
+    dest='learning_rate', default=0.00001,
     help='Learning rate for training the model'
 )
 args = vars(parser.parse_args())
@@ -127,7 +127,7 @@ if __name__ == '__main__':
         num_classes=len(dataset_classes)
     )
 
-    #model = nn.DataParallel(model,device_ids = [0, 1])
+    #model = nn.DataParallel(model)
     model = model.to(device)
 
     
