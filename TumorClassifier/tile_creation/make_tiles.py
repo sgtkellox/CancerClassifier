@@ -55,23 +55,31 @@ def make_tiles(slidepath,outPath,size):
 
     
 
-    w = int(slide.properties["openslide.level[0].width"])
-    h = int(slide.properties["openslide.level[0].height"])
+    w = int(slide.properties["openslide.level[1].width"])
+    h = int(slide.properties["openslide.level[1].height"])
+
+    w0 = int(slide.properties["openslide.level[0].width"])
+    h0 = int(slide.properties["openslide.level[0].height"])
     
     
     # extract dimensions and print them
     #[w, h] = slide.dimensions
+    print("-----")
     print(f"Slide dimensions are {w}x{h}.", flush=True)
     print("Tiling...", flush=True)
+
+    print(f"Slide w0 dimensions are {w0}x{h0}.", flush=True)
+    print("Tiling...", flush=True)
+    print("-----")
 
     
 
     
   
-    for x in range(0, w-size, size):
-        for y in range(0, h-size, size):
+    for x in range(0, w-size*4, size*4):
+        for y in range(0, h-size*4, size*4):
 
-            tile=slide.read_region(location=(x,y), level=0,size=(size,size))
+            tile=slide.read_region(location=(x,y), level=1,size=(size,size))
             tileRGB = tile.convert('RGB')
            
             tileNP = np.array(tileRGB)
