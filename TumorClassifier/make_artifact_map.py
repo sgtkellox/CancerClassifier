@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 
 from tile_creation.tile_utils import calcPixelPosition
 
-import tqdm
+from tqdm import tqdm
 
 #from tile_creation.filter_utils import open_slide
 
@@ -173,6 +173,8 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
 
     result = pyvips.Image.black(slideWidth,slideHeight,bands=3)
 
+    
+
     slideWidth = int(slideWidth/500)
     slideHeight = int(slideHeight/500)
 
@@ -186,28 +188,19 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
     diffPath = os.path.join(outPath,"difficult")
    
 
-    for img in imgs:   
-
-
-
-        if ".ini" in img:
-            continue
-
-
-        #print("Classifying " + str(img))
-
-        
-        
-        x,y = calcPixelPosition(img)
+    for img in tqdm(imgs):   
 
        
         
+        if ".ini" in img:
+            continue
+   
+        x,y = calcPixelPosition(img)
+   
         imgFullPath = os.path.join(tilePath,img)
+
+
         tile = pyvips.Image.new_from_file(imgFullPath, access='sequential')
-
-        mem_img = tile.write_to_memory()
-
-        np_3d = np.ndarray(buffer=mem_img,dtype=format_to_dtype[tile.format],shape=[tile.height, tile.width, tile.bands])
 
         image = cv2.imread(imgFullPath)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -226,16 +219,11 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
 
         if output_sigmoid<0.5:
             safePath = os.path.join(aPath,img)
-            np_3d[:,:,0] = 255
-            #print(safePath)
-            #print(output_sigmoid)
+            tile = tile.new_from_image(220).bandjoin(tile[1:3])
             tileMap[y][x]= 1
         elif output_sigmoid>0.5:
             safePath = os.path.join(gPath,img)
-            np_3d[:,:,1] = 255
-            
-            #print(safePath)
-            #print(output_sigmoid)
+           
             tileMap[y][x]= 2
 
         else:
@@ -244,25 +232,16 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
 
         orig_image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB)
 
-        height, width, bands = np_3d.shape
-
-        linear = np_3d.reshape(width * height * bands)
-
-        vi = pyvips.Image.new_from_memory(linear.data, width, height, bands,
-                                          dtype_to_format[str(np_3d.dtype)])
-
 
         absX,absY = extractTileCoordinates(img)
 
-        result = result.insert(vi,absX,absY)
-        
-      
-        cv2.imwrite(safePath,orig_image)
+        result = result.insert(tile,absX,absY)
 
 
        
-
-   
+        
+      
+        cv2.imwrite(safePath,orig_image)    
         
         
                
@@ -305,8 +284,10 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
      return result
     
 
+def printWsis(wsis):
 
-
+    for slide in wsis:
+        print(slide+str(len(wsis[slide])))
 
 
 
@@ -314,13 +295,16 @@ def makeClassificationRun(tilePath, outPath, model, transform):
     wsis = sortTilesByWSI(tilePath)
 
     aPath, gPath , diffPath, mapPath,wsiPath  = makeResultFolder(outPath)
-    for slide in wsis:
-        #print("slide from tileName: "+slide)
-        #slideWidth , slideHeight = getWsiDimensions(slide,slidePath)
+
+    printWsis(wsis)
+    
+    for slide in tqdm(wsis):
+        
+        print("processing slide"+ slide)
 
         slideWidth , slideHeight = findWidhHeight(wsis[slide])
 
-        print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
+        #print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
 
         w = int(slideWidth/500)
         h = int(slideHeight/500)
@@ -337,11 +321,9 @@ def makeClassificationRun(tilePath, outPath, model, transform):
 
         
 
-        tifPath = os.path.join(wsiPath,slide+".tif")
-
-        result.tiffsave(tifPath, compression=pyvips.enums.ForeignTiffCompression.DEFLATE,
-                 tile=True, tile_width=512, tile_height=512, #rgbjpeg=True,
-                 pyramid=True,  bigtiff=True)
+        tifPath = os.path.join(wsiPath,slide+".tiff")
+    
+       
        
         resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
 
@@ -351,13 +333,19 @@ def makeClassificationRun(tilePath, outPath, model, transform):
 
         cv2.imwrite(safePath, resultImg)
 
+        result.tiffsave(tifPath, compression='jp2k', 
+                  tile=True, tile_width=512, tile_height=512, 
+                  pyramid=True,  bigtiff=True)
+
+        
+
 
        
 
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\neuro\kryoTestTiles"
+     tilePath = r"C:\Users\felix\Desktop\neuro\stitcherTest"
 
      slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
 

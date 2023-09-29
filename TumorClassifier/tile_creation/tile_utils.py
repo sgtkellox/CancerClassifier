@@ -1,5 +1,5 @@
 def calcPixelPosition(image):
-    print(image)
+    #print(image)
     splitP1 = image.split("_")
     x = int(int(splitP1[1])/500)
     y = int(int(splitP1[2].split(".")[0])/500)

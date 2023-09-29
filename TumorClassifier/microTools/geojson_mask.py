@@ -55,8 +55,6 @@ while x < out_image.shape[1]-500:
         y+=500
     x+=500
 
-
-
 plt.imshow(out_image)
 plt.show()
 
