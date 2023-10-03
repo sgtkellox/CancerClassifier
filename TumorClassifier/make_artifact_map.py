@@ -119,9 +119,9 @@ def getWsiDimensions(nNumber, slidePath):
 
 
 def findWidhHeight(images):
-    minX = 0
+    minX = 100000
     maxX = 0
-    minY = 0
+    minY = 100000
     maxY = 0
     for image in images:
    
@@ -132,10 +132,21 @@ def findWidhHeight(images):
         minY = min(minY,y)
         maxY = max(maxY,y)
 
+    
+    if minX == 0:
+        xshift = 0
+    else:
+        xshift = minX-500
+    if minY == 0:
+        yShift = 0
+    else:
+        yShift = minY-500
+
+    print("minY " + str(minY))
     width = maxX+500-minX
     height = maxY + 500 - minY
 
-    return width, height
+    return width, height , xshift, yShift
 
 
 
@@ -168,7 +179,7 @@ def makeResultFolder(outPath):
     return aPath,gPath,diffPath,mapPath,wsiPath
 
 
-def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transform):
+def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift, model, transform):
 
 
     result = pyvips.Image.black(slideWidth,slideHeight,bands=3)
@@ -178,7 +189,7 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
     slideWidth = int(slideWidth/500)
     slideHeight = int(slideHeight/500)
 
-    tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
+    tileMap = np.zeros((slideHeight+10, slideWidth+10, 1), np.uint8)
 
     
 
@@ -195,7 +206,7 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
         if ".ini" in img:
             continue
    
-        x,y = calcPixelPosition(img)
+        x,y = calcPixelPosition(img,xshift,yshift)
    
         imgFullPath = os.path.join(tilePath,img)
 
@@ -219,7 +230,7 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
 
         if output_sigmoid<0.5:
             safePath = os.path.join(aPath,img)
-            tile = tile.new_from_image(220).bandjoin(tile[1:3])
+            tile = tile.new_from_image(250).bandjoin(tile[1:3])
             tileMap[y][x]= 1
         elif output_sigmoid>0.5:
             safePath = os.path.join(gPath,img)
@@ -234,6 +245,9 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
 
 
         absX,absY = extractTileCoordinates(img)
+
+        absX = absX-xshift
+        absY = absY -yshift
 
         result = result.insert(tile,absX,absY)
 
@@ -302,7 +316,7 @@ def makeClassificationRun(tilePath, outPath, model, transform):
         
         print("processing slide"+ slide)
 
-        slideWidth , slideHeight = findWidhHeight(wsis[slide])
+        slideWidth , slideHeight, xshift, yshift = findWidhHeight(wsis[slide])
 
         #print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
 
@@ -317,11 +331,11 @@ def makeClassificationRun(tilePath, outPath, model, transform):
        
        
 
-        tileMap, result = makeTileMap(tilePath,wsis[slide],outPath,slideWidth, slideHeight, model, transform)
+        tileMap, result = makeTileMap(tilePath,wsis[slide],outPath,slideWidth, slideHeight,xshift,yshift, model, transform)
 
         
 
-        tifPath = os.path.join(wsiPath,slide+".tiff")
+        tifPath = os.path.join(wsiPath,slide+".tif")
     
        
        
@@ -333,7 +347,7 @@ def makeClassificationRun(tilePath, outPath, model, transform):
 
         cv2.imwrite(safePath, resultImg)
 
-        result.tiffsave(tifPath, compression='jp2k', 
+        result.tiffsave(tifPath, compression='jpeg', 
                   tile=True, tile_width=512, tile_height=512, 
                   pyramid=True,  bigtiff=True)
 
@@ -345,11 +359,11 @@ def makeClassificationRun(tilePath, outPath, model, transform):
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\neuro\stitcherTest"
+     tilePath = r"C:\Users\felix\Desktop\fixedKryoTest\stitcherTest"
 
-     slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
+     slidePath =r"C:\Users\felix\Desktop\fixedKryoTest\kryoTest"
 
-     outPath = r"C:\Users\felix\Desktop\neuro\result"
+     outPath = r"C:\Users\felix\Desktop\fixedKryoTest\stitcherRes"
 
 
      
@@ -367,7 +381,7 @@ if __name__ == '__main__':
     ])
 
      model = CustomCNN(num_classes=1)
-     checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models\model85.pth', map_location=device)
+     checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models\model150.pth', map_location=device)
      print('Loading trained model weights...')
      model.load_state_dict(checkpoint['model_state_dict'])
      

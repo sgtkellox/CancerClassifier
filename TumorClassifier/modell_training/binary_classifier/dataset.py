@@ -46,6 +46,6 @@ train_loader = DataLoader(
 # validation data loaders
 valid_loader = DataLoader(
     valid_dataset, batch_size=BATCH_SIZE, shuffle=False,
-    num_workers=10, pin_memory=True
+    num_workers=4, pin_memory=True
 )
 

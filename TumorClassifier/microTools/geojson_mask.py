@@ -9,11 +9,11 @@ import cv2
 
 import os
 
-slidePath= r"C:\Users\felix\Desktop\AutoEncoder\slide\GBM-N21-0329-K-Q1.svs"
+slidePath= r"C:\Users\felix\Desktop\fixedKryoTest\kryoTest\GBM-N18-3107-K-Q2.svs"
 
-tilePath = r"C:\Users\felix\Desktop\AutoEncoder\gtTiles"
+tilePath = r"C:\Users\felix\Desktop\goodjson\toCheck"
 
-with fiona.open(r"C:\Users\felix\Desktop\AutoEncoder\goodTissueJsons\GBM-N21-0329-K-Q1.geojson", "r") as geojson:
+with fiona.open(r"C:\Users\felix\Desktop\goodjson\jsons\GBM-N18-3107-K-Q2.geojson", "r") as geojson:
    features = [feature["geometry"] for feature in geojson]
 
 with rasterio.open(slidePath) as src:

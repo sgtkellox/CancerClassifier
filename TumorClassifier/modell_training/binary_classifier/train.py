@@ -152,7 +152,7 @@ if __name__ == '__main__':
         T_mult=1,
         verbose=True
     )
-    model, optimizer, epoch = load_ckp(r"C:\Users\felix\Desktop\AutoEncoder\models\model73.pth", model, optimizer)
+    model, optimizer, epoch = load_ckp(r"C:\Users\felix\Desktop\AutoEncoder\models\model83.pth", model, optimizer)
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
