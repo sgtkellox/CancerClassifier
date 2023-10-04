@@ -90,6 +90,13 @@ def extractTileCoordinates(image):
     y = int(splitP1[2].split(".")[0])
     return x , y
 
+def extractXCoordinate(tile):
+    splitP1 = tile.split("_")
+    x = int(splitP1[1])
+    return x
+
+
+
 
 def getWsiDimensions(nNumber, slidePath):
     slides = os.listdir(slidePath)
@@ -136,19 +143,31 @@ def findWidhHeight(images):
     if minX == 0:
         xshift = 0
     else:
-        xshift = minX-500
+        xshift = minX-tileSize
     if minY == 0:
         yShift = 0
     else:
-        yShift = minY-500
+        yShift = minY-tileSize
 
     print("minY " + str(minY))
-    width = maxX+500-minX
-    height = maxY + 500 - minY
+    width = maxX+2*tileSize-minX
+    height = maxY + 2*tileSize - minY
 
     return width, height , xshift, yShift
 
 
+def sortByXCoordinate(images):
+
+    res = sorted(images, key=extractXCoordinate)
+
+    print(res)
+    
+
+
+
+def calcGaps():
+
+    return
 
 
 
@@ -179,7 +198,7 @@ def makeResultFolder(outPath):
     return aPath,gPath,diffPath,mapPath,wsiPath
 
 
-def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift, model, transform):
+def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift, model, transform,tileSize):
 
 
     result = pyvips.Image.black(slideWidth,slideHeight,bands=3)
@@ -206,7 +225,7 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift,
         if ".ini" in img:
             continue
    
-        x,y = calcPixelPosition(img,xshift,yshift)
+        x,y = calcPixelPosition(img,xshift,yshift,tileSize)
    
         imgFullPath = os.path.join(tilePath,img)
 
@@ -331,7 +350,7 @@ def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
        
        
 
-        tileMap, result = makeTileMap(tilePath,wsis[slide],outPath,slideWidth, slideHeight,xshift,yshift, model, transform)
+        tileMap, result = makeTileMap(tilePath,wsis[slide],outPath,slideWidth, slideHeight,xshift,yshift, model, transform,tileSize)
 
         
 
@@ -363,7 +382,7 @@ def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\fixedKryoTest\stitcherTest"
+     tilePath = r"C:\Users\felix\Desktop\neuro\stitcherTest"
 
      slidePath =r"C:\Users\felix\Desktop\neuro\stitcherBad"
 
@@ -387,7 +406,7 @@ if __name__ == '__main__':
     ])
 
      model = CustomCNN(num_classes=1)
-     checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models\model150.pth', map_location=device)
+     checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models\model73.pth', map_location=device)
      print('Loading trained model weights...')
      model.load_state_dict(checkpoint['model_state_dict'])
      
