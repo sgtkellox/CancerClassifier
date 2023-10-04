@@ -51,24 +51,28 @@ def drawResultImage(resultsArray, wsiWidth, wsiHeight):
      result = np.zeros((wsiHeight, wsiWidth, 3), np.uint8)
      result.fill(255)
 
+     print(result.shape)
+
      for entry in resultsArray:
             if entry[0]==1:
-                result[int(entry[1])*10:int(entry[1])*10+10,int(entry[2])*10:int(entry[2])*10+10] = [0, 0, 0]
+                result[int(entry[1])*40:int(entry[1])*40+40,int(entry[2])*40:int(entry[2])*40+40] = [0, 0, 0]
             
      return result
 
 
-def getWsiDimensions(nNumber, slidePath):
-    slides = os.listdir(slidePath)
+def getWsiDimensions(nNumber, slidesPath):
+    slides = os.listdir(slidesPath)
    
     for wsi in slides:
         wsiNnumber = wsi.split(".")[0]
         
         if wsiNnumber == nNumber:
                
-            slidePath = os.path.join(slidePath,wsi)
+            slidePath = os.path.join(slidesPath,wsi)
             slide = open_slide(slidePath)
-            a = slide.dimensions
+            a = slide.level_dimensions[1]
+
+            print(a)
             return a[0] , a[1]
                     
     return 0, 0
@@ -84,8 +88,8 @@ def tilingResultVisualisation(path, tileSize, slidePath, outpath):
         if w == 0 or h == 0:
             print("Warning: the slide "+ slide +" has dims 0 , 0")
             continue
-        w = math.floor(w/tileSize)*10
-        h = math.floor(h/tileSize)*10
+        w = math.floor(w/tileSize)*40
+        h = math.floor(h/tileSize)*40
         resultImage = drawResultImage(resultMap,w,h)
 
         imgPath = os.path.join(outpath,slide+ ".jpg")

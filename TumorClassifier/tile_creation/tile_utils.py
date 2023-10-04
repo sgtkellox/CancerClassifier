@@ -1,8 +1,8 @@
-def calcPixelPosition(image):
+def calcPixelPosition(image, xShift, yShift):
     #print(image)
     splitP1 = image.split("_")
-    x = int(int(splitP1[1])/512)
-    y = int(int(splitP1[2].split(".")[0])/512)
+    x = int((int(splitP1[1])-xShift)/500)
+    y = int((int(splitP1[2].split(".")[0])-yShift)/500)
     return x , y 
 
 
