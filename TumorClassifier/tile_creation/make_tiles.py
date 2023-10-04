@@ -76,10 +76,10 @@ def make_tiles(slidepath,outPath,size):
 
     
   
-    for x in range(0, w-size*4, size*4):
-        for y in range(0, h-size*4, size*4):
+    for x in range(0, w0-size, size):
+        for y in range(0, h0-size, size):
 
-            tile=slide.read_region(location=(x,y), level=1,size=(size,size))
+            tile=slide.read_region(location=(x,y), level=0,size=(size,size))
             tileRGB = tile.convert('RGB')
            
             tileNP = np.array(tileRGB)

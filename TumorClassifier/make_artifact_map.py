@@ -132,8 +132,8 @@ def findWidhHeight(images):
         minY = min(minY,y)
         maxY = max(maxY,y)
 
-    width = maxX+500-minX
-    height = maxY + 500 - minY
+    width = maxX+tileSize-minX
+    height = maxY + tileSize - minY
 
     return width, height
 
@@ -168,17 +168,17 @@ def makeResultFolder(outPath):
     return aPath,gPath,diffPath,mapPath,wsiPath
 
 
-def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transform):
+def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transform,tileSize):
 
 
     result = pyvips.Image.black(slideWidth,slideHeight,bands=3)
 
     
 
-    slideWidth = int(slideWidth/500)
-    slideHeight = int(slideHeight/500)
+    slideWidth = int(slideWidth/tileSize)
+    slideHeight = int(slideHeight/tileSize)
 
-    tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
+    tileMap = np.zeros((slideHeight+1, slideWidth+1, 1), np.uint8)
 
     
 
@@ -219,7 +219,7 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
 
         if output_sigmoid<0.5:
             safePath = os.path.join(aPath,img)
-            tile = tile.new_from_image(220).bandjoin(tile[1:3])
+            tile = tile.new_from_image(250).bandjoin(tile[1:3])
             tileMap[y][x]= 1
         elif output_sigmoid>0.5:
             safePath = os.path.join(gPath,img)
@@ -249,8 +249,8 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, model, transfo
 
 def drawResultImage(resultsArray, slideWidth, slideHeight):
 
-     slideWidth = int(slideWidth/500)
-     slideHeight = int(slideHeight/500)
+     slideWidth = int(slideWidth/tileSize)
+     slideHeight = int(slideHeight/tileSize)
      result = np.zeros((slideHeight*10, slideWidth*10, 3), np.uint8)
      result.fill(255)
 
@@ -291,7 +291,7 @@ def printWsis(wsis):
 
 
 
-def makeClassificationRun(tilePath, outPath, model, transform):
+def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
     wsis = sortTilesByWSI(tilePath)
 
     aPath, gPath , diffPath, mapPath,wsiPath  = makeResultFolder(outPath)
@@ -306,8 +306,8 @@ def makeClassificationRun(tilePath, outPath, model, transform):
 
         #print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
 
-        w = int(slideWidth/500)
-        h = int(slideHeight/500)
+        w = int(slideWidth/tileSize)
+        h = int(slideHeight/tileSize)
 
         print("dims of out image w: " + str(w)+ "h: " + str(h))
 
@@ -317,11 +317,11 @@ def makeClassificationRun(tilePath, outPath, model, transform):
        
        
 
-        tileMap, result = makeTileMap(tilePath,wsis[slide],outPath,slideWidth, slideHeight, model, transform)
+        tileMap, result = makeTileMap(tilePath,wsis[slide],outPath,slideWidth, slideHeight, model, transform,tileSize)
 
         
 
-        tifPath = os.path.join(wsiPath,slide+".tiff")
+        tifPath = os.path.join(wsiPath,slide+".tif")
     
        
        
@@ -333,9 +333,13 @@ def makeClassificationRun(tilePath, outPath, model, transform):
 
         cv2.imwrite(safePath, resultImg)
 
-        result.tiffsave(tifPath, compression='jp2k', 
+        print("stitching result")
+
+        result.tiffsave(tifPath, compression='deflate', 
                   tile=True, tile_width=512, tile_height=512, 
-                  pyramid=True,  bigtiff=True)
+                  pyramid=True,  bigtiff=True,Q=100)
+
+        print("finished")
 
         
 
@@ -347,9 +351,11 @@ if __name__ == '__main__':
 
      tilePath = r"C:\Users\felix\Desktop\neuro\stitcherTest"
 
-     slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
+     slidePath =r"C:\Users\felix\Desktop\neuro\stitcherBad"
 
-     outPath = r"C:\Users\felix\Desktop\neuro\result"
+     outPath = r"C:\Users\felix\Desktop\neuro\result512"
+
+     tileSize = 512
 
 
      
@@ -374,4 +380,4 @@ if __name__ == '__main__':
      model.eval()
      model = model.to(device)
 
-     makeClassificationRun(tilePath, outPath, model, transform)
+     makeClassificationRun(tilePath, outPath, model, transform,tileSize)
