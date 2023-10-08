@@ -142,9 +142,17 @@ def findWidhHeight(images):
     else:
         yShift = minY-500
 
-    print("minY " + str(minY))
-    width = maxX+500-minX
-    height = maxY + 500 - minY
+    
+    width = maxX+1000-minX
+    height = maxY + 1000 - minY
+
+    
+
+    print("width " +str(width))
+    print("height " +str(height))
+
+    print("maxX " +str(maxX-xshift))
+    print("maxY " +str(maxY-yShift))
 
     return width, height , xshift, yShift
 
@@ -246,8 +254,12 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift,
 
         absX,absY = extractTileCoordinates(img)
 
+        
+
         absX = absX-xshift
         absY = absY -yshift
+
+       
 
         result = result.insert(tile,absX,absY)
 
@@ -347,7 +359,7 @@ def makeClassificationRun(tilePath, outPath, model, transform):
 
         cv2.imwrite(safePath, resultImg)
 
-        result.tiffsave(tifPath, compression='jpeg', 
+        result.tiffsave(tifPath, compression='deflate', 
                   tile=True, tile_width=512, tile_height=512, 
                   pyramid=True,  bigtiff=True)
 
