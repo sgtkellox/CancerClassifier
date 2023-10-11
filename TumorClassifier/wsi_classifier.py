@@ -9,7 +9,7 @@ import cv2
 import torchvision.transforms as transforms
 import numpy as np
 
-from modell_training.effNet_v2.effNet_model import build_model
+from modell_training.effNet.effNet_model import build_model
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 
@@ -58,12 +58,16 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
 
         print("Classifying " + str(img))
 
+        print(img)
         
-        
-        x,y = calcPixelPosition(img)
+        x,y = calcPixelPosition(img,0,0,224)
 
-        x = int(x)
-        y = int(y)
+        print(x)
+
+        x = int(x)/4
+        y = int(y)/4
+
+        print(x)
         
         imgFullPath = os.path.join(tilePath,img)
         image = cv2.imread(imgFullPath)
@@ -113,7 +117,7 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
     return tileMap, acc
 
 
-def getWsiDimensions(nNumber, slidePath):
+def getWsiDimensions(nNumber, slidePath, lvl=0):
     slides = os.listdir(slidePath)
    
     for wsi in slides:
@@ -130,8 +134,9 @@ def getWsiDimensions(nNumber, slidePath):
             slidePath = os.path.join(slidePath,wsi)
             
             slide = open_slide(slidePath)
-            a = slide.dimensions
-            return a[0] , a[1]
+            w = int(slide.properties["openslide.level[1].width"])
+            h = int(slide.properties["openslide.level[1].height"])
+            return w , h
                     
     return 0, 0
 
@@ -183,7 +188,7 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
     wsis = sortTilesByWSI(tilePath)
     for slide in wsis:
         print("slide from tileName: "+slide)
-        slideWidth , slideHeight = getWsiDimensions(slide,slidePath)
+        slideWidth , slideHeight = getWsiDimensions(slide,slidePath,1)
         print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
         if slideWidth == 0 or slideHeight == 0:
            print("Warning: the slide "+ slide +" has dims 0 , 0")
@@ -211,14 +216,14 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 if __name__ == '__main__':
 
 
-     tilePath = r"E:\fixedKryoTest\SN"
+     tilePath = r"C:\Users\felix\Desktop\kryoSplitSN\kryo\test\Astro"
 
-     slidePath =r"E:\fixedKryoTest\kryoTestSn"
+     slidePath =r"F:\slides\kryoQ2"
 
-     outPath = r"E:\fixedKryoTest\mapsM9"
+     outPath = r"C:\Users\felix\Desktop\reNet\maps"
 
 
-     imagesOutPath = r"C:\Users\felix\Desktop\neuro\testing\results"
+     imagesOutPath = r"C:\Users\felix\Desktop\reNet\images"
 
      
 
@@ -226,7 +231,7 @@ if __name__ == '__main__':
 
      transform = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize(384),
+        transforms.Resize(224),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -237,7 +242,7 @@ if __name__ == '__main__':
      model = build_model(pretrained=True, fine_tune=True, num_classes=3)
      
      
-     checkpoint = torch.load(r'E:\modelCollection\kryo\effNet\v2_500_sn\model_15.pth', map_location=device)
+     checkpoint = torch.load(r'C:\Users\felix\Desktop\EffNetRes\model_23_pretrained.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      

@@ -19,7 +19,7 @@ parser.add_argument(
 )
 parser.add_argument(
     '-lr', '--learning-rate', type=float,
-    dest='learning_rate', default=0.0001,
+    dest='learning_rate', default=0.00001,
     help='Learning rate for training the model'
 )
 args = vars(parser.parse_args())
@@ -39,10 +39,10 @@ def train(model, trainloader, optimizer, criterion):
     train_running_loss = 0.0
     train_running_correct = 0
     counter = 0
-    for i, data in enumerate(trainloader):
+    for i, data in tqdm(enumerate(trainloader), total=len(trainloader)):
         counter += 1
-        if i%100 ==0:
-            print("step: " +str(i))
+        #if i%100 ==0:
+            #print("step: " +str(i))
 
         image, labels = data
         image = image.to(device)
@@ -75,10 +75,10 @@ def validate(model, testloader, criterion):
     valid_running_correct = 0
     counter = 0
     with torch.no_grad():
-        for i, data in enumerate(testloader):
+        for i, data in tqdm(enumerate(testloader), total=len(testloader)):
 
-            if i%100 == 0:
-                print("step " +str(i))
+            #if i%100 == 0:
+                #print("step " +str(i))
 
             counter += 1
             
@@ -145,10 +145,10 @@ if __name__ == '__main__':
     train_acc, valid_acc = [], []
     epoch = 0
 
-    model, optimizer, start_epoch = load_ckp(r"/mnt/scratch1/fkeller/modelsB5/model_5_pretrained.pth", model, optimizer)
-    model = model.to(device)
+    #model, optimizer, start_epoch = load_ckp(r"/mnt/scratch1/fkeller/modelsB5/model_5_pretrained.pth", model, optimizer)
+    #model = model.to(device)
     # Start the training.
-    epoch = start_epoch
+    #epoch = start_epoch
     while epoch in range(epochs):
         print(f"[INFO]: Epoch {epoch+1} of {epochs}")
         train_epoch_loss, train_epoch_acc = train(model, train_loader, 

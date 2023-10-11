@@ -1,6 +1,7 @@
 import torch
 import matplotlib
-import matplotlib.pyplot as plt
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
 matplotlib.style.use('ggplot')
 def save_model(epochs, model, optimizer, criterion, pretrained):
     """
@@ -11,7 +12,7 @@ def save_model(epochs, model, optimizer, criterion, pretrained):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': criterion,
-                }, r"/mnt/scratch1/fkeller/modelsB5/model_"+str(epochs)+"_pretrained.pth")
+                }, r"C:\Users\felix\Desktop\EffNetRes\model_"+str(epochs)+"_pretrained.pth")
 
 def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     """
@@ -30,7 +31,7 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
-    plt.savefig(r"/mnt/scratch1/fkeller/modelsB5/effNetAcc.png")
+    plt.savefig(r"C:\Users\felix\Desktop\EffNetRes\effNetAcc.png")
     
     # loss plots
     plt.figure(figsize=(10, 7))
@@ -45,5 +46,5 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(r"/mnt/scratch1/fkeller/modelsB5/effNetLoss.png")
+    plt.savefig(r"C:\Users\felix\Desktop\EffNetRes\effNetLoss.png")
     plt.close()

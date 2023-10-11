@@ -149,9 +149,17 @@ def findWidhHeight(images):
     else:
         yShift = minY-tileSize
 
-    print("minY " + str(minY))
-    width = maxX+2*tileSize-minX
-    height = maxY + 2*tileSize - minY
+    
+    width = maxX+1000-minX
+    height = maxY + 1000 - minY
+
+    
+
+    print("width " +str(width))
+    print("height " +str(height))
+
+    print("maxX " +str(maxX-xshift))
+    print("maxY " +str(maxY-yShift))
 
     return width, height , xshift, yShift
 
@@ -287,8 +295,12 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift,
 
         absX,absY = extractTileCoordinates(img)
 
+        
+
         absX = absX-xshift
         absY = absY -yshift
+
+       
 
         result = result.insert(tile,absX,absY)
 

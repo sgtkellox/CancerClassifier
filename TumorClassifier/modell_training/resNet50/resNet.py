@@ -17,7 +17,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
-from torchvision.models import resnet50, ResNet50_Weights
+from torchvision.models import resnet18, ResNet18_Weights
 
 
 
@@ -38,9 +38,9 @@ def trainResNet():
     test_transforms = transforms.Compose([transforms.Resize(224),
                                           transforms.ToTensor(),
                                           ])    
-    train_data = datasets.ImageFolder(r"C:\Users\felix\Desktop\Neuro\KryoSplit\train",       
+    train_data = datasets.ImageFolder(r"C:\Users\felix\Desktop\kryoSplitSN\kryo\train",       
                         transform=train_transforms)
-    test_data = datasets.ImageFolder(r"C:\Users\felix\Desktop\Neuro\KryoSplit\val",
+    test_data = datasets.ImageFolder(r"C:\Users\felix\Desktop\kryoSplitSN\kryo\val",
                         transform=test_transforms)    
     num_train = len(train_data)
 
@@ -56,7 +56,7 @@ def trainResNet():
                                       else "cpu")
 
 
-    model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
+    model = resnet18(weights="ResNet50_Weights.IMAGENET1K_V2")
 
     print(model)
 
@@ -65,11 +65,11 @@ def trainResNet():
     
     model.fc = nn.Sequential(nn.Linear(2048, 512),
                                      nn.ReLU(),
-                                     nn.Dropout(0.2),
-                                     nn.Linear(512, 10),
+                                     nn.Dropout(0.5),
+                                     nn.Linear(512, 3),
                                      nn.LogSoftmax(dim=1))
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.fc.parameters(), lr=0.003)
+    optimizer = optim.Adam(model.fc.parameters(), lr=0.0001)
     model.to(device)
 
     epochs = 1000
@@ -111,12 +111,12 @@ def trainResNet():
                       f"Test accuracy: {accuracy/len(testloader):.3f}")
                 running_loss = 0
                 model.train()
-        modelPath = os.path.join(r'D:\ClassifierResults\resNet50Kryo\models',"model"+str(epoch) + ".pth")
+        modelPath = os.path.join(r'C:\Users\felix\Desktop\reNet\models',"model"+str(epoch) + ".pth")
         torch.save(model, modelPath)
         plt.plot(train_losses, label='Training loss')
         plt.plot(test_losses, label='Validation loss')
         plt.legend(frameon=False)
-        plt.savefig(r'D:\ClassifierResults\resNet50Kryo\models\loss.png', bbox_inches='tight')
+        plt.savefig(r'C:\Users\felix\Desktop\reNet\loss.png', bbox_inches='tight')
 
 def predict_image(image,test_transforms,device, model):
     image_tensor = test_transforms(image).float()

@@ -165,7 +165,7 @@ if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
 
     argParser.add_argument("-i", "--tilePath", help="The path to the folder containing the tiles")
-    argParser.add_argument("-o", "--filePath", help="The path to the result file")
+    argParser.add_argument("-o", "--filePath", help="The path to the split folder")
    
 
     
