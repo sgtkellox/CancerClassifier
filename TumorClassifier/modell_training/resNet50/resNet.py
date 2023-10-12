@@ -9,9 +9,9 @@ from torchvision import datasets, transforms, models
 from torch.autograd import Variable
 import os 
 
-from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
-from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
-from pytorch_grad_cam.utils.image import show_cam_on_image
+#from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
+#from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+#from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -44,8 +44,8 @@ def trainResNet():
                         transform=test_transforms)    
     num_train = len(train_data)
 
-    trainloader = torch.utils.data.DataLoader(train_data, shuffle=True,num_workers=2, batch_size=128)
-    testloader = torch.utils.data.DataLoader(test_data,batch_size=128)
+    trainloader = torch.utils.data.DataLoader(train_data, shuffle=True,num_workers=2, batch_size=50)
+    testloader = torch.utils.data.DataLoader(test_data,batch_size=50)
  
 
 
@@ -56,19 +56,22 @@ def trainResNet():
                                       else "cpu")
 
 
-    model = resnet18(weights="ResNet50_Weights.IMAGENET1K_V2")
+    model = resnet18(weights="ResNet18_Weights.IMAGENET1K_V1")
 
     print(model)
 
     for param in model.parameters():
         param.requires_grad = False
-    
-    model.fc = nn.Sequential(nn.Linear(2048, 512),
+
+
+    fc_inputs = model.fc.in_features
+    model.fc = nn.Sequential(nn.Linear(fc_inputs, 256),
                                      nn.ReLU(),
                                      nn.Dropout(0.5),
-                                     nn.Linear(512, 3),
+                                     nn.Linear(256, 3),
                                      nn.LogSoftmax(dim=1))
     criterion = nn.CrossEntropyLoss()
+    print(model)
     optimizer = optim.Adam(model.fc.parameters(), lr=0.0001)
     model.to(device)
 
@@ -79,6 +82,7 @@ def trainResNet():
     train_losses, test_losses = [], []
     for epoch in range(epochs):
         for inputs, labels in trainloader:
+            
             steps += 1
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
@@ -111,7 +115,7 @@ def trainResNet():
                       f"Test accuracy: {accuracy/len(testloader):.3f}")
                 running_loss = 0
                 model.train()
-        modelPath = os.path.join(r'C:\Users\felix\Desktop\reNet\models',"model"+str(epoch) + ".pth")
+        modelPath = os.path.join(r'C:\Users\felix\Desktop\resNet\models',"model"+str(epoch) + ".pth")
         torch.save(model, modelPath)
         plt.plot(train_losses, label='Training loss')
         plt.plot(test_losses, label='Validation loss')
@@ -299,4 +303,5 @@ def makeGradCam():
     visualization = show_cam_on_image(rgb_img, grayscale_cam, use_rgb=True)
        
 if __name__ == '__main__':
+    trainResNet()
    

@@ -407,7 +407,7 @@ def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
 
         print("stitching result")
 
-        result.tiffsave(tifPath, compression='deflate', 
+        result.tiffsave(tifPath, compression='jpeg', 
                   tile=True, tile_width=512, tile_height=512, 
                   pyramid=True,  bigtiff=True)
 

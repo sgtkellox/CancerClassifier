@@ -17,6 +17,7 @@ def get_train_transform(IMAGE_SIZE, pretrained):
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
         transforms.RandomAdjustSharpness(sharpness_factor=2, p=0.5),
+        transforms.Grayscale(3),
         transforms.ToTensor(),
         normalize_transform(pretrained)
     ])
@@ -53,12 +54,12 @@ def get_datasets(pretrained):
     
 
     train_dataset = datasets.ImageFolder(
-        root=r'C:\Users\felix\Desktop\kryoSplitSN\kryo\train',
+        root=r'/mnt/projects/neuropath_hd/data/kryoQ2Split1/kryo/train',
         transform=(get_train_transform(IMAGE_SIZE, pretrained))
     )
 # validation dataset
     valid_dataset = datasets.ImageFolder(
-        root=r'C:\Users\felix\Desktop\kryoSplitSN\kryo\val',
+        root=r'/mnt/projects/neuropath_hd/data/kryoQ2Split1/kryo/val',
         transform=(get_valid_transform(IMAGE_SIZE, pretrained))
     )
     

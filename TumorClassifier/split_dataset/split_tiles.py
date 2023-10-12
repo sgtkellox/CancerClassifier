@@ -20,6 +20,8 @@ def sortTilesByWSI(path):
         else:
             wsis[wsiName] = []
             wsis[wsiName].append(img)
+
+    print(wsis)
     return wsis
 
 
@@ -138,7 +140,7 @@ def copyTiles(tiles, inPath, destPath):
         shutil.move(srcPath,safePath)
         
 
-        #print(tile + " "+ destPath+"\n") 
+        print(tile + " "+ destPath+"\n") 
 
 
 
