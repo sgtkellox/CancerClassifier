@@ -48,17 +48,17 @@ def aboveThreshOld(tile):
 
 
 
-def make_tiles(slidepath,outPath,size):
+def make_tiles(slidepath,outPath,size, level = 0):
 
     
     slide = open_slide(slidepath)
 
     #print(slide.level_downsamples)
 
-    
+    #slidePropertyString = "openslide.level[" +str(level)+ "].width"
 
-    w = int(slide.properties["openslide.level[1].width"])
-    h = int(slide.properties["openslide.level[1].height"])
+    #w = int(slide.properties[slidePropertyString+".width"])
+    #h = int(slide.properties[slidePropertyString+".height"])
 
     w0 = int(slide.properties["openslide.level[0].width"])
     h0 = int(slide.properties["openslide.level[0].height"])
@@ -66,9 +66,9 @@ def make_tiles(slidepath,outPath,size):
     
     # extract dimensions and print them
     #[w, h] = slide.dimensions
-    print("-----")
-    print(f"Slide dimensions are {w}x{h}.", flush=True)
-    print("Tiling...", flush=True)
+    #print("-----")
+    #print(f"Slide dimensions are {w}x{h}.", flush=True)
+    #print("Tiling...", flush=True)
 
     print(f"Slide w0 dimensions are {w0}x{h0}.", flush=True)
     print("Tiling...", flush=True)

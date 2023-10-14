@@ -166,16 +166,40 @@ def findWidhHeight(images):
 
 def sortByXCoordinate(images):
 
-    res = sorted(images, key=extractXCoordinate)
+    xCoords = []
 
-    print(res)
+    for image in images:
+        xCoords.append(extractXCoordinate(image))
+
+    xCoords = list(set(xCoords))
     
+    xCoords.sort()
+         
+    return xCoords
 
 
+def findGaps(xCoords, tileSize, k):
+    gaps = []
+    for i in range(0,len(xCoords)-1):
+        if xCoords[i+1] - xCoords[i] >= k * tileSize:
+            gap = (xCoords[i], xCoords[i+1])
+            gaps.append(gap)
+    print(gaps)
+    return gaps
 
-def calcGaps():
+def mergeGaps(gaps, tileSize, k):
+    toMerge = []
+    for i in range(0, len(gaps-1)):
+        if gaps[i+1][0] - gaps[i][1] < k *tileSize:
+            mergedGap = (gaps[i][0], gaps[i+1][1])
+            toMerge.append((i,i+1))
+           
+           
+        else:
+            
+            return toMerge
+        
 
-    return
 
 
 
@@ -209,14 +233,14 @@ def makeResultFolder(outPath):
 def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift, model, transform,tileSize):
 
 
-    result = pyvips.Image.black(slideWidth,slideHeight,bands=3)
+    result = pyvips.Image.black(slideWidth+512,slideHeight,bands=3)
 
     
 
     slideWidth = int(slideWidth/tileSize)
     slideHeight = int(slideHeight/tileSize)
 
-    tileMap = np.zeros((slideHeight+1, slideWidth+1, 1), np.uint8)
+    tileMap = np.zeros((slideHeight+1, slideWidth+20, 1), np.uint8)
 
     
 
@@ -228,8 +252,6 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift,
 
     for img in tqdm(imgs):   
 
-       
-        
         if ".ini" in img:
             continue
    
@@ -296,7 +318,7 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
 
      slideWidth = int(slideWidth/tileSize)
      slideHeight = int(slideHeight/tileSize)
-     result = np.zeros((slideHeight*10, slideWidth*10, 3), np.uint8)
+     result = np.zeros((slideHeight*10, slideWidth*30, 3), np.uint8)
      result.fill(255)
 
      numArt=0
@@ -347,6 +369,11 @@ def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
         
         print("processing slide"+ slide)
 
+        xCoords = sortByXCoordinate(wsis[slide])
+
+        findGaps(xCoords, tileSize, 3)
+        
+
         slideWidth , slideHeight, xshift, yshift = findWidhHeight(wsis[slide])
 
         #print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
@@ -380,9 +407,9 @@ def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
 
         print("stitching result")
 
-        result.tiffsave(tifPath, compression='deflate', 
+        result.tiffsave(tifPath, compression='jpeg', 
                   tile=True, tile_width=512, tile_height=512, 
-                  pyramid=True,  bigtiff=True,Q=100)
+                  pyramid=True,  bigtiff=True)
 
         print("finished")
 

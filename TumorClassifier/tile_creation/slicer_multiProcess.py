@@ -31,6 +31,8 @@ if __name__ == "__main__":
     argParser.add_argument("-i", "--input", help="The path to the folder containing the slides")
     argParser.add_argument("-o", "--out", help="The path to the folder where u want the tiles")
     argParser.add_argument("-s", "--size",type=int, default=500, help="size of the tiles in pixel")
+    argParser.add_argument("-l", "--level",type=int, default=0, help="Magnification level, at which u want to cut the tiles")
+
 
     args = argParser.parse_args()
 
@@ -39,6 +41,8 @@ if __name__ == "__main__":
     pathOut = args.out
 
     size = args.size
+
+    level = args.level
 
     cpus = multiprocessing.cpu_count()-4
 

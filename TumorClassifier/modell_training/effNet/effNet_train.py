@@ -39,10 +39,10 @@ def train(model, trainloader, optimizer, criterion):
     train_running_loss = 0.0
     train_running_correct = 0
     counter = 0
-    for i, data in tqdm(enumerate(trainloader), total=len(trainloader)):
+    for i, data in enumerate(trainloader):
         counter += 1
-        #if i%100 ==0:
-            #print("step: " +str(i))
+        if i%100 ==0:
+            print("step: " +str(i))
 
         image, labels = data
         image = image.to(device)
@@ -75,10 +75,10 @@ def validate(model, testloader, criterion):
     valid_running_correct = 0
     counter = 0
     with torch.no_grad():
-        for i, data in tqdm(enumerate(testloader), total=len(testloader)):
+        for i, data in enumerate(testloader):
 
-            #if i%100 == 0:
-                #print("step " +str(i))
+            if i%100 == 0:
+                print("step " +str(i))
 
             counter += 1
             
