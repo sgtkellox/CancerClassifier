@@ -15,6 +15,7 @@ def get_train_transform(IMAGE_SIZE, pretrained):
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
         transforms.RandomAdjustSharpness(sharpness_factor=2, p=0.5),
+        transforms.Grayscale(3),
         transforms.ToTensor(),
         normalize_transform(pretrained)
     ])

@@ -53,7 +53,7 @@ def make_tiles(slidepath,outPath,size):
     
     slide = open_slide(slidepath)
 
-    print(slide.level_downsamples)
+    #print(slide.level_downsamples)
 
     
 
