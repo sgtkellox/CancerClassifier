@@ -64,8 +64,8 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
 
         print(x)
 
-        x = int(x)/4
-        y = int(y)/4
+        x = int(x/4)
+        y = int(y/4)
 
         print(x)
         
@@ -184,7 +184,7 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
      return result
 
 
-def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, transform):
+def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, transform, tileSize):
     wsis = sortTilesByWSI(tilePath)
     for slide in wsis:
         print("slide from tileName: "+slide)
@@ -193,8 +193,8 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
         if slideWidth == 0 or slideHeight == 0:
            print("Warning: the slide "+ slide +" has dims 0 , 0")
            continue
-        slideWidth = int(slideWidth/500) 
-        slideHeight = int(slideHeight/500) 
+        slideWidth = int(slideWidth/tileSize) 
+        slideHeight = int(slideHeight/tileSize) 
         #slideWidth = int(slideWidth - (slideWidth % 500))
         #slideHeight = int(slideHeight - (slideHeight % 500))
 
@@ -225,6 +225,8 @@ if __name__ == '__main__':
 
      imagesOutPath = r"C:\Users\felix\Desktop\reNet\images"
 
+
+     tileSize = 224
      
 
      device = ('cuda' if torch.cuda.is_available() else 'cpu')
@@ -249,7 +251,7 @@ if __name__ == '__main__':
      model.eval()
      model = model.to(device)
 
-     makeClassificationRun(tilePath, slidePath, outPath,imagesOutPath, model, transform)
+     makeClassificationRun(tilePath, slidePath, outPath,imagesOutPath, model, transform, tileSize)
 
 
 

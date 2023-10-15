@@ -78,7 +78,7 @@ def trainResNet():
     epochs = 1000
     steps = 0
     running_loss = 0
-    print_every = 10
+    print_every = 1000
     train_losses, test_losses = [], []
     for epoch in range(epochs):
         for inputs, labels in trainloader:
@@ -91,7 +91,7 @@ def trainResNet():
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-        
+            print(steps)
             if steps % print_every == 0:
                 test_loss = 0
                 accuracy = 0

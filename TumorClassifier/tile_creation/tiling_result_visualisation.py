@@ -39,7 +39,7 @@ def calcSlideResultWithPositions(imgs):
         if ".ini" in img:
             continue
         resultEntry = 1
-        x,y = calcPixelPosition(img)
+        x,y = calcPixelPosition(img,0,0)
 
         resEntry = [resultEntry,y,x]
 

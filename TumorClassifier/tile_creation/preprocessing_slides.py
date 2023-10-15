@@ -6,12 +6,18 @@ import pickle
 from filter_utils import *
 from openslide import PROPERTY_NAME_COMMENT, PROPERTY_NAME_OBJECTIVE_POWER
 
+from PIL import Image
+
 import os
+
+import multiprocessing
+
+import argparse
 
 
 BG_THR=90
-MASK_THR=100
-SIZE=500
+MASK_THR=60
+
 
 def get_magnification(slide):
     """
@@ -167,7 +173,7 @@ def mask_tile(tile, mask):
     return masked_tile, masked
 
 
-def process_tiles(slidepath, mask,outPath,size):
+def process_tiles(slidepath, mask,outPath,size, level):
     """
     Process a slide.
     Args:
@@ -199,27 +205,27 @@ def process_tiles(slidepath, mask,outPath,size):
 
     pass_names = []
 
-    sz = size
+    grow = 4* size
         
-    for x in range(0, w-sz, sz):
-        for y in range(0, h-sz, sz):
+    for x in range(0, w-grow, grow):
+        for y in range(0, h-grow, grow):
             # count the tile
             ntotal += 1
 
             # read, resize and convert a tile to RGB
             try:
-                tile=slide.read_region(location=(x,y), level=0, size=(sz,sz))
+                tile=slide.read_region(location=(x,y), level=level, size=(size,size))
             except:
                 print("shit file")
                 continue
-            tile=tile.resize((SIZE,SIZE), Image.Resampling.LANCZOS)
+            tile=tile.resize((size,size), Image.Resampling.LANCZOS)
             tile=tile.convert("RGB")
             
             # mask a tile
             masked_tile, masked = mask_tile(tile, mask)
             
             # generate a tilename
-            tilename = get_tilename(slidepath, x, y)
+            tilename = get_tilename(slidepath, int(x/4), int(y/4))
 
             # count background tiles
             if masked == 101: nbg += 1
@@ -251,21 +257,77 @@ def save_tile(tile, tilename, outPath):
     tile.save(path, "JPEG")
         
 
-def main():
+def slice(slidePath,tilePath,size, level):
     print("Start processing the slide...", flush=True)
 
     # produce masked tiles and save counts
-    n_total, n_pass, n_bg = process_tiles(SLIDEPATH, mask4, OUT_PATH)
+    n_total, n_pass, n_bg = process_tiles(slidePath, mask4, tilePath,size,level)
     
     # Print statistics
     print("------------------------------------------------", flush=True)
     print(f"{round(n_pass / n_total * 100, 2)}% passed", flush=True)
     print("Slide\tTotal\tBackground\tPassed", flush=True)
-    print(f"{get_slidename(SLIDEPATH)}\t{n_total}\t{n_bg}\t{n_pass}", flush=True)
+    print(f"{get_slidename(slidePath)}\t{n_total}\t{n_bg}\t{n_pass}", flush=True)
     print("------------------------------------------------", flush=True)
     print("Finished.", flush=True)
+
+
+def sliceSubset(pathIn, pathOut, slides,size, level):
+    for slide in slides:
+        if slide.endswith(".svs"):
+             filePath = os.path.join(pathIn,slide)      
+             slice(filePath, pathOut, size,level)
+
+def printInfo(subSet):
+    print("started processing subset" +str(i)+ " of " + str(cpus)+"\n")
+    print(" tiling subset with:")
+    for slide in subSet:
+        print("slideName" + slide)
     
     
 if __name__ == "__main__":
-    main()
+    argParser = argparse.ArgumentParser()
+
+    argParser.add_argument("-i", "--input", help="The path to the folder containing the slides")
+    argParser.add_argument("-o", "--out", help="The path to the folder where u want the tiles")
+    argParser.add_argument("-s", "--size",type=int, default=500, help="size of the tiles in pixel")
+    argParser.add_argument("-l", "--level",type=int, default=0, help="Magnification level, at which u want to cut the tiles")
+
+
+    args = argParser.parse_args()
+
+    pathIn = args.input
+  
+    pathOut = args.out
+
+    size = args.size
+
+    level = args.level
+
+    cpus = multiprocessing.cpu_count()-4
+
+    print("Number of cpu : ", cpus)
+
+    images = os.listdir(pathIn)
+
+    numImages = len(images)
+
+    procs = []
+    cpus = int(cpus)
+
+    #createOutPath(pathOut)
+
+
+
+    for i in range(1,cpus+1):
+        subSet = images[int((i-1)*numImages/cpus):int(i*numImages/cpus)]
+        printInfo(subSet)
+        tilingProc = multiprocessing.Process(target=sliceSubset,args=(pathIn,pathOut,subSet,size,level))
+        procs.append(tilingProc)
+        tilingProc.start()
+        
+
+    for process in procs:
+        process.join()
+    print("folder finished")
 
