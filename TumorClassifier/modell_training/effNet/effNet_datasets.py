@@ -5,8 +5,8 @@ from torch.utils.data import DataLoader, Subset
 
 
 IMAGE_SIZE = 224 # Image size of resize when applying transforms.
-BATCH_SIZE = 45
-NUM_WORKERS = 4 # Number of parallel processes for data preparation.
+BATCH_SIZE = 256
+NUM_WORKERS = 10 # Number of parallel processes for data preparation.
 
 # Training transforms
 def get_train_transform(IMAGE_SIZE, pretrained):
@@ -54,12 +54,12 @@ def get_datasets(pretrained):
     
 
     train_dataset = datasets.ImageFolder(
-        root=r'/mnt/projects/neuropath_hd/data/kryoQ2Split1/kryo/train',
+        root=r'/mnt/projects/neuropath_hd/data/splits/areeba_224_20x/kryo/train',
         transform=(get_train_transform(IMAGE_SIZE, pretrained))
     )
 # validation dataset
     valid_dataset = datasets.ImageFolder(
-        root=r'/mnt/projects/neuropath_hd/data/kryoQ2Split1/kryo/val',
+        root=r'/mnt/projects/neuropath_hd/data/splits/areeba_224_20x/kryo/val',
         transform=(get_valid_transform(IMAGE_SIZE, pretrained))
     )
     

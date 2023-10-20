@@ -10,7 +10,7 @@ import numpy as np
 import os
 
 
-slidePath= r"D:\kryoQ2\GBM-N17-1629-K-Q2.svs"
+slidePath= r"E:slides\kryoQ2\GBM-N17-1629-K-Q2.svs"
 
 #tilePath = r"C:\Users\felix\Desktop\AutoEncoder\gtTiles"
 

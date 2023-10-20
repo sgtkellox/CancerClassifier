@@ -12,7 +12,7 @@ def save_model(epochs, model, optimizer, criterion, pretrained):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': criterion,
-                }, r"/mnt/projects/neuropath_hd/data/result/model_"+str(epochs)+"_pretrained.pth")
+                }, r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/effNet/v1_20x_224/model_"+str(epochs)+"_pretrained.pth")
 
 def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     """
@@ -31,7 +31,7 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
-    plt.savefig(r"/mnt/projects/neuropath_hd/data/result/effNetAcc.png")
+    plt.savefig(r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/effNet/v1_20x_224/effNetAcc.png")
     
     # loss plots
     plt.figure(figsize=(10, 7))
@@ -46,5 +46,5 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(r"/mnt/projects/neuropath_hd/data/result/effNetLoss.png")
+    plt.savefig(r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/effNet/v1_20x_224/effNetLoss.png")
     plt.close()
