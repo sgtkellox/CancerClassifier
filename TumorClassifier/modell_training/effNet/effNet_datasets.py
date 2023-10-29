@@ -54,12 +54,12 @@ def get_datasets(pretrained):
     
 
     train_dataset = datasets.ImageFolder(
-        root=r'/mnt/projects/neuropath_hd/data/splits/areeba_224_20x/kryo/train',
+        root=r'/mnt/projects/neuropath_hd/data/splits/areeba_448_40x/kryo/train',
         transform=(get_train_transform(IMAGE_SIZE, pretrained))
     )
 # validation dataset
     valid_dataset = datasets.ImageFolder(
-        root=r'/mnt/projects/neuropath_hd/data/splits/areeba_224_20x/kryo/val',
+        root=r'/mnt/projects/neuropath_hd/data/splits/areeba_448_40x/kryo/val',
         transform=(get_valid_transform(IMAGE_SIZE, pretrained))
     )
     

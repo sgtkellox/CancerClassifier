@@ -3,18 +3,26 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 matplotlib.style.use('ggplot')
+import os
+
+outPath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/effNet/v1_40x_448"
 def save_model(epochs, model, optimizer, criterion, pretrained):
     """
     Function to save the trained model to disk.
+    
+    
     """
+    
+    safePath = os.path.join(outPath,"model"+ str(epochs)+".pth")
     torch.save({
                 'epoch': epochs,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': criterion,
-                }, r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/effNet/v1_20x_224/model_"+str(epochs)+"_pretrained.pth")
+                }, safePath)
 
 def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
+    safePath = os.path.join(outPath,"acc.png")
     """
     Function to save the loss and accuracy plots to disk.
     """
@@ -31,7 +39,7 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
-    plt.savefig(r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/effNet/v1_20x_224/effNetAcc.png")
+    plt.savefig(safePath)
     
     # loss plots
     plt.figure(figsize=(10, 7))
@@ -46,5 +54,6 @@ def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/effNet/v1_20x_224/effNetLoss.png")
+    safePath = os.path.join(outPath,"loss.png")
+    plt.savefig(safePath)
     plt.close()

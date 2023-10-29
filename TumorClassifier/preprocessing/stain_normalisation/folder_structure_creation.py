@@ -17,17 +17,6 @@ def makeDiagnosisFolderStructure(parent):
     for path in diagPaths:
         if not os.path.exists(path):
             os.makedirs(path)
-            
-
-def makeLabelFolderStructure(parent, labels):
-    labelPaths = []
-    for label in labels:
-        path = os.path.join(parent,label)
-        labelPaths.append(path)
-    
-    for path in labelPaths:
-        if not os.path.exists(path):
-            os.makedirs(path)
 
 
 def makeSplitFolderStructure(parent):
@@ -63,8 +52,6 @@ def makeFolderStructure(path):
         if not os.path.exists(path):
             os.makedirs(path)
         makeSplitFolderStructure(path)
-
-
 
 if __name__ == '__main__': 
 

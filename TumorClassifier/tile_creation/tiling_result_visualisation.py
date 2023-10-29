@@ -70,7 +70,7 @@ def getWsiDimensions(nNumber, slidesPath):
                
             slidePath = os.path.join(slidesPath,wsi)
             slide = open_slide(slidePath)
-            a = slide.level_dimensions[1]
+            a = slide.level_dimensions[0]
 
             print(a)
             return a[0] , a[1]

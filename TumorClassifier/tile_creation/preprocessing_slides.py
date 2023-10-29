@@ -205,7 +205,7 @@ def process_tiles(slidepath, mask,outPath,size, level):
 
     pass_names = []
 
-    grow = 4* size
+    grow = size
         
     for x in range(0, w-grow, grow):
         for y in range(0, h-grow, grow):
@@ -225,7 +225,7 @@ def process_tiles(slidepath, mask,outPath,size, level):
             masked_tile, masked = mask_tile(tile, mask)
             
             # generate a tilename
-            tilename = get_tilename(slidepath, int(x/4), int(y/4))
+            tilename = get_tilename(slidepath, int(x), int(y))
 
             # count background tiles
             if masked == 101: nbg += 1

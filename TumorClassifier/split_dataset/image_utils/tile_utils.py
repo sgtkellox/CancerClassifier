@@ -34,9 +34,9 @@ def extractIndetifierFromSlide(slide):
 
     return identifier
 
-def getPreparation(slide):
-    identifier = slide.split("_")[0]
-    prep = slide.split("-")[3]
+def getPreparation(tile):
+    identifier = tile.split("_")[0]
+    prep = identifier.split("-")[3]
     if prep[-1].isdigit():
         prep = prep[0]
     if prep =="K":

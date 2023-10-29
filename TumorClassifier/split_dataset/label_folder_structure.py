@@ -3,20 +3,7 @@ import os
 import argparse
 
 
-def makeDiagnosisFolderStructure(parent):
-    astroPath = os.path.join(parent,"Astro")
-    gbmPath = os.path.join(parent,"GBM")
-    oligoPath = os.path.join(parent,"Oligo")
 
-    diagPaths = []
-
-    diagPaths.append(astroPath)
-    diagPaths.append(gbmPath)
-    diagPaths.append(oligoPath)
-
-    for path in diagPaths:
-        if not os.path.exists(path):
-            os.makedirs(path)
             
 
 def makeLabelFolderStructure(parent, labels):
@@ -30,7 +17,7 @@ def makeLabelFolderStructure(parent, labels):
             os.makedirs(path)
 
 
-def makeSplitFolderStructure(parent):
+def makeSplitFolderStructure(parent,labels):
     trainPath = os.path.join(parent,"train")
     valPath = os.path.join(parent,"val")
     testPath = os.path.join(parent,"test")
@@ -44,11 +31,11 @@ def makeSplitFolderStructure(parent):
     for path in splitPaths:
         if not os.path.exists(path):
             os.makedirs(path)
-        makeDiagnosisFolderStructure(path)
+        makeLabelFolderStructure(path,labels)
 
 
 
-def makeFolderStructure(path):
+def makeFolderStructure(path,labels):
     kryoPath = os.path.join(path,"smear")
     smearPath = os.path.join(path,"kryo")
     touchPath = os.path.join(path,"touch")
@@ -62,7 +49,7 @@ def makeFolderStructure(path):
     for path in prepPaths:
         if not os.path.exists(path):
             os.makedirs(path)
-        makeSplitFolderStructure(path)
+        makeSplitFolderStructure(path,labels)
 
 
 
@@ -71,11 +58,31 @@ if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
 
     argParser.add_argument("-p", "--path", help="The path to the folder IN which u want the Folder Structure to be created")
+    argParser.add_argument("-l", "--labels", help="Labels to sort by")
+    
 
     args = argParser.parse_args()
+    
+
+    
+    
 
     path = args.path
+    labels = args.labels
+    
+    if labels == "diag":
+        folders = {"Astro","GBM","Oligo"}
+        
+    elif labels == "idh":
+        folders = {"wild","mutated"}
+        
+    elif labels == "diff":
+        folders = {"Astro","Oligo"}
+    
+    elif labels == "grade":
+        folders = {"two","three","four"}
+    
+    elif labels == "gradeR":
+        folders = {"low","high"}
 
-    makeFolderStructure(path)
-
-
+    makeFolderStructure(path,folders)

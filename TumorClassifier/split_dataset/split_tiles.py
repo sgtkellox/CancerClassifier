@@ -25,6 +25,8 @@ def sortTilesByWSI(path):
     return wsis
 
 
+
+
 def validateInput(trainRatio, valRatio, testRation):
 
     if trainRatio + valRatio + testRation == 1:

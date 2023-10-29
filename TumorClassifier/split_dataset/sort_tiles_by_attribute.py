@@ -1,16 +1,71 @@
 import os
 import argparse
 
+def getGroupByLabel(tile, label):
+    
+    if label == "diag":
+        if tile.startswith("A"):
+            return "Astro"
+        elif tile.startswith("GBM"):
+            return "GBM"
+        elif tile.startswith("O"):
+            return "Oligo"
+        
+    elif label == "grade":
+        diagPart = tile.split("-")[0]
+        if diagPart.startswith("GBM"):
+            return "four"
+        elif diagPart[-1] == str(2):
+            return "two"
+        elif diagPart[-1] == str(3):
+            return "three"
+        elif diagPart[-1] == str(4):
+            return "four"
+        
+    elif label == "gradeR":
+        diagPart = tile.split("-")[0]
+        if diagPart.startswith("GBM"):
+            return "high"
+        elif diagPart[-1] == str(2):
+            return "low"
+        elif diagPart[-1] == str(3):
+            return "high"
+        elif diagPart[-1] == str(4):
+            return "high"
+            
+    elif label == "diff": 
+        diagPart = tile.split("-")[0]
+        if tile.startswith("A"):
+            return "astros"
+        elif tile.startswith("GBM"):
+            return "astros"
+        elif tile.startswith("O"):
+            return "oligos"
+        
+    elif label == "idh":
+        diagPart = tile.split("-")[0]
+        if tile.startswith("GBM"):
+            return "wild"
+        else:
+            return "mutated"
+    
 
 
-def sortByDiagnosis(inPath):
+
+            
+        
+        
+        
+    
+
+def sortByDiagnosis(wsis):
     astros = []
     gbms = []
     oligos = []
     
     result = []
     
-    for slide in os.listdir(inPath):
+    for slide in wsis:
         if slide.startswith("A"):
             astros.append(slide)
         elif slide.startswith("GBM"):
@@ -25,7 +80,7 @@ def sortByDiagnosis(inPath):
     return result
 
 
-def sortByGrade(inPath):
+def sortByGrade(wsis):
     
     two = []
     three = []
@@ -33,7 +88,7 @@ def sortByGrade(inPath):
     
     result = []
     
-    for slide in os.listdir(inPath):
+    for slide in wsis:
         diagPart = slide.split("-")[0]
         if diagPart.startswith("GBM"):
             four.append(slide)
@@ -50,7 +105,7 @@ def sortByGrade(inPath):
     
     return result
 
-def sortByRoughGrade(inPath): 
+def sortByRoughGrade(wsis): 
     
     high = []
     low = []
@@ -58,7 +113,7 @@ def sortByRoughGrade(inPath):
     
     result = []
     
-    for slide in os.listdir(inPath):
+    for slide in wsis:
         diagPart = slide.split("-")[0]
         if diagPart.startswith("GBM"):
             high.append(slide)
@@ -76,14 +131,14 @@ def sortByRoughGrade(inPath):
     
 
 
-def sortByDifferentiation(inPath):
+def sortByDifferentiation(wsis):
     
     astros = []
     oligos = []
     
     result = []
     
-    for slide in os.listdir(inPath):
+    for slide in wsis:
         diagPart = slide.split("-")[0]
         if slide.startswith("A"):
             astros.append(slide)
@@ -99,13 +154,13 @@ def sortByDifferentiation(inPath):
     return result
     
     
-def sortByIDHstatus(inPath):
+def sortByIDHstatus(wsis):
     mutated = []
     wild = []
     
     result = []
     
-    for slide in os.listdir(inPath):
+    for slide in wsis:
         diagPart = slide.split("-")[0]
         if slide.startswith("A"):
             mutated.append(slide)
@@ -125,13 +180,9 @@ def printResult(result):
         print("--------------")
         for file in entry:
             print(file)
-        
+            
 
-
-def sortByLabelFile(inPath, attribute):
-    
-
-    return 
+ 
 
 
 
@@ -140,6 +191,7 @@ if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
 
     argParser.add_argument("-i", "--inPath", help="The path to the folder containing the slides split")
+    argParser.add_argument("-o", "--outPath", help="The path to where the new folder is supposed to go")
     argParser.add_argument("-a", "--attribute", help="The path to the folder containing the slides split")
     
     args = argParser.parse_args()
@@ -148,7 +200,7 @@ if __name__ == '__main__':
     
     inPath = args.inPath
     
-    
+    outPath = args.outPath
     
     if attr == "diag":
         result = sortByDiagnosis(inPath)
@@ -167,5 +219,3 @@ if __name__ == '__main__':
         
 
     printResult(result)
-    
-    
