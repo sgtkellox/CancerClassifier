@@ -19,7 +19,7 @@ parser.add_argument(
 )
 parser.add_argument(
     '-lr', '--learning-rate', type=float,
-    dest='learning_rate', default=0.00001,
+    dest='learning_rate', default=0.000001,
     help='Learning rate for training the model'
 )
 args = vars(parser.parse_args())
