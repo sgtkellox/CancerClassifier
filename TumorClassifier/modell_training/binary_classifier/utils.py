@@ -3,8 +3,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import torch
 from sklearn.metrics import f1_score
+import os
 matplotlib.style.use('ggplot')
+
+outPath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo"
 def save_model(epoch, model, optimizer, criterion):
+    
+    safePath = os.path.join(outPath,str(epoch)+".pth")
     """
     Function to save the trained model to disk.
     """
@@ -13,7 +18,7 @@ def save_model(epoch, model, optimizer, criterion):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': criterion,
-                }, r"C:\Users\felix\Desktop\AutoEncoder\models\model"+str(epoch)+".pth")
+                },safePath )
 def save_plots(
     train_acc, valid_acc, 
     train_loss, valid_loss,
@@ -32,10 +37,12 @@ def save_plots(
         valid_acc, color='blue', linestyle='-', 
         label='validataion accuracy'
     )
+    
+    safePath = os.path.join(outPath,"acc.png")
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
     plt.legend()
-    plt.savefig(r"C:\Users\felix\Desktop\AutoEncoder\models\accuracy.png")
+    plt.savefig(safePath)
     
     # Loss plots
     plt.figure(figsize=(10, 7))
@@ -47,10 +54,11 @@ def save_plots(
         valid_loss, color='red', linestyle='-', 
         label='validataion loss'
     )
+    safePath = os.path.join(outPath,"loss.png")
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(r"C:\Users\felix\Desktop\AutoEncoder\models\loss.png")
+    plt.savefig(safePath)
     # F1 score plots.
     plt.figure(figsize=(10, 7))
     plt.plot(
@@ -61,10 +69,11 @@ def save_plots(
         valid_f1_score, color='olive', linestyle='-', 
         label='validataion f1 score'
     )
+    safePath = os.path.join(outPath,"f1.png")
     plt.xlabel('Epochs')
     plt.ylabel('F1 Score')
     plt.legend()
-    plt.savefig(r"C:\Users\felix\Desktop\AutoEncoder\models\f1_score.png")
+    plt.savefig(safePath)
 
 def get_outputs_binary_list(outputs):
     """

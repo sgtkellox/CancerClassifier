@@ -35,7 +35,7 @@ def train(model, trainloader, optimizer, criterion, scheduler=None, epoch=None):
     y_true = []
     y_pred = [] 
     iters = len(trainloader)
-    for i, data in tqdm(enumerate(trainloader), total=len(trainloader)):
+    for i, data in enumerate(trainloader):
         counter += 1
         image, labels = data
         image = image.to(device)
@@ -59,8 +59,9 @@ def train(model, trainloader, optimizer, criterion, scheduler=None, epoch=None):
         loss.backward()
         # Update the weights.
         optimizer.step()
-        if scheduler is not None:
-            scheduler.step(epoch + i / iters)
+        if i%100 ==0:
+            if scheduler is not None:
+                scheduler.step(epoch + i / iters)
         y_true.extend(labels.detach().cpu().numpy())
         y_pred.extend(outputs_binary_list)
         
@@ -81,7 +82,7 @@ def validate(model, testloader, criterion):
     y_pred = []
     counter = 0
     with torch.no_grad():
-        for i, data in tqdm(enumerate(testloader), total=len(testloader)):
+        for i, data in enumerate(testloader):
             counter += 1
             
             image, labels = data
@@ -124,7 +125,7 @@ if __name__ == '__main__':
     
    
     # Learning_parameters. 
-    lr = 1e-3
+    lr = 1e-4
     epochs = 1000
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Computation device: {device}")
@@ -150,14 +151,15 @@ if __name__ == '__main__':
         optimizer, 
         T_0=25, 
         T_mult=1,
-        verbose=True
+        verbose=False
     )
-    model, optimizer, epoch = load_ckp(r"C:\Users\felix\Desktop\AutoEncoder\models\model83.pth", model, optimizer)
+    #model, optimizer, epoch = load_ckp(r"C:\Users\felix\Desktop\AutoEncoder\models\model83.pth", model, optimizer)
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
     train_f1_score, valid_f1_score = [], []
     # Start the training.
+    epoch = 0
     while epoch in range(epochs):
         epoch+=1
         print(f"[INFO]: Epoch {epoch+1} of {epochs}")
@@ -185,7 +187,7 @@ if __name__ == '__main__':
             f"validation acc: {valid_epoch_acc:.3f},",
             f"validation f1-score: {valid_epoch_f1_score:.3f}"
             )
-        print(f"LR at end of epoch {epoch+1} {scheduler.get_last_lr()[0]}")
+        #print(f"LR at end of epoch {epoch+1} {scheduler.get_last_lr()[0]}")
         print('-'*50)
         
     # Save the trained model weights.

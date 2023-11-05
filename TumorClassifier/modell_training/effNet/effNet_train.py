@@ -137,7 +137,7 @@ if __name__ == '__main__':
         p.numel() for p in model.parameters() if p.requires_grad)
     print(f"{total_trainable_params:,} training parameters.")
     # Optimizer.
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4, momentum = 0.9)
     # Loss function.
     criterion = nn.CrossEntropyLoss()
     # Lists to keep track of losses and accuracies.
