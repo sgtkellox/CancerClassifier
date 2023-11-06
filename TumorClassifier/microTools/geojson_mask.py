@@ -30,6 +30,7 @@ def tileAnnotatedArea(slide,json, tilePath):
     with rasterio.open(slide) as src:
        out_image, out_transform = rasterio.mask.mask(src, features, crop=True)
        out_meta = src.meta
+       
 
     imageName = slide.split("\\")[-1].split(".")[0]
 
