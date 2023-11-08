@@ -8,24 +8,7 @@ from effNet_model import build_model
 from effNet_datasets import get_datasets, get_data_loaders
 from effNet_utils import save_model, save_plots
 # construct the argument parser
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    '-e', '--epochs', type=int, default=400,
-    help='Number of epochs to train our network for'
-)
-parser.add_argument(
-    '-pt', '--pretrained', action='store_true',
-    help='Whether to use pretrained weights or not'
-)
-parser.add_argument(
-    '-lr', '--learning-rate', type=float,
-    dest='learning_rate', default=0.000001,
-    help='Learning rate for training the model'
-)
-args = vars(parser.parse_args())
 
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 import gc
 def report_gpu():
@@ -107,7 +90,26 @@ def load_ckp(modelPath, model, optimizer):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-e', '--epochs', type=int, default=800,
+        help='Number of epochs to train our network for'
+    )
+    parser.add_argument(
+        '-pt', '--pretrained', action='store_true',
+        help='Whether to use pretrained weights or not'
+    )
+    parser.add_argument(
+        '-lr', '--learning-rate', type=float,
+        dest='learning_rate', default=0.000001,
+        help='Learning rate for training the model'
+    )
+    args = vars(parser.parse_args())
+
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # Load the training and validation datasets.
+    print("running training")
     report_gpu()
     dataset_train, dataset_valid, dataset_classes = get_datasets(args['pretrained'])
     print(f"[INFO]: Number of training images: {len(dataset_train)}")
