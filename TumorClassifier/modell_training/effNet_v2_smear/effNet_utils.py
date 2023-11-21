@@ -16,7 +16,7 @@ def save_model(epochs, model, optimizer, criterion, pretrained):
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': criterion,
-                }, os.path.join(outPath,model +str(epochs)+".pth"))
+                }, os.path.join(outPath,"model" +str(epochs)+".pth"))
 
 def save_plots(train_acc, valid_acc, train_loss, valid_loss, pretrained):
     """

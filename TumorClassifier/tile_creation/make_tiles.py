@@ -57,19 +57,10 @@ def make_tiles(slidepath,outPath,size, level = 0):
 
     #slidePropertyString = "openslide.level[" +str(level)+ "].width"
 
-    #w = int(slide.properties[slidePropertyString+".width"])
-    #h = int(slide.properties[slidePropertyString+".height"])
 
     w0 = int(slide.properties["openslide.level[0].width"])
     h0 = int(slide.properties["openslide.level[0].height"])
-    
-    
-    # extract dimensions and print them
-    #[w, h] = slide.dimensions
-    #print("-----")
-    #print(f"Slide dimensions are {w}x{h}.", flush=True)
-    #print("Tiling...", flush=True)
-
+      
     print(f"Slide w0 dimensions are {w0}x{h0}.", flush=True)
     print("Tiling...", flush=True)
     print("-----")
@@ -77,7 +68,6 @@ def make_tiles(slidepath,outPath,size, level = 0):
     
     grow = 4* size
     
-  
     for x in range(0, w0-grow, grow):
         for y in range(0, h0-grow, grow):
 

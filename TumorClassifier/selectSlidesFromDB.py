@@ -7,7 +7,7 @@ import math
 from openpyxl import load_workbook
 
 
-def copySlides():
+def copySlides(table):
     for index, row in table1.iterrows():
 
 
@@ -59,13 +59,6 @@ def extractNNumberFromSlide(slide):
     nNumber = parts[1] + "-" + parts[2]
 
     return nNumber
-
-
-def checkIfFileIsAllreadyCopied(nNumber):
-
-
-
-    return
 
 
 def fixRaminsStupidNameConvention(path):
