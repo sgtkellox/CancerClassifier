@@ -2,7 +2,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 # batch size
-BATCH_SIZE = 256
+BATCH_SIZE = 64
 
 dataPath = ""
 
@@ -31,12 +31,12 @@ valid_transform = transforms.Compose([
 
 # training dataset
 train_dataset = datasets.ImageFolder(
-    root=r'/mnt/projects/neuropath_hd/data/splits/448_40x_idh/kryo/train',
+    root=r'C:\Users\felix\Desktop\AutoEncoder\artefactSplit\train',
     transform=train_transform
 )
 # validation dataset
 valid_dataset = datasets.ImageFolder(
-    root=r'/mnt/projects/neuropath_hd/data/splits/448_40x_idh/kryo/val',
+    root=r'C:\Users\felix\Desktop\AutoEncoder\artefactSplit\val',
     transform=valid_transform
 )
 # training data loaders

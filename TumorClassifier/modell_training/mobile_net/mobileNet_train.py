@@ -26,21 +26,19 @@ val_path = os.path.join(path,'val')
 
 data_transforms = {
         "train": transforms.Compose([
-            transforms.RandomResizedCrop(256),
+            transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.RandomRotation(degrees=(-3,3)),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
                                     ]),
         "val": transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(128),
+            transforms.Resize(224),          
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
                                    ]),
         "test":transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(128),
+            transforms.Resize(224),           
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
         ])
@@ -105,7 +103,7 @@ sorted_counts  = df.value_counts('label')
 plt.title('distribution in train dataset')
 plt.pie(sorted_counts, labels = class_names,startangle = 90,counterclock = False,autopct="%.1f%%")
 
-batch_size = 32
+batch_size = 25
 nw = min([os.cpu_count(), batch_size if batch_size > 1 else 0, 8])  # number of workers
 print('Using {} dataloader workers every process'.format(nw))
 
