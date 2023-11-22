@@ -66,12 +66,12 @@ def make_tiles(slidepath,outPath,size, level = 0):
     print("-----")
 
     
-    grow = 4* size
+    grow =  size
     
     for x in range(0, w0-grow, grow):
         for y in range(0, h0-grow, grow):
 
-            tile=slide.read_region(location=(x,y), level=1,size=(size,size))
+            tile=slide.read_region(location=(x,y), level=0,size=(size,size))
             tileRGB = tile.convert('RGB')
            
             tileNP = np.array(tileRGB)
@@ -84,7 +84,7 @@ def make_tiles(slidepath,outPath,size, level = 0):
                 continue
             else:              
                 if np.average(tileNP)<235:
-                    tilename = get_tilename(slidepath, int(x/4), int(y/4))
+                    tilename = get_tilename(slidepath, int(x), int(y))
                     tilename = os.path.join(outPath,tilename)
                     tileNP = cv2.cvtColor(tileNP, cv2.COLOR_BGR2RGB)
                     cv2.imwrite(tilename, tileNP)

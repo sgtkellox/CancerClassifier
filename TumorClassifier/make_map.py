@@ -9,7 +9,7 @@ from torchvision import transforms
 import numpy as np
 
 from tile_creation.tile_utils import  calcPixelPosition
-from tile_creation.filter_utils import open_slide
+#from tile_creation.filter_utils import open_slide
 
 import shutil
 
@@ -31,7 +31,16 @@ def sortTilesByWSI(path):
     print("finished sorting by wsi")
     return wsis
 
-def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, transform):
+def extractTileCoordinates(image):
+
+    splitP1 = image.split("_")
+    x = int(splitP1[1])
+    y = int(splitP1[2].split(".")[0])
+    return x , y
+
+
+
+def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, transform, xShift,yShift):
 
     tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
     
@@ -41,11 +50,11 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
             continue
 
 
-        print("Classifying " + str(img))
+        #print("Classifying " + str(img))
 
         
         
-        x,y = calcPixelPosition(img)
+        x,y = calcPixelPosition(img,xShift,yShift,tileSize)
 
         x = int(x)
         y = int(y)
@@ -100,6 +109,44 @@ def getWsiDimensions(nNumber, slidePath):
                     
     return 0, 0
 
+def findWidhHeight(images):
+    minX = 100000
+    maxX = 0
+    minY = 100000
+    maxY = 0
+    for image in images:
+   
+        x,y = extractTileCoordinates(image)
+
+        minX = min(minX,x)
+        maxX = max(maxX,x)
+        minY = min(minY,y)
+        maxY = max(maxY,y)
+
+    
+    if minX == 0:
+        xshift = 0
+    else:
+        xshift = minX-tileSize
+    if minY == 0:
+        yShift = 0
+    else:
+        yShift = minY-tileSize
+
+    
+    width = maxX+2*tileSize-minX
+    height = maxY + 2*tileSize - minY
+
+    
+
+    print("width " +str(width))
+    print("height " +str(height))
+
+    print("maxX " +str(maxX-xshift))
+    print("maxY " +str(maxY-yShift))
+
+    return width, height , xshift, yShift
+
 
                   
 def drawResultImage(resultsArray, slideWidth, slideHeight):
@@ -121,17 +168,22 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
     wsis = sortTilesByWSI(tilePath)
     for slide in wsis:
         print("slide from tileName: "+slide)
-        slideWidth , slideHeight = getWsiDimensions(slide,slidePath)
+        slideWidth , slideHeight, xShift, yShift = findWidhHeight(wsis[slide])
         print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
         if slideWidth == 0 or slideHeight == 0:
            print("Warning: the slide "+ slide +" has dims 0 , 0")
            continue
-        slideWidth = int(slideWidth/500) 
-        slideHeight = int(slideHeight/500) 
+        slideWidth = int(slideWidth/tileSize) 
+        slideHeight = int(slideHeight/tileSize) 
+        print(xShift)
+        print(yShift)
+
+        print(slideWidth)
+        print(slideHeight)
         #slideWidth = int(slideWidth - (slideWidth % 500))
         #slideHeight = int(slideHeight - (slideHeight % 500))
 
-        tileMap = makeTileMap(tilePath,wsis[slide],imagesOutPath,slideWidth, slideHeight, model, transform)
+        tileMap = makeTileMap(tilePath,wsis[slide],imagesOutPath,slideWidth, slideHeight, model, transform,xShift, yShift)
        
         resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
 
@@ -147,22 +199,22 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 
 if __name__ == '__main__':
 
-    tilePath = r"C:\Users\felix\Desktop\neuro\kryoTestTiles"
+    tilePath = r"C:\Users\felix\Desktop\adTest"
 
     slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
 
-    outPath = r"C:\Users\felix\Desktop\AutoEncoder\kryoTestRes\maps"
+    outPath = r"C:\Users\felix\Desktop\AutoEncoder\maps"
 
 
-    imagesOutPath = r"C:\Users\felix\Desktop\AutoEncoder\kryoTestRes\results"
+    imagesOutPath = r"C:\Users\felix\Desktop\AutoEncoder\imgs"
 
-   
+    tileSize = 512
 
     IMAGE_SIZE = 224
     device = 'cuda'
     # Load the trained model.
     model = CustomCNN(num_classes=1)
-    checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models\model73.pth', map_location=device)
+    checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models2\110.pth', map_location=device)
     print('Loading trained model weights...')
     model.load_state_dict(checkpoint['model_state_dict'])
     transform = transforms.Compose([
@@ -174,7 +226,7 @@ if __name__ == '__main__':
                 std=[0.5, 0.5, 0.5]
             )
         ]) 
-
+    model.eval()
 
     model = model.to(device)
 

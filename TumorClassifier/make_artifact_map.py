@@ -187,16 +187,28 @@ def findGaps(xCoords, tileSize, k):
     return gaps
 
 def mergeGaps(gaps, tileSize, k):
-    toMerge = []
-    for i in range(0, len(gaps-1)):
-        if gaps[i+1][0] - gaps[i][1] < k *tileSize:
-            mergedGap = (gaps[i][0], gaps[i+1][1])
-            toMerge.append((i,i+1))
-           
-           
-        else:
-            
-            return toMerge
+    
+    for index, gap in enumerate(gaps.copy()[0:-1]):               
+        if gaps[index+1][0] - gap[1] <= k *tileSize:
+            mergedGap = (gap[0], gaps[index+1][1])
+            del gaps[index+1]
+            del gaps[index]          
+            gaps.insert(index,mergedGap)
+            mergeGaps(gaps,tileSize,k)
+            break
+
+    return gaps
+
+
+def addUpGaps(gaps):
+    sum = 0
+    for gap in gaps:
+        sum = gap[0]+gap[1]
+    return sum
+
+def adjustTileCoords(tile, gaps):
+    return
+    
         
 
 
@@ -274,19 +286,19 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift,
         # Forward pass throught the image.
         outputs = model(image)
         output_sigmoid = torch.sigmoid(outputs)
+        pred_class = 1 if output_sigmoid > 0.5 else 0
 
 
-        if output_sigmoid<0.5:
+        if pred_class==1:
             safePath = os.path.join(aPath,img)
             tile = tile.new_from_image(250).bandjoin(tile[1:3])
-            tileMap[y][x]= 1
-        elif output_sigmoid>0.5:
+            
+        else:
             safePath = os.path.join(gPath,img)
            
-            tileMap[y][x]= 2
+        tileMap[y][x]= pred_class+1
 
-        else:
-            safePath = os.path.join(diffPath,img)
+       
             
 
         orig_image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB)
@@ -302,11 +314,7 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift,
        
 
         result = result.insert(tile,absX,absY)
-
-
-       
-        
-      
+     
         cv2.imwrite(safePath,orig_image)    
         
         
@@ -420,11 +428,11 @@ def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\neuro\stitcherTest"
+     tilePath = r"C:\Users\felix\Desktop\adTest"
 
-     slidePath =r"C:\Users\felix\Desktop\neuro\stitcherBad"
+     slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
 
-     outPath = r"C:\Users\felix\Desktop\neuro\result512"
+     outPath = r"C:\Users\felix\Desktop\AutoEncoder\tiffs"
 
      tileSize = 512
 
@@ -435,20 +443,20 @@ if __name__ == '__main__':
 
      transform = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.Resize(224),
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
+                mean=[0.5, 0.5, 0.5],
+                std=[0.5, 0.5, 0.5]
             )
     ])
 
      model = CustomCNN(num_classes=1)
-     checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models\model73.pth', map_location=device)
+     checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models2\110.pth', map_location=device)
      print('Loading trained model weights...')
      model.load_state_dict(checkpoint['model_state_dict'])
      
-     model.eval()
+     
      model = model.to(device)
 
      makeClassificationRun(tilePath, outPath, model, transform,tileSize)

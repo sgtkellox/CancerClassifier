@@ -28,46 +28,26 @@ if __name__ == '__main__':
     val_path = os.path.join(path,'val')
 
 
-data_transforms = {
-        "train": transforms.Compose([
-            transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(degrees=(-3,3)),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
-                                    ]),
-        "val": transforms.Compose([
-            transforms.Resize(224),          
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
-                                   ]),
-        "test":transforms.Compose([
-            transforms.Resize(224),           
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
-        ])
-}
     data_transforms = {
             "train": transforms.Compose([
-                transforms.RandomResizedCrop(256),
+                transforms.RandomResizedCrop(224),
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomRotation(degrees=(-3,3)),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
                                         ]),
             "val": transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(128),
+                transforms.Resize(224),          
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
                                        ]),
             "test":transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(128),
+                transforms.Resize(224),           
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
             ])
     }
+    
 
     data_sets = {
         "train":datasets.ImageFolder(train_path,transform = data_transforms['train']),

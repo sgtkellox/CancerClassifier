@@ -59,6 +59,7 @@ def save_plots(
     plt.ylabel('Loss')
     plt.legend()
     plt.savefig(safePath)
+    plt.close()
     # F1 score plots.
     plt.figure(figsize=(10, 7))
     plt.plot(
@@ -74,6 +75,7 @@ def save_plots(
     plt.ylabel('F1 Score')
     plt.legend()
     plt.savefig(safePath)
+    plt.close()
 
 def get_outputs_binary_list(outputs):
     """
