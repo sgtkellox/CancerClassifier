@@ -2,6 +2,8 @@ import os
 from openpyxl import load_workbook
 import pandas as pd
 
+import argparse
+
 def extractNNumberFromWsi(wsi):
     wsi = wsi.split(".")[0]
     split = wsi.split("-")
@@ -15,6 +17,17 @@ def extraxtPrepInfo(wsi):
     if len(split)>3:
         prep = prep+"-"+split[3]
     return prep
+
+
+def printNotFoundFiles(files, path):
+    
+    with open(path, 'a') as doc:
+        for file in files:
+            doc.write(file)
+            doc.write('\n')
+    doc.close()
+    
+
     
 
 
@@ -24,32 +37,36 @@ def lookUp(table,wsi):
     
     for index, row in table.iterrows():
         if row["Patho-Nr"] == nNumber:
+            app = "fail"
             diag = row["Diagnosis"]
             
             if diag == "PXA":
-                app = "PXA-"
+                app = "PXA"
             elif diag == "Pilocytic astrocytoma":
-                app = "PA-"     
+                app = "PA"     
             elif diag == "Metastasis":
-                app = "MET-"    
+                app = "MET"    
             elif diag == "Medulloblastoma":
-                app = "MB-"
+                app = "MB"
             elif diag == "Lymphoma":
-                app = "LYM-"
+                app = "LYM"
             elif diag == "Ependymoma":
-                app = "LYM-"
+                app = "LYM"
             elif diag == "Neurinom":
-                app = "N-"
+                app = "N"
             elif diag == "Hypophysenadenom":
-                app = "PIT-"
+                app = "PIT"
             elif diag == "H3-mutiertes Gliom":
-                app = "H3-"
-            name = diag +"-" +nNumber
+                app = "H3"
+            elif diag == "Meningeoma":
+                app = "MEN"
+            
+            name = app +"-" +nNumber
             name = name + "-" +prep
             print(name)
-            return
+            return name
             
-    print("not found " +nNumber)
+    return app
             
             
     
@@ -58,16 +75,34 @@ def lookUp(table,wsi):
 
 def processFolder(path, table):
     for wsi in os.listdir(path):
+        notFound = 
         if wsi.endswith(".svs"):
             
-            lookUp(table,wsi)
+            fullName = lookUp(table,wsi)
+
             
 
 path = r"D:\new entities\Kryo"
 tablePath = r"C:\Users\felix\Downloads\All_New_Cases_SS_11_entities(1).xlsx"
-table = pd.read_excel(tablePath)
 
-processFolder(path,table)          
+
+
+if __name__ == '__main__':
+    argParser = argparse.ArgumentParser()
+    
+    argParser.add_argument("-p", "--path", help="")
+    argParser.add_argument("-t", "--tablePath", help="The path to the table")
+    
+    
+    args = argParser.parse_args()
+
+    tablePath= args.tablePath
+    path = args.path
+
+    table = pd.read_excel(tablePath)
+
+    processFolder(path,table) 
+   
             
             
 
