@@ -90,8 +90,7 @@ def make_tiles(slidepath,outPath,size, level = 0):
                     cv2.imwrite(tilename, tileNP)
             
             
-                  
-
+              
     print("Done.", flush=True) 
     
     

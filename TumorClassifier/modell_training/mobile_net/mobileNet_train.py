@@ -21,7 +21,8 @@ from sklearn.metrics import accuracy_score,classification_report
     
 
 if __name__ == '__main__':
-    path = r"C:\Users\felix\Desktop\kryoSplitSN\kryo"
+    path = r"/mnt/projects/neuropath_hd/data/splits/areeba_448_40x/kryo"
+    safePath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/mobileNetV3"
 
     test_path = os.path.join(path,'test')
     train_path = os.path.join(path,'train')
@@ -30,19 +31,19 @@ if __name__ == '__main__':
 
     data_transforms = {
             "train": transforms.Compose([
-                transforms.RandomResizedCrop(224),
+                transforms.Resize((224,224)), 
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomRotation(degrees=(-3,3)),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
                                         ]),
             "val": transforms.Compose([
-                transforms.Resize(224),          
+                transforms.Resize((224,224)),          
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
                                        ]),
             "test":transforms.Compose([
-                transforms.Resize(224),           
+                transforms.Resize((224,224)),           
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
             ])
@@ -108,7 +109,7 @@ if __name__ == '__main__':
     plt.title('distribution in train dataset')
     plt.pie(sorted_counts, labels = class_names,startangle = 90,counterclock = False,autopct="%.1f%%")
 
-    batch_size = 64
+    batch_size = 300
     nw = min([os.cpu_count(), batch_size if batch_size > 1 else 0, 8])  # number of workers
     print('Using {} dataloader workers every process'.format(nw))
 
@@ -132,11 +133,11 @@ if __name__ == '__main__':
       )
     model.to(device)
 
-    optimizer=torch.optim.Adam(model.parameters(),lr=0.001,weight_decay=0.0001)
+    optimizer=torch.optim.Adam(model.parameters(),lr=0.0001,weight_decay=0.0001)
     loss_function=nn.CrossEntropyLoss()
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
-    num_epochs = 30
+    num_epochs = 800
     best_acc = 0.0
     train_loss_list = []
     train_acc_list = []
@@ -189,7 +190,7 @@ if __name__ == '__main__':
                 if phase == 'val' and epoch_acc > best_acc:
                     best_acc = epoch_acc
                     best_model_wts = copy.deepcopy(model.state_dict())
-                    torch.save(model.state_dict(),'best_checkpoint.model')
+                    torch.save(model.state_dict(),os.path.join(safePath,"best.pth"))
                 
     print('Best val Acc: {:4f}'.format(best_acc)) 
 
