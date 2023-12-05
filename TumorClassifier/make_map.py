@@ -137,13 +137,6 @@ def findWidhHeight(images):
     width = maxX+2*tileSize-minX
     height = maxY + 2*tileSize - minY
 
-    
-
-    print("width " +str(width))
-    print("height " +str(height))
-
-    print("maxX " +str(maxX-xshift))
-    print("maxY " +str(maxY-yShift))
 
     return width, height , xshift, yShift
 
@@ -163,10 +156,29 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
             
      return result
 
+def collectAllreadyProcessed(path):
+    wsis = []
+
+    for img in os.listdir(path):
+
+        split = img.split(".")[0]
+        split = split.split("-")
+        wsiName = split[0] + "-"+split[1] + "-" + split[2]+ "-"+split[3]+"-"+split[4]
+        
+        print(wsiName)
+        wsis.append(wsiName)
+                     
+    return wsis
+
+
 
 def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, transform):
     wsis = sortTilesByWSI(tilePath)
+    allreadyProcessed = collectAllreadyProcessed(outPath)
     for slide in wsis:
+        if slide in allreadyProcessed:
+            print("allready done: " + slide )
+            continue
         print("slide from tileName: "+slide)
         slideWidth , slideHeight, xShift, yShift = findWidhHeight(wsis[slide])
         print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
@@ -175,11 +187,7 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
            continue
         slideWidth = int(slideWidth/tileSize) 
         slideHeight = int(slideHeight/tileSize) 
-        print(xShift)
-        print(yShift)
-
-        print(slideWidth)
-        print(slideHeight)
+        
         #slideWidth = int(slideWidth - (slideWidth % 500))
         #slideHeight = int(slideHeight - (slideHeight % 500))
 
@@ -199,14 +207,14 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 
 if __name__ == '__main__':
 
-    tilePath = r"C:\Users\felix\Desktop\adTest"
+    tilePath = r"C:\Users\felix\Desktop\kryoQ1"
 
-    slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
+    slidePath =r"D:\slides\kryoQ1"
 
-    outPath = r"C:\Users\felix\Desktop\AutoEncoder\maps"
+    outPath = r"C:\Users\felix\Desktop\result\maps"
 
 
-    imagesOutPath = r"C:\Users\felix\Desktop\AutoEncoder\imgs"
+    imagesOutPath = r"C:\Users\felix\Desktop\result\imgs"
 
     tileSize = 512
 
