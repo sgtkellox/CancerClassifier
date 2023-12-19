@@ -1,4 +1,4 @@
-from genericpath import isdir
+
 import torch
 import cv2
 import glob as glob
@@ -50,11 +50,8 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
         if ".ini" in img:
             continue
 
-
         #print("Classifying " + str(img))
-
-        
-        
+       
         x,y = calcPixelPosition(img,xShift,yShift,tileSize)
 
         x = int(x)
@@ -75,11 +72,11 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
         output_sigmoid = torch.sigmoid(outputs)
         pred_class = 1 if output_sigmoid > 0.5 else 0
 
-        if pred_class == 1:
-            artifactFolder = os.path.join(imagesOutPath,"artefact")
-            if not os.path.isdir(artifactFolder):
-                os.mkdir(artifactFolder)
-            safePath = os.path.join(artifactFolder,img)     
+        if pred_class == 0:
+            artefactFolder = os.path.join(imagesOutPath,"artefact")
+            if not os.path.isdir(artefactFolder):
+                os.mkdir(artefactFolder)
+            safePath = os.path.join(artefactFolder,img)     
         else:
             goodFolder = os.path.join(imagesOutPath,"good")
             if not os.path.isdir(goodFolder):
@@ -138,13 +135,6 @@ def findWidhHeight(images):
     width = maxX+2*tileSize-minX
     height = maxY + 2*tileSize - minY
 
-    
-
-    print("width " +str(width))
-    print("height " +str(height))
-
-    print("maxX " +str(maxX-xshift))
-    print("maxY " +str(maxY-yShift))
 
     return width, height , xshift, yShift
 
@@ -164,10 +154,29 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
             
      return result
 
+def collectAllreadyProcessed(path):
+    wsis = []
+
+    for img in os.listdir(path):
+
+        split = img.split(".")[0]
+        split = split.split("-")
+        wsiName = split[0] + "-"+split[1] + "-" + split[2]+ "-"+split[3]+"-"+split[4]
+        
+        print(wsiName)
+        wsis.append(wsiName)
+                     
+    return wsis
+
+
 
 def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, transform):
     wsis = sortTilesByWSI(tilePath)
+    allreadyProcessed = collectAllreadyProcessed(outPath)
     for slide in wsis:
+        if slide in allreadyProcessed:
+            print("allready done: " + slide )
+            continue
         print("slide from tileName: "+slide)
         slideWidth , slideHeight, xShift, yShift = findWidhHeight(wsis[slide])
         print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
@@ -176,11 +185,7 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
            continue
         slideWidth = int(slideWidth/tileSize) 
         slideHeight = int(slideHeight/tileSize) 
-        print(xShift)
-        print(yShift)
-
-        print(slideWidth)
-        print(slideHeight)
+        
         #slideWidth = int(slideWidth - (slideWidth % 500))
         #slideHeight = int(slideHeight - (slideHeight % 500))
 
@@ -200,14 +205,14 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 
 if __name__ == '__main__':
 
-    tilePath = r"C:\Users\felix\Desktop\artefact"
+    tilePath = r"F:\home\rerun\images\good"
 
-    slidePath =r"D:\slides\kryoQ2"
+    slidePath =r"F:\slides\kryoQ2"
 
-    outPath = r"C:\Users\felix\Desktop\rerun\maps"
+    outPath = r"C:\Users\felix\Desktop\res\maps"
 
 
-    imagesOutPath = r"C:\Users\felix\Desktop\rerun\images"
+    imagesOutPath = r"C:\Users\felix\Desktop\res\imgs"
 
     tileSize = 512
 

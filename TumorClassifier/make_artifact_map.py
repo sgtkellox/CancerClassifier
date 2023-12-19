@@ -2,16 +2,17 @@ import os
 import argparse
 import math
 
+
 import numpy as np
 
 import torch
 import cv2
 import torchvision.transforms as transforms
 
+from tqdm import tqdm
+
 
 from tile_creation.tile_utils import calcPixelPosition
-
-from tqdm import tqdm
 
 #from tile_creation.filter_utils import open_slide
 
@@ -199,21 +200,34 @@ def mergeGaps(gaps, tileSize, k):
 
     return gaps
 
+def getGapLenght(gap):
+    return gap[1] - gap[0]
 
-def addUpGaps(gaps):
-    sum = 0
-    for gap in gaps:
-        sum = gap[0]+gap[1]
-    return sum
 
-def adjustTileCoords(tile, gaps):
-    return
-    
+def addUpGaps(gaps, index, tileSize = 512):
+    gapSum = 0
+    for i in range(index):
         
+        gapSum = gapSum + getGapLenght(gaps[i]) - tileSize
+    return gapSum
 
+def adjustTileCoords(tile, gaps, tileSize):
+    x = extractXCoordinate(tile)
+    if x > gaps[-1][1]:
+        newX = x-addUpGaps(gaps,len(gaps),tileSize)
+        return newX
+    elif x < gaps[0][0]:
+        return x
+    for i in range(len(gaps)-2):
+        if x > gaps[i][1] and x < gaps[i+1][0]:
+            newX = x-addUpGaps(gaps,i,tileSize)
+            return          
+    return
 
-
-
+def adjustXDim(x, gaps, tileSize):
+    return x - addUpGaps(gaps, len(gaps), tileSize)
+     
+    
 def makeResultFolder(outPath):
 
     aPath = os.path.join(outPath,"artefact")
@@ -241,10 +255,10 @@ def makeResultFolder(outPath):
     return aPath,gPath,diffPath,mapPath,wsiPath
 
 
-def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift, model, transform,tileSize):
+def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift, model, transform,tileSize, gaps):
 
 
-    result = pyvips.Image.black(slideWidth+512,slideHeight,bands=3)
+    result = pyvips.Image.black(slideWidth+tileSize,slideHeight,bands=3)
 
     
 
@@ -267,6 +281,8 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift,
             continue
    
         x,y = calcPixelPosition(img,xshift,yshift,tileSize)
+        
+        x = adjustTileCoords(img, gaps,tileSize)
    
         imgFullPath = os.path.join(tilePath,img)
 
@@ -315,7 +331,7 @@ def makeTileMap(tilePath, imgs, outPath ,slideWidth, slideHeight, xshift,yshift,
 
         result = result.insert(tile,absX,absY)
      
-        cv2.imwrite(safePath,orig_image)    
+        #cv2.imwrite(safePath,orig_image)    
         
         
                
@@ -325,7 +341,7 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
 
      slideWidth = int(slideWidth/tileSize)
      slideHeight = int(slideHeight/tileSize)
-     result = np.zeros((slideHeight*10, slideWidth*30, 3), np.uint8)
+     result = np.zeros((slideHeight*10, slideWidth*10, 3), np.uint8)
      result.fill(255)
 
      numArt=0
@@ -378,10 +394,12 @@ def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
 
         xCoords = sortByXCoordinate(wsis[slide])
 
-        findGaps(xCoords, tileSize, 3)
+        gaps = findGaps(xCoords, tileSize, 3)
         
 
         slideWidth , slideHeight, xshift, yshift = findWidhHeight(wsis[slide])
+        
+        slideWidth = adjustXDim(slideWidth, gaps, tileSize)
 
         #print("dims of slide " + slide + " with dimensions w: " + str(slideWidth) +" and "+ str(slideHeight))
 
@@ -396,7 +414,7 @@ def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
        
        
 
-        tileMap, result = makeTileMap(tilePath,wsis[slide],outPath,slideWidth, slideHeight,xshift,yshift, model, transform,tileSize)
+        tileMap, result = makeTileMap(tilePath,wsis[slide],outPath,slideWidth, slideHeight,xshift,yshift, model, transform,tileSize,gaps)
 
         
 
@@ -428,11 +446,11 @@ def makeClassificationRun(tilePath, outPath, model, transform,tileSize):
 if __name__ == '__main__':
 
 
-     tilePath = r"C:\Users\felix\Desktop\adTest"
+     tilePath = r"C:\Users\felix\Desktop\stitcherTestIn"
 
-     slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
+     slidePath =r"D:\slides\kryoQ1"
 
-     outPath = r"C:\Users\felix\Desktop\AutoEncoder\tiffs"
+     outPath = r"C:\Users\felix\Desktop\stitcherTestOut"
 
      tileSize = 512
 
