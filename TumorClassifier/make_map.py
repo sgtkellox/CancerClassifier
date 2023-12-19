@@ -34,6 +34,7 @@ def sortTilesByWSI(path):
 def extractTileCoordinates(image):
 
     splitP1 = image.split("_")
+    print(image)
     x = int(splitP1[1])
     y = int(splitP1[2].split(".")[0])
     return x , y
@@ -75,7 +76,7 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
         pred_class = 1 if output_sigmoid > 0.5 else 0
 
         if pred_class == 1:
-            artifactFolder = os.path.join(imagesOutPath,"artifact")
+            artifactFolder = os.path.join(imagesOutPath,"artefact")
             if not os.path.isdir(artifactFolder):
                 os.mkdir(artifactFolder)
             safePath = os.path.join(artifactFolder,img)     
@@ -84,7 +85,7 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
             if not os.path.isdir(goodFolder):
                 os.mkdir(goodFolder)
             safePath = os.path.join(goodFolder,img)
-        shutil.copy(imgFullPath,safePath)
+        shutil.move(imgFullPath,safePath)
         
         tileMap[y][x] = pred_class +1
              
@@ -199,14 +200,14 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 
 if __name__ == '__main__':
 
-    tilePath = r"C:\Users\felix\Desktop\adTest"
+    tilePath = r"C:\Users\felix\Desktop\artefact"
 
-    slidePath =r"C:\Users\felix\Desktop\neuro\kryoTest"
+    slidePath =r"D:\slides\kryoQ2"
 
-    outPath = r"C:\Users\felix\Desktop\AutoEncoder\maps"
+    outPath = r"C:\Users\felix\Desktop\rerun\maps"
 
 
-    imagesOutPath = r"C:\Users\felix\Desktop\AutoEncoder\imgs"
+    imagesOutPath = r"C:\Users\felix\Desktop\rerun\images"
 
     tileSize = 512
 
@@ -214,7 +215,7 @@ if __name__ == '__main__':
     device = 'cuda'
     # Load the trained model.
     model = CustomCNN(num_classes=1)
-    checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models2\110.pth', map_location=device)
+    checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models4\25.pth', map_location=device)
     print('Loading trained model weights...')
     model.load_state_dict(checkpoint['model_state_dict'])
     transform = transforms.Compose([

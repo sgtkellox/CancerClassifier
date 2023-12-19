@@ -6,7 +6,7 @@ from sklearn.metrics import f1_score
 import os
 matplotlib.style.use('ggplot')
 
-outPath = r"C:\Users\felix\Desktop\AutoEncoder\models2"
+outPath = r"C:\Users\felix\Desktop\AutoEncoder\models4"
 def save_model(epoch, model, optimizer, criterion):
     
     safePath = os.path.join(outPath,str(epoch)+".pth")
@@ -43,6 +43,7 @@ def save_plots(
     plt.ylabel('Accuracy')
     plt.legend()
     plt.savefig(safePath)
+    plt.close()
     
     # Loss plots
     plt.figure(figsize=(10, 7))
