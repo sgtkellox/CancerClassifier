@@ -11,8 +11,9 @@ import cv2
 
 
 def get_slidename(slidepath):
+    dirName , slideName  = os.path.split(slidepath)
     
-    slide_id = slidepath.split("\\")[-1].split(".")[0]
+    slide_id = slideName.split(".")[0]
     return slide_id
 
 
@@ -71,7 +72,7 @@ def make_tiles(slidepath,outPath,size, level = 0):
     for x in range(0, w0-grow, grow):
         for y in range(0, h0-grow, grow):
 
-            tile=slide.read_region(location=(x,y), level=0,size=(size,size))
+            tile=slide.read_region(location=(x,y), level=level,size=(size,size))
             tileRGB = tile.convert('RGB')
            
             tileNP = np.array(tileRGB)

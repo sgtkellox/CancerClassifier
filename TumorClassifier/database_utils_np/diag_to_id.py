@@ -65,7 +65,7 @@ def lookUp(table,wsi):
             elif diag == "Melanom":
                 app = "MEL"
             name = app +"-" +nNumber
-            name = name + "-" +prep+".geojson"
+            name = name + "-" +prep+".svs"
             return name
             
     return app
@@ -132,7 +132,7 @@ def correctName(path):
 def processFolder(path, table):
     notFound = []
     for wsi in os.listdir(path):
-        if wsi.endswith(".geojson"):     
+        if wsi.endswith(".svs"):     
             fullName = lookUp(table,wsi)
             
             if fullName == "fail":

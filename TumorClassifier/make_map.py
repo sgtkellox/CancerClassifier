@@ -1,4 +1,4 @@
-from genericpath import isdir
+
 import torch
 import cv2
 import glob as glob
@@ -49,11 +49,8 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
         if ".ini" in img:
             continue
 
-
         #print("Classifying " + str(img))
-
-        
-        
+       
         x,y = calcPixelPosition(img,xShift,yShift,tileSize)
 
         x = int(x)
@@ -74,11 +71,11 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
         output_sigmoid = torch.sigmoid(outputs)
         pred_class = 1 if output_sigmoid > 0.5 else 0
 
-        if pred_class == 1:
-            artifactFolder = os.path.join(imagesOutPath,"artifact")
-            if not os.path.isdir(artifactFolder):
-                os.mkdir(artifactFolder)
-            safePath = os.path.join(artifactFolder,img)     
+        if pred_class == 0:
+            artefactFolder = os.path.join(imagesOutPath,"artefact")
+            if not os.path.isdir(artefactFolder):
+                os.mkdir(artefactFolder)
+            safePath = os.path.join(artefactFolder,img)     
         else:
             goodFolder = os.path.join(imagesOutPath,"good")
             if not os.path.isdir(goodFolder):
@@ -207,14 +204,14 @@ def makeClassificationRun(tilePath, slidePath, outPath, imagesOutPath, model, tr
 
 if __name__ == '__main__':
 
-    tilePath = r"C:\Users\felix\Desktop\kryoQ1"
+    tilePath = r"F:\home\rerun\images\good"
 
-    slidePath =r"D:\slides\kryoQ1"
+    slidePath =r"F:\slides\kryoQ2"
 
-    outPath = r"C:\Users\felix\Desktop\result\maps"
+    outPath = r"C:\Users\felix\Desktop\res\maps"
 
 
-    imagesOutPath = r"C:\Users\felix\Desktop\result\imgs"
+    imagesOutPath = r"C:\Users\felix\Desktop\res\imgs"
 
     tileSize = 512
 

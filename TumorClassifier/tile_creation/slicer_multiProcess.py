@@ -14,7 +14,7 @@ def sliceSubset(pathIn, pathOut, slides,size):
     for slide in slides:
         if slide.endswith(".svs"):
              filePath = os.path.join(pathIn,slide)      
-             make_tiles(filePath, outPath=pathOut, size = size)
+             make_tiles(filePath, pathOut, size = size)
 
 def printInfo(subSet):
     print("started processing subset" +str(i)+ " of " + str(cpus)+"\n")
