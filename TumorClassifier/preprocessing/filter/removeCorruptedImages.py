@@ -1,8 +1,9 @@
 import os
-from os import listdir
-from PIL import Image
+
+import cv2
 
 import argparse
+import shutil
 
 
 
@@ -13,12 +14,8 @@ def checkFiles(path):
          
          filePath = os.path.join(path,file)
          try:             
-            im = Image.load(filePath)
-            im.verify() #I perform also verify, don't know if he sees other types o defects
-            im.close() #reload is necessary in my case
-            im = Image.load(filePath) 
-            im.transpose(PIL.Image.FLIP_LEFT_RIGHT)
-            im.close()
+            img = cv2.imread(filePath)
+            
          except: 
               os.remove(filePath)
               counter+=1
@@ -36,11 +33,13 @@ if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
 
     argParser.add_argument("-p", "--path", help="The path to the folder containing the images")
+    argParser.add_argument("-b", "--bin", help="The path to the bin ")
     
     args = argParser.parse_args()
 
     path = args.path
+    thrash = args.bin
     
-    checkFiles(path)
+    checkFiles(path,thrash)
    
 

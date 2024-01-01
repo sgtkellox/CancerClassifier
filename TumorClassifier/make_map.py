@@ -34,6 +34,7 @@ def sortTilesByWSI(path):
 def extractTileCoordinates(image):
 
     splitP1 = image.split("_")
+    print(image)
     x = int(splitP1[1])
     y = int(splitP1[2].split(".")[0])
     return x , y
@@ -81,7 +82,7 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
             if not os.path.isdir(goodFolder):
                 os.mkdir(goodFolder)
             safePath = os.path.join(goodFolder,img)
-        shutil.copy(imgFullPath,safePath)
+        shutil.move(imgFullPath,safePath)
         
         tileMap[y][x] = pred_class +1
              
@@ -219,7 +220,7 @@ if __name__ == '__main__':
     device = 'cuda'
     # Load the trained model.
     model = CustomCNN(num_classes=1)
-    checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models2\110.pth', map_location=device)
+    checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models4\25.pth', map_location=device)
     print('Loading trained model weights...')
     model.load_state_dict(checkpoint['model_state_dict'])
     transform = transforms.Compose([

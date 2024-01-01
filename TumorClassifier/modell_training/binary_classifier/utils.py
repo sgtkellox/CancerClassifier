@@ -43,6 +43,7 @@ def save_plots(
     plt.ylabel('Accuracy')
     plt.legend()
     plt.savefig(safePath)
+    plt.close()
     
     # Loss plots
     plt.figure(figsize=(10, 7))
