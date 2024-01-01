@@ -3,12 +3,15 @@ import os
 import torch
 import cv2
 
-from modell_training.binary_classifier.model import CustomCNN
+from model import CustomCNN
 from torchvision import transforms
 
+import argparse
+import shutil
 
 
-def makeFilterRun(path, model):
+
+def makeFilterRun(path,thresh, model):
     
     imgs = os.listdir(path) 
     for img in imgs:   
@@ -29,9 +32,13 @@ def makeFilterRun(path, model):
       
         output_sigmoid = torch.sigmoid(outputs)
         pred_class = 1 if output_sigmoid > 0.5 else 0
+        
+        
 
         if pred_class == 0:
-            os.remove(imgFullPath)
+            threshPath = os.path.join(thresh,img)
+            
+            shutil.move(imgFullPath,threshPath)
         
              
 
@@ -46,12 +53,24 @@ def checkSizeTileWise(path):
 
 if __name__ == '__main__':
     
+    argParser = argparse.ArgumentParser()
+
+    argParser.add_argument("-p", "--path", help="The path to the folder containing the images")
+    argParser.add_argument("-b", "--bin", help="The path to the bin")
+    argParser.add_argument("-m", "--model", help="The path to the model")
+    
+    args = argParser.parse_args()
+
+    path = args.path
+    thresh = args.bin
+    modelPath = args.model
+    
 
     IMAGE_SIZE = 224
     device = 'cuda'
     # Load the trained model.
     model = CustomCNN(num_classes=1)
-    checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models2\110.pth', map_location=device)
+    checkpoint = torch.load(modelPath, map_location=device)
     print('Loading trained model weights...')
     model.load_state_dict(checkpoint['model_state_dict'])
     transform = transforms.Compose([
@@ -67,3 +86,4 @@ if __name__ == '__main__':
 
     model = model.to(device)
     
+    makeFilterRun(path,thresh, model)

@@ -25,7 +25,7 @@ def normStainForFolder(pathIn,pathOut, images):
             
             
     for imageName in images:
-        if not imageName.endswith(".jpg"):
+        if not imageName.endswith(".jpg"):  
             continue
         if imageName in copiedFiles:
             print("file " + imageName+ " allready copied")
@@ -63,18 +63,27 @@ def stainNormSplit(inPath, outPath):
     
     for prep in os.listdir(inPath):
         prepPath = os.path.join(inPath,prep)
+        print("prepPath "+prepPath)
         destPath = os.path.join(outPath,prep)
         for part in os.listdir(prepPath):
             partPath = os.path.join(prepPath,part)
+            print("partPath "+partPath)
             destPartPath = os.path.join(destPath,part)
             for diag in os.listdir(partPath):
                 diagPath = os.path.join(partPath,diag)
-                destPartPath = os.path.join(destPartPath,diag)
+                print("diagPath "+diagPath)
+                fileDestPath = os.path.join(destPartPath,diag)
+                
+                #print(fileDestPath)
                     
                 cpus = multiprocessing.cpu_count()-4
-                images = os.listdir(pathIn)
+                images = os.listdir(diagPath)
 
                 numImages = len(images)
+                
+                if numImages == 0:
+                    continue
+                    
 
                 procs = []
                 cpus = int(cpus)
@@ -84,7 +93,7 @@ def stainNormSplit(inPath, outPath):
                 for i in range(1,cpus):
                     subSet = images[int((i-1)*numImages/cpus):int(i*numImages/cpus)]
                     print("started processing subset" +str(i)+ " of " + str(cpus))
-                    tilingProc = multiprocessing.Process(target=normStainForFolder,args=(diagPath,destPartPath,subSet))
+                    tilingProc = multiprocessing.Process(target=normStainForFolder,args=(diagPath,fileDestPath,subSet))
                     procs.append(tilingProc)
                     tilingProc.start()
 
@@ -115,26 +124,12 @@ if __name__ == '__main__':
     pathIn = args.input
   
     pathOut = args.out
+    
+    stainNormSplit(pathIn,pathOut)
 
-    cpus = multiprocessing.cpu_count()-4
+    
+    
 
-    print("Number of cpu : ", cpus)
+  
 
-    images = os.listdir(pathIn)
-
-    numImages = len(images)
-
-    procs = []
-    cpus = int(cpus)
-
-    #createOutPath(pathOut)
-
-    for i in range(1,cpus):
-        subSet = images[int((i-1)*numImages/cpus):int(i*numImages/cpus)]
-        print("started processing subset" +str(i)+ " of " + str(cpus))
-        tilingProc = multiprocessing.Process(target=normStainForFolder,args=(pathIn,pathOut,subSet))
-        procs.append(tilingProc)
-        tilingProc.start()
-
-    for process in procs:
-        process.join()
+    
