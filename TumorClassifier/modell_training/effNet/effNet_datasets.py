@@ -3,17 +3,21 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, Subset
 # Required constants.
 
+import os 
+
 
 IMAGE_SIZE = 224 # Image size of resize when applying transforms.
 BATCH_SIZE = 256
 NUM_WORKERS = 10 # Number of parallel processes for data preparation.
+
+dataPath = r"/mnt/projects/neuropath_hd/data/splits/448_40x_ar"
 
 # Training transforms
 def get_train_transform(IMAGE_SIZE, pretrained):
     train_transform = transforms.Compose([
         transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
         #transforms.ColorJitter(brightness=(0.5,1.5), contrast=(1), saturation=(0.5,1.5), hue=(-0.1,0.1)),
-        #transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomHorizontalFlip(p=0.5),
         transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
         transforms.RandomAdjustSharpness(sharpness_factor=2, p=0.5),
         #transforms.Grayscale(3),
@@ -33,8 +37,8 @@ def get_valid_transform(IMAGE_SIZE, pretrained):
 def normalize_transform(pretrained):
     if pretrained: # Normalization for pre-trained weights.
         normalize = transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5]
             )
     else: # Normalization when training from scratch.
         normalize = transforms.Normalize(
@@ -53,12 +57,12 @@ def get_datasets(pretrained):
     
 
     train_dataset = datasets.ImageFolder(
-        root=r'/mnt/projects/neuropath_hd/data/splits/areeba_448_40x/kryo/train',
+        root=os.path.join(dataPath,"train"),
         transform=(get_train_transform(IMAGE_SIZE, pretrained))
     )
 # validation dataset
     valid_dataset = datasets.ImageFolder(
-        root=r'/mnt/projects/neuropath_hd/data/splits/areeba_448_40x/kryo/val',
+        root=os.path.join(dataPath,"val"),
         transform=(get_valid_transform(IMAGE_SIZE, pretrained))
     )
     

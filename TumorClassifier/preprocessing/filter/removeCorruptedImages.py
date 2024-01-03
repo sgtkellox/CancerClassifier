@@ -33,13 +33,13 @@ if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
 
     argParser.add_argument("-p", "--path", help="The path to the folder containing the images")
-    argParser.add_argument("-b", "--bin", help="The path to the bin ")
+  
     
     args = argParser.parse_args()
 
     path = args.path
-    thrash = args.bin
     
-    checkFiles(path,thrash)
+    
+    checkFiles(path)
    
 

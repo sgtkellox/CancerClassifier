@@ -10,7 +10,7 @@ from effNet_utils import save_model, save_plots
 # construct the argument parser
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    '-e', '--epochs', type=int, default=400,
+    '-e', '--epochs', type=int, default=1000,
     help='Number of epochs to train our network for'
 )
 parser.add_argument(
@@ -137,7 +137,7 @@ if __name__ == '__main__':
         p.numel() for p in model.parameters() if p.requires_grad)
     print(f"{total_trainable_params:,} training parameters.")
     # Optimizer.
-    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4, momentum = 0.9)
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
     # Loss function.
     criterion = nn.CrossEntropyLoss()
     # Lists to keep track of losses and accuracies.

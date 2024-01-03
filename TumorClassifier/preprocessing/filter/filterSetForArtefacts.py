@@ -5,6 +5,7 @@ import cv2
 
 from modell_training.binary_classifier.model import CustomCNN
 from torchvision import transforms
+import argparse
 
 
 
@@ -45,6 +46,15 @@ def checkSizeTileWise(path):
     
 
 if __name__ == '__main__':
+
+    argParser = argparse.ArgumentParser()
+
+    argParser.add_argument("-p", "--path", help="The path to the folder containing the images")
+  
+    
+    args = argParser.parse_args()
+
+    path = args.path
     
 
     IMAGE_SIZE = 224
@@ -66,4 +76,6 @@ if __name__ == '__main__':
     model.eval()
 
     model = model.to(device)
+
+    makeFilterRun()
     
