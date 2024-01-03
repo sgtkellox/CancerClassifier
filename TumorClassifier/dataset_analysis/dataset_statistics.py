@@ -9,6 +9,7 @@ def extractNNumberFromWsi(wsi):
 
 
 def extraxtPrepInfo(wsi):
+    print(wsi)
     wsi = wsi.split(".")[0]
     split = wsi.split("-")
     prep = split[3]
@@ -59,13 +60,7 @@ def groupNNumbersByDiag(path,prep):
                     diag = extractDiag(slide)
                     diagsMap[diag] += 1
     
-    
-    
-    
-    
-    
-                
-        
+       
     print(list(diagsMap.keys()))
     print(list(diagsMap.values()))
     
@@ -118,7 +113,103 @@ def collectNNumbersFromTable(tablePath):
         
     return nToDiagMap 
 
+def listNNumbersInTable(table):
+    numbersMap = {}
+    for index, row in table.iterrows():
+        nNumber = row["Patho-Nr"]
+        nNumber = nNumber.strip()
+        
+        if " " in nNumber:
+            nNumber = nNumber.split(" ")[0]
+            
+        prepMap = {"K":0,"Q":0,"T":0}
+        
+        numbersMap[nNumber] = prepMap
+        
+    return numbersMap
 
+def lookUpNnumber(nNumber,paths):
+    matchingSlides = []
+    for path in paths:
+        for folder in os.listdir(path):
+            folderPath = os.path.join(path,folder)
+            for slide in os.listdir(folderPath):
+            
+                if not slide.endswith(".svs"):
+                    continue
+                slideNumber = extractNNumberFromWsi(slide)
+            
+                if slideNumber == nNumber:
+                
+                    matchingSlides.append(slide)
+    return matchingSlides
+
+
+        
+                
+
+def fillMapFromFiles(numbersMap,path):
+    for number in numbersMap.keys():
+        matchingSlides = lookUpNnumber(number,path)
+        for slide in matchingSlides:
+                    
+            prep = extraxtPrepInfo(slide)
+            numbersMap[number][prep] = 1
+    return numbersMap
+
+
+def mapToPandas(numbersMap, excelPath,tablePath):
+    numbers = []
+    kryos = []
+    smears = []
+    touch = []
+    diags = []
+    diagsMap = collectNNumbersFromTable(tablePath)
+    
+    for number in numbersMap.keys():
+        diags.append(diagsMap[number])
+        numbers.append(number)
+        if numbersMap[number]["K"] ==1:
+            kryos.append("yes")
+        else:
+            kryos.append("no")
+            
+        if numbersMap[number]["Q"] ==1:
+            smears.append("yes")
+        else:
+            smears.append("no")
+            
+        if numbersMap[number]["T"] ==1:
+            touch.append("yes")
+        else:
+            touch.append("no")
+            
+    data = {
+        'NNummer': numbers,
+        'Diag': diags,
+        'Kryo': kryos,
+        'Smear': smears,
+        'Touch' : touch
+    }
+    print("num " + str(len(numbers)))
+    print("Kryo " + str(len(kryos)))
+    print("Smear " + str(len(smears)))
+    print("Touch " + str(len(touch)))
+
+    df = pd.DataFrame(data)
+    df.to_excel(excelPath, index=True)
+    
+
+    
+def makeExcel(tablePath, filePaths, outPath):
+    table = pd.read_excel(tablePath)
+    numbersMap = listNNumbersInTable(table)
+    numbersMapFilled = fillMapFromFiles(numbersMap,filePath)
+    mapToPandas(numbersMapFilled, outPath,tablePath)
+    
+    
+    
+        
 def collectNNumbersFromFiles(path):
     
     diagsMap = {}
@@ -133,9 +224,8 @@ def collectNNumbersFromFiles(path):
                 diag = extractDiag(slide)
                 diagsMap[nNumber] = diag
     return diagsMap
-                
-                
-                
+
+                         
     
 def printList(numbers, path):
     with open(path, 'a') as doc:
@@ -147,9 +237,6 @@ def printList(numbers, path):
         
     
         
-    
-    
-
 def checkCorrectDiags(slidesPath, tablePath, outPath):
     
     nToDiagTable = collectNNumbersFromFiles(slidesPath)
@@ -181,16 +268,8 @@ def checkCorrectDiags(slidesPath, tablePath, outPath):
     printList(approved,approvedPath)
     printList(missing,notFoundPath)
     printList(wrong,wrongPath)
-            
-
     
-               
-                    
-                
-    
-    
-    
-    
+  
 def printMap(map):
     for entry in map.items():
         print(entry)
@@ -198,20 +277,21 @@ def printMap(map):
                 
                 
                 
-                
-
-
 if __name__ == '__main__':
     
-    path = r"D:\slides"
+    path1 = r"D:\slides"
     
     tablePath = r"C:\Users\felix\Downloads\All_New_Cases_SS_11_entities(1).xlsx"
     
-    outPath = r"D:\out"
+    outPath = r"D:\out\overview.xlsx"
+    
+    paths = []
+    
+    paths.append(path1)
     
 
     #groupNNumbersByDiag(path,"K")
-    checkCorrectDiags(path, tablePath,outPath)
+    makeExcel(tablePath, paths,outPath)
     
     
     
