@@ -4,7 +4,6 @@ from torch.utils.data import DataLoader, Subset
 # Required constants.
 import os
 
-import os 
 
 
 IMAGE_SIZE = 224 # Image size of resize when applying transforms.
@@ -53,7 +52,7 @@ def get_datasets(pretrained):
     Returns the training and validation datasets along 
     with the class names.
     """
-    
+    dataPath = r"/mnt/projects/neuropath_hd/data/splits/448_40x_ar_sn/kryo"
 
     train_dataset = datasets.ImageFolder(
         root=os.path.join(dataPath,"train"),

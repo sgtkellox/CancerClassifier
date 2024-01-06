@@ -21,8 +21,8 @@ from sklearn.metrics import accuracy_score,classification_report
     
 
 if __name__ == '__main__':
-    path = r"/mnt/projects/neuropath_hd/data/splits/areeba_448_40x/kryo"
-    safePath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/mobileNetV3"
+    path = r"/mnt/projects/neuropath_hd/data/splits/448_40x_ar/kryo"
+    safePath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/mobileNetV3/448_40x_ar"
 
     test_path = os.path.join(path,'test')
     train_path = os.path.join(path,'train')

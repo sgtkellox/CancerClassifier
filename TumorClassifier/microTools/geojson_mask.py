@@ -21,7 +21,7 @@ def getSLidePath(json, pathToSlides):
     
     
 
-def tileAnnotatedArea(slide,json, tilePath):
+def tileAnnotatedArea(slide,json, tilePath, tileSize):
     
 
     with fiona.open(json, "r") as geojson:
@@ -39,11 +39,11 @@ def tileAnnotatedArea(slide,json, tilePath):
     x = 0
     y = 0
 
-    while x < out_image.shape[1]-500:
+    while x < out_image.shape[1]-tileSize:
         y = 0
-        while y < out_image.shape[0]-500:
+        while y < out_image.shape[0]-tileSize:
 
-            tile = out_image[y:y+500,x:x+500]
+            tile = out_image[y:y+tileSize,x:x+tileSize]
 
             #tile = cv2.cvtColor(tile, cv2.COLOR_BGR2GRAY)
 
@@ -58,12 +58,12 @@ def tileAnnotatedArea(slide,json, tilePath):
             y+=500
         x+=500
     
-def tileAllJsons(slidePath, tilePath, jsonPath):
+def tileAllJsons(slidePath, tilePath, jsonPath,tileSize):
     for json in os.listdir(jsonPath):
         if json.endswith(".geojson"):
             absjsonPath = os.path.join(jsonPath,json)
             correspondingSlide = getSLidePath(json,slidePath)
-            tileAnnotatedArea(correspondingSlide,absjsonPath, tilePath)
+            tileAnnotatedArea(correspondingSlide,absjsonPath, tilePath, tileSize)
             
             
 
@@ -72,17 +72,19 @@ if __name__ == '__main__':
 
     argParser = argparse.ArgumentParser()
 
-    argParser.add_argument("-s", "--slides", help="The Path to the slides")
+    argParser.add_argument("-w", "--wsis", help="The Path to the slides")
     argParser.add_argument("-t", "--tiles", help="the path where the tiles are supposed to be stored")
-    argParser.add_argument("-j", "--jsons", help="the path to the folder containing the")
+    argParser.add_argument("-j", "--jsons", help="the path to the folder containing the json files")
+    argParser.add_argument("-s", "--size", help="tile size ")
 
     args = argParser.parse_args()
 
-    slides = args.slides
+    slides = args.wsis
     tiles = args.tiles
     jsons = args.jsons
+    tileSize  = args.size
     
-    tileAllJsons(slides,tiles,jsons)
+    tileAllJsons(slides,tiles,jsons, tileSize)
     
     
     
