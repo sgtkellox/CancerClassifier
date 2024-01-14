@@ -469,16 +469,16 @@ def main_worker(gpu, args):
 def parse_args():
     parser = argparse.ArgumentParser(description="Multiple Instance Learning (MIL) example of classification from WSI.")
     parser.add_argument(
-        "--data_root", default="/PandaChallenge2020/train_images/", help="path to root folder of images"
+        "--data_root", default="/mnt/projects/neuropath_hd/data/slides2/kryoQ2", help="path to root folder of images"
     )
-    parser.add_argument("--dataset_json", default=None, type=str, help="path to dataset json file")
+    parser.add_argument("--dataset_json", default="/mnt/projects/neuropath_hd/data/splits/monai/mil_split1.json", type=str, help="path to dataset json file")
 
-    parser.add_argument("--num_classes", default=5, type=int, help="number of output classes")
+    parser.add_argument("--num_classes", default=3, type=int, help="number of output classes")
     parser.add_argument("--mil_mode", default="att_trans", help="MIL algorithm")
     parser.add_argument(
         "--tile_count", default=44, type=int, help="number of patches (instances) to extract from WSI image"
     )
-    parser.add_argument("--tile_size", default=256, type=int, help="size of square patch (instance) in pixels")
+    parser.add_argument("--tile_size", default=512, type=int, help="size of square patch (instance) in pixels")
 
     parser.add_argument("--checkpoint", default=None, help="load existing checkpoint")
     parser.add_argument(
@@ -487,7 +487,7 @@ def parse_args():
         help="run only inference on the validation set, must specify the checkpoint argument",
     )
 
-    parser.add_argument("--logdir", default=None, help="path to log directory to store Tensorboard logs")
+    parser.add_argument("--logdir", default="/mnt/projects/neuropath_hd/analysis/monai", help="path to log directory to store Tensorboard logs")
 
     parser.add_argument("--epochs", "--max_epochs", default=50, type=int, help="number of training epochs")
     parser.add_argument("--batch_size", default=4, type=int, help="batch size, the number of WSI images per gpu")
@@ -528,13 +528,7 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    if args.dataset_json is None:
-        # download default json datalist
-        resource = "https://drive.google.com/uc?id=1L6PtKBlHHyUgTE4rVhRuOLTQKgD4tBRK"
-        dst = "./datalist_panda_0.json"
-        if not os.path.exists(dst):
-            gdown.download(resource, dst, quiet=False)
-        args.dataset_json = dst
+    
 
     if args.distributed:
         ngpus_per_node = torch.cuda.device_count()

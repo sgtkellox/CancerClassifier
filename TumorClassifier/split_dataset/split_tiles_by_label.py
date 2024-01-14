@@ -10,6 +10,11 @@ from label_folder_structure import makeFolderStructure
 
 from image_utils.tile_utils import getPreparation
 
+glialList = ["A", "O", "GBM" , "PXA" , "PA", "H3"]
+non_glialList = ["MB", "MET", "LYM", "MEL" ,"MEN" , "SCHW", "PIT"]
+
+
+
 def getGroupByLabel(tile, label):
     
     if label == "diag":
@@ -55,6 +60,16 @@ def getGroupByLabel(tile, label):
             return "wild"
         else:
             return "mutated"
+        
+    elif label == "glial":
+        diagPart = tile.split("-")[0]
+        if diagPart in glialList:
+            return "glial"
+        elif diagPart in non_glialList:
+            return "non-glial"
+        
+    
+        
     
 
 
@@ -108,11 +123,6 @@ def split(labels, trainRatio, valRatio, testRatio):
 
         testSize = math.floor(setSize*testRatio)
         
-
-        #print(valSize)
-    
-        
-    
         x = 0
     
         while x<valSize:
@@ -301,6 +311,26 @@ def sortByIDHstatus(wsis):
     
     return result
 
+def sortByLocalisation(wsis):
+    glial = []
+    nonglial = []
+    
+    result = []
+    
+    for slide in wsis:
+        diagPart = slide.split("-")[0]
+        if diagPart in glialList:
+            glial.append(slide)
+        elif diagPart in non_glialList:
+            nonglial.append(slide)
+                       
+    result.append(glial)
+    result.append(nonglial)
+    
+    return result
+        
+    
+
 
 def copyTiles(inPath, outPath, label, trainSet, valSet, testSet, wsis):
     
@@ -396,12 +426,16 @@ if __name__ == '__main__':
     elif attr == "gradeR":
         result = sortByRoughGrade(wsis)
         folders = {"low","high"}
+    elif attr == "glial":
+        result = sortByLocalisation(wsis)
+        folders = {"glial","non-glial"}
+        
              
 
     
     
     trainSet , valSet, testSet = split(result,0.7 ,0.2,0.1)
-    print(valSet)
+    
     makeFolderStructure(outPath,folders)
     
     filePath = os.path.join(outPath,"splitDoc.txt")

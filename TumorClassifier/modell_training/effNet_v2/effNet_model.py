@@ -17,6 +17,6 @@ def build_model(pretrained=True, fine_tune=True, num_classes=3):
         for params in model.parameters():
             params.requires_grad = False
     # Change the final classification head.
-    model.classifier[0] = nn.Dropout(0.4, inplace=True)
+    model.classifier[0] = nn.Dropout(0.5, inplace=True)
     model.classifier[1] = nn.Linear(in_features=1280, out_features=num_classes)
     return model

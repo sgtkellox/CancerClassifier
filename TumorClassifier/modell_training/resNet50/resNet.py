@@ -120,7 +120,7 @@ def trainResNet():
         plt.plot(train_losses, label='Training loss')
         plt.plot(test_losses, label='Validation loss')
         plt.legend(frameon=False)
-        plt.savefig(r'C:\Users\felix\Desktop\reNet\loss.png', bbox_inches='tight')
+        plt.savefig(r'C:\Users\felix\Desktop\resNet\loss.png', bbox_inches='tight')
 
 def predict_image(image,test_transforms,device, model):
     image_tensor = test_transforms(image).float()

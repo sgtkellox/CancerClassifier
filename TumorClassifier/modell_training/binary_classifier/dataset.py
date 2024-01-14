@@ -1,10 +1,12 @@
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
+
+import os
 # batch size
 BATCH_SIZE = 64
 
-dataPath = ""
+dataPath = r"C:\Users\felix\Desktop\split\smear"
 
 # the training transforms
 train_transform = transforms.Compose([
@@ -31,12 +33,12 @@ valid_transform = transforms.Compose([
 
 # training dataset
 train_dataset = datasets.ImageFolder(
-    root=r'C:\Users\felix\Desktop\AutoEncoder\artefactSplit\train',
+    root=os.path.join(dataPath,"train"),
     transform=train_transform
 )
 # validation dataset
 valid_dataset = datasets.ImageFolder(
-    root=r'C:\Users\felix\Desktop\AutoEncoder\artefactSplit\val',
+    root=os.path.join(dataPath,"val"),
     transform=valid_transform
 )
 # training data loaders

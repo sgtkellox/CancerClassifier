@@ -132,8 +132,8 @@ if __name__ == '__main__':
     print(f"Learning rate: {lr}")
     print(f"Epochs to train for: {epochs}\n")
     model = CustomCNN(num_classes=1)
-    checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models3\47.pth', map_location='cuda')
-    model.load_state_dict(checkpoint['model_state_dict'])
+    #checkpoint = torch.load(r'C:\Users\felix\Desktop\AutoEncoder\models3\47.pth', map_location='cuda')
+    #model.load_state_dict(checkpoint['model_state_dict'])
     model.classifier[2] = nn.Linear(in_features=128, out_features=1)
     model = model.to(device)
     
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     print(f"{total_trainable_params:,} training parameters.")
     # Optimizer.
     optimizer = optim.AdamW(model.parameters(), lr=lr)
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     # Loss function.
     criterion = nn.BCEWithLogitsLoss()
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(

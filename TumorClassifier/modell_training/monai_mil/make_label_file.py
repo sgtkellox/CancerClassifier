@@ -53,23 +53,20 @@ def suitedForVal(wsi):
     
         
 
-def makeSplit(path, train, val, test):
+def makeSplit(path, train, val):
 
-    if test+val+train !=1:
+    if val+train !=1:
         print("invalid split ratio")
         return
 
     trainSet = []
     valSet = []
-    testSet = []
 
     slides = os.listdir(path)
 
     setSize = len(slides)
 
     valSize = math.floor(setSize*val)
-
-    testSize = math.floor(setSize*test)
     
     x = 0
     
@@ -81,25 +78,16 @@ def makeSplit(path, train, val, test):
             slides.remove(randomWsi)
             x +=1
 
-    x = 0
-    while x < testSize:
-        randomWsi  = random.choice(slides)
-        if suitedForVal(randomWsi):
-            entry = makeEntry(randomWsi)
-            testSet.append(entry)
-            slides.remove(randomWsi)
-            x +=1
-    
             
     for wsi in slides:
-        entry = makeEntry(randomWsi)
+        entry = makeEntry(wsi)
         trainSet.append(entry)
 
 
     splitDict = {}
     splitDict["training"] = trainSet
     splitDict["validation"] =  valSet
-    splitDict["test"] = testSet
+ 
         
     return splitDict
 
@@ -116,7 +104,7 @@ if __name__ == '__main__':
     inPath = args.inPath
     filePath = args.filePath
 
-    splitDict = makeSplit(inPath,0.7,0.2, 0.1)
+    splitDict = makeSplit(inPath,0.7,0.3)
     
     jsonFile = json.dumps(splitDict,sort_keys=True,indent=4,separators=(',', ': '))
 

@@ -57,15 +57,45 @@ def tileAnnotatedArea(slide,json, tilePath, tileSize):
                 cv2.imwrite(safePath,tile)
             y+=500
         x+=500
+        
+
+def extractNNumberFromJason(json):
+    json = json.split(".")[0]
+    split = json.split("-")
+    nNumber = split[1]+"-"+split[2]
+    return nNumber
+
+def extractNNumberFromTile(tile):
+    tile = tile.split("_")[0]
+    split = tile.split("-")
+    nNumber = split[1]+"-"+split[2]
+    return nNumber
+    
+            
+def getProcessedImages(pathOut):
+    images = set()
+    
+    for image in os.listdir(pathOut):
+        imageName = extractNNumberFromTile(image)
+        images.add(imageName)
+        
+    return list(images)
     
 def tileAllJsons(slidePath, tilePath, jsonPath,tileSize):
+    processedImages = getProcessedImages(tilePath)
     for json in os.listdir(jsonPath):
+        
+        if extractNNumberFromJason(json) in processedImages:
+            print("item " + json + " allready processed")
+            continue
         if json.endswith(".geojson"):
             absjsonPath = os.path.join(jsonPath,json)
             correspondingSlide = getSLidePath(json,slidePath)
             tileAnnotatedArea(correspondingSlide,absjsonPath, tilePath, tileSize)
             
-            
+
+
+    
 
 
 if __name__ == '__main__':
@@ -75,7 +105,7 @@ if __name__ == '__main__':
     argParser.add_argument("-w", "--wsis", help="The Path to the slides")
     argParser.add_argument("-t", "--tiles", help="the path where the tiles are supposed to be stored")
     argParser.add_argument("-j", "--jsons", help="the path to the folder containing the json files")
-    argParser.add_argument("-s", "--size", help="tile size ")
+    argParser.add_argument("-s", "--size",type=int, default=500, help="tile size")
 
     args = argParser.parse_args()
 
