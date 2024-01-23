@@ -99,7 +99,7 @@ if __name__ == '__main__':
     path = args.path
     docPath = args.file
 
-    trainSet,valSet,testSet = listFolder(path)
+    t,testSet = listFolder(path)
     trainWsis, valWsis, testWsis = getWsiNames(trainSet,valSet,testSet)
     printWsis(trainWsis, valWsis, testWsis, docPath)
 
