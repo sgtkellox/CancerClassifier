@@ -310,14 +310,14 @@ if __name__ == '__main__':
     path5 = r"D:\slides\touch"
     
     
-    path6 = r"D:\newSlides"
+   
     
     
     
     tablePath1 = r"C:\Users\felix\Downloads\All_New_Cases_SS_11_entities(1).xlsx"
     tablePath2 = r"C:\Users\felix\Downloads\All_glioma_SS.xlsx"
     
-    outPath = r"E:\out\overview3.xlsx"
+    outPath = r"E:\out\overview4.xlsx"
     
     paths = []
     
