@@ -469,7 +469,7 @@ def main_worker(gpu, args):
 def parse_args():
     parser = argparse.ArgumentParser(description="Multiple Instance Learning (MIL) example of classification from WSI.")
     parser.add_argument(
-        "--data_root", default="/mnt/projects/neuropath_hd/data/slides2/kryoQ2", help="path to root folder of images"
+        "--data_root", default="/mnt/projects/neuropath_hd/data/slides/kryoQ2", help="path to root folder of images"
     )
     parser.add_argument("--dataset_json", default="/mnt/projects/neuropath_hd/data/splits/monai/mil_split1.json", type=str, help="path to dataset json file")
 

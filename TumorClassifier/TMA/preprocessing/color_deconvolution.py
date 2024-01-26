@@ -21,7 +21,7 @@ def getSlideName(slide):
     
 
 
-def processFile(file, pathOut):
+def processFile(file, pathOut, pathResized):
     
     
     print(file)
@@ -33,7 +33,7 @@ def processFile(file, pathOut):
     #green = image[:, :, 1]
     blue = image[:, :, 2]
     
-    grey = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    #grey = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     
     
     
@@ -52,24 +52,27 @@ def processFile(file, pathOut):
     
     imageResized = cv2.resize(image, (500, 500))
     imageResized = cv2.cvtColor(imageResized, cv2.COLOR_BGR2RGB)
-    resizedOridPath = os.path.join(pathOut,getSlideName(file)+"_resizedOrig.png")
+    #resizedOridPath = os.path.join(pathOut,getSlideName(file)+".png")
     
-    cv2.imwrite(resizedOridPath,imageResized)
+    cv2.imwrite(pathOut,imageResized)
     
-    ret, thresh1 = cv2.threshold(grey, 80, 255, cv2.THRESH_BINARY) 
+    
+    ret, thresh1 = cv2.threshold(blue, 100, 255, cv2.THRESH_BINARY) 
 
 
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (13,13))
+    #kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (13,13))
 
     #opening_img = cv2.morphologyEx(thresh1, cv2.MORPH_CLOSE , kernel )
-    safePath = os.path.join(pathOut,getSlideName(file)+".jpg")
+    #safePath = os.path.join(pathOut,getSlideName(file)+".jpg")
     
     resized = cv2.resize(thresh1, (500, 500))
     
-    resizedPath = os.path.join(pathOut,getSlideName(file)+"_resized.png")
+    #resizedPath = os.path.join(pathOut,getSlideName(file)+"_resized.png")
     
-    cv2.imwrite(resizedPath,resized)
-    cv2.imwrite(safePath,thresh1)
+    cv2.imwrite(pathResized,resized)
+    #cv2.imwrite(safePath,thresh1)
+    
+    
     
 
 def testMask(file, pathOut):

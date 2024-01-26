@@ -8,6 +8,10 @@ import pandas as pd
 import math
 
 
+def getTMAIdent(tma):
+    return tma.split("-")[2]
+
+
 
 def lookUpNumber(folder, position, table):
     for index, row in table.iterrows():
@@ -26,28 +30,33 @@ def lookUpNumber(folder, position, table):
  
             
 
-def printMap(coreMap, outPath):
+def printMap(coreMaps, outPath):
     with open(outPath, 'w') as doc:
-        for key, value in coreMap.items():
-            doc.write(key+ "   " + value)
-            doc.write('\n')
-        doc.close()
+        for coreMap in coreMaps:
+            for key, value in coreMap.items():
+                doc.write(key+ "   " + value)
+                doc.write('\n')
+    doc.close()
             
 
 def asignLabels(imagePath, table):
+    tmaMaps = []
     for folder in os.listdir(imagePath):
         print("------------------------------")
         folderpath = os.path.join(imagePath,folder)
         if os.path.isfile(folderpath):
             continue
         tmaMap = {}
+        tmaIdentifier = getTMAIdent(folder)
         for file in os.listdir(folderpath):
             if file.endswith(".tif"):
                 position = file.split(".")[0]
                 grade = lookUpNumber(folder, position, table)
+                fileIndent = str(tmaIdentifier)+"-"+file.split(".")[0]
                 if grade != "empty" and grade != None:
-                    tmaMap[file] = grade
-        printMap(tmaMap, os.path.join(folderpath,"label.txt"))
+                    tmaMap[fileIndent] = grade
+        tmaMaps.append(tmaMap)
+    printMap(tmaMaps, os.path.join(imagePath,"label.txt"))
                     
                 
 

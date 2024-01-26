@@ -29,11 +29,11 @@ def sortByDiagnosis(path):
 def makeEntry(slide):
     entry = {}
     if slide.startswith("A"):
-        label = "A"
+        label = "0"
     elif slide.startswith("GBM"):
-        label = "GBM"
+        label = "1"
     elif slide.startswith("O"):
-        label = "O"
+        label = "2"
 
     entry["image"] = slide
     entry["label"] = label
