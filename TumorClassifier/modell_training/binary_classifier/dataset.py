@@ -4,30 +4,30 @@ from torch.utils.data import DataLoader
 
 import os
 # batch size
-BATCH_SIZE = 64
+BATCH_SIZE = 45
 
-dataPath = r"C:\Users\felix\Desktop\split\smear"
+dataPath = r"C:\Users\felix\Desktop\greySplit"
 
 # the training transforms
 train_transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomVerticalFlip(p=0.5),
-    transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
+    #transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
     transforms.RandomRotation(degrees=(30, 70)),
     transforms.ToTensor(),
     transforms.Normalize(
-        mean=[0.5, 0.5, 0.5],
-        std=[0.5, 0.5, 0.5]
+        mean=[0.5,0.5,0.5],
+        std=[0.5,0.5,0.5]
     )
 ])
 # the validation transforms
 valid_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
+    transforms.Resize((512, 512)),
     transforms.ToTensor(),
     transforms.Normalize(
-        mean=[0.5, 0.5, 0.5],
-        std=[0.5, 0.5, 0.5]
+        mean=[0.5,0.5,0.5],
+        std=[0.5,0.5,0.5]
     )
 ])
 

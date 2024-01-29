@@ -23,8 +23,15 @@ def extractNNumberFromTile(tile):
 def getSLidePath(json, pathToSlides):
     fileName = json.split(".")[0]
     slidePath = os.path.join(pathToSlides,fileName+".svs")
-    print("now processing: " + fileName)
+    #print("now processing: " + fileName)
     return slidePath
+
+def getJsonPath(slide,pathToJson):
+    fileName = slide.split(".")[0]
+    jsonPath = os.path.join(pathToJson,fileName+".geojson")
+    print("now processing: " + fileName)
+    return jsonPath
+    
 
 def getSlideName(slide):
     slideName = slide.split("\\")[-1]
@@ -41,18 +48,21 @@ def getProcessedImages(pathOut):
         
     return list(images)
 
-def tileAnnotatedArea(slide,json, tilePath, tileSize, level):
-    with open(json) as f:
+def tileAnnotatedArea(slidePath,geojson, tilePath, tileSize, level):
+    
+
+    with open(geojson) as f:
         geojson_data = json.load(f)
 
     # Extract the coordinates of the ROI
-    coordinates = geojson_data['geometry']['coordinates'][0]
+    coordinates = geojson_data['features'][0]['geometry']['coordinates'][0]
 
     # Create a polygon from the coordinates using the shapely library
     roi_polygon = Polygon(coordinates)
 
     # Open the whole-slide image using OpenSlide
-    slide = OpenSlide(slide)
+    
+    slide = OpenSlide(slidePath)
 
     # Define the size of the tiles to be extracted
     tile_size = (tileSize, tileSize)
@@ -60,9 +70,6 @@ def tileAnnotatedArea(slide,json, tilePath, tileSize, level):
 
     # Create the output directory if it doesn't exist
     os.makedirs(tilePath, exist_ok=True)
-
-    # Initialize an empty list to store the extracted tiles
-    tiles = []
 
     # Iterate through the slide to extract tiles
     for y in range(0, slide.level_dimensions[level][1], tile_size[1]):
@@ -77,7 +84,7 @@ def tileAnnotatedArea(slide,json, tilePath, tileSize, level):
 
             # Check if the tile intersects with the Region of Interest (ROI) polygon: add it to the list
             if tile_bbox.intersects(roi_polygon):
-               slideName = getSlideName(slide)
+               slideName = getSlideName(slidePath)
                safePath = os.path.join(tilePath,slideName+"_"+str(x)+"_"+str(y)+".jpg")
                tile = cv2.cvtColor(tile, cv2.COLOR_BGR2RGB)
                cv2.imwrite(safePath,tile)
@@ -86,20 +93,35 @@ def tileAnnotatedArea(slide,json, tilePath, tileSize, level):
     
     slide.close()
     
-    def tileAllJsons(slidePath, tilePath, jsonPath,tileSize):
-        processedImages = getProcessedImages(tilePath)
-        for json in os.listdir(jsonPath):
+def tileAllJsons(slidePath, tilePath, jsonPath,tileSize):
+    processedImages = getProcessedImages(tilePath)
+    for json in os.listdir(jsonPath):
         
-            if extractNNumberFromJason(json) in processedImages:
-                print("item " + json + " allready processed")
-                continue
-            if json.endswith(".geojson"):
-                absjsonPath = os.path.join(jsonPath,json)
-                correspondingSlide = getSLidePath(json,slidePath)
-                tileAnnotatedArea(correspondingSlide,absjsonPath, tilePath, tileSize)
+        if extractNNumberFromJason(json) in processedImages:
+            print("item " + json + " allready processed")
+            continue
+        if json.endswith(".geojson"):
+            absjsonPath = os.path.join(jsonPath,json)
+            correspondingSlide = getSLidePath(json,slidePath)
+            tileAnnotatedArea(correspondingSlide,absjsonPath, tilePath, tileSize, level)
 
 
     # Load the GeoJSON file
+
+def tileKryos(slidePath, tilePath, jsonPath,tileSize, level, includedDiags):
+    for slide in os.listdir(slidePath):       
+        split = slide.split(".")[0].split("-")      
+        if split[0] in includedDiags:
+            
+            if split[3] =="K":
+                
+                if split[4]=="G":
+                    json = getJsonPath(slide,jsonPath)
+                    filePath = os.path.join(slidePath,slide)
+                    tileAnnotatedArea(filePath,json, tilePath, tileSize,level)
+
+
+
 
 
 
@@ -123,3 +145,7 @@ if __name__ == '__main__':
     jsons = args.jsons
     tileSize  = args.size
     level = args.level
+
+    diags = ["MET", "MEL", "MEN"]
+
+    tileKryos(slides, tiles, jsons,tileSize, level, diags)

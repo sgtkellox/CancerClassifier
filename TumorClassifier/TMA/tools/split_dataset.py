@@ -99,7 +99,6 @@ def getGradeFronmLine(line):
     ident =  line.split("   ")[1]
     print(ident)
     if ident == str(1):
-        print("hi")
         return "one"
     if ident == str(2) or ident == str(3): 
         return "two"
@@ -116,11 +115,12 @@ def copyTiles(inPath, destPath, lines):
         safePath = os.path.join(safePath,slide)
         
         srcPath = os.path.join(inPath,slide)
-        print(safePath)
-        #shutil.move(srcPath,safePath)
+        
+        if os.path.isfile(srcPath):
+            shutil.copy(srcPath,safePath)
         
 
-        #print(tile + " "+ destPath+"\n")
+       
 
 if __name__ == '__main__':
 
@@ -138,11 +138,16 @@ if __name__ == '__main__':
     
     lines = readFile(filePath)
     makeSplitFolderStructure(outPath)
+    
     trainSet, valSet ,testSet = makeSplit(lines, 0.6, 0.3, 0.1)
     
-    copyTiles(inPath, os.path.join(outPath,"train"), lines)
-    copyTiles(inPath, os.path.join(outPath,"val"), lines)
-    copyTiles(inPath, os.path.join(outPath,"test"), lines)
+    copyTiles(inPath, os.path.join(outPath,"train"), trainSet)
+    copyTiles(inPath, os.path.join(outPath,"val"), valSet)
+    copyTiles(inPath, os.path.join(outPath,"test"), testSet)
+
+    print(str(len(trainSet)))
+    print(str(len(valSet)))
+    print(str(len(testSet)))
     
     
     

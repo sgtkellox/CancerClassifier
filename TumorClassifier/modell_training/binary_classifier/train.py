@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm.auto import tqdm
 from model import CustomCNN
+import os
 
 from dataset import train_loader, valid_loader
 from utils import (
@@ -14,7 +15,7 @@ from utils import (
 # Construct the argument parser.
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    '-e', '--epochs', type=int, default=10,
+    '-e', '--epochs', type=int, default=4,
     help='Number of epochs to train our network for'
 )
 parser.add_argument(
@@ -23,6 +24,8 @@ parser.add_argument(
     help='Learning rate for training the model'
 )
 args = vars(parser.parse_args())
+
+dataPath = r"C:\Users\felix\Desktop\split"
 
 
 # Training function.
@@ -125,7 +128,7 @@ if __name__ == '__main__':
     
    
     # Learning_parameters. 
-    lr = 1e-4
+    lr = 1e-3
     epochs = 1000
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Computation device: {device}")
@@ -147,7 +150,10 @@ if __name__ == '__main__':
     optimizer = optim.AdamW(model.parameters(), lr=lr)
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     # Loss function.
-    criterion = nn.BCEWithLogitsLoss()
+
+    pos_weight = torch.FloatTensor ([4.0]).to(device) 
+   
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer, 
         T_0=25, 

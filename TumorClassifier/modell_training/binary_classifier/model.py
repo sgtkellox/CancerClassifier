@@ -1,7 +1,7 @@
 import torch.nn.functional as F
 import torch.nn as nn
 class CustomCNN(nn.Module):
-    def __init__(self, num_classes=2):
+    def __init__(self, num_classes=1):
         super(CustomCNN, self).__init__()
         self.conv_block = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3),

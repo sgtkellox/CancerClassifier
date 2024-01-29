@@ -21,8 +21,8 @@ import pickle
 
 import shutil
 
-outPath = r"C:\Users\felix\Desktop\neuroImages\clustering\results\n10"
-path = r"C:\Users\felix\Desktop\neuroImages\clustering\Images"
+outPath = r"C:\Users\felix\Desktop\New folder\result"
+path = r"C:\Users\felix\Desktop\mix\grey"
 # change the working directory to the path where the images are located
 os.chdir(path)
 
@@ -44,7 +44,7 @@ model = Model(inputs = model.inputs, outputs = model.layers[-2].output)
 
 def extract_features(file, model):
     # load the image as a 224x224 array
-    img = load_img(file, target_size=(224,224))
+    img = load_img(file, target_size=(224,224),color_mode='rgb')
     # convert from 'PIL.Image.Image' to numpy array
     img = np.array(img) 
     # reshape the data for the model reshape(num_of_samples, dim 1, dim 2, channels)
@@ -56,7 +56,7 @@ def extract_features(file, model):
     return features
    
 data = {}
-p = r"C:\Users\felix\Desktop\neuro\kMeansFeatures"
+p = r"C:\Users\felix\Desktop\New folder\temp"
 
 # lop through each image in the dataset
 for flower in flowers:
@@ -90,7 +90,7 @@ pca.fit(feat)
 x = pca.transform(feat)
 
 # cluster feature vectors
-kmeans = KMeans(n_clusters=10,  init='k-means++', n_init=10, max_iter=300, tol=0.0001, verbose=0, random_state=None, copy_x=True, algorithm='auto')
+kmeans = KMeans(n_clusters=2,  init='k-means++', n_init=10, max_iter=300, tol=0.0001, verbose=0, random_state=None, copy_x=True, algorithm='lloyd')
 kmeans.fit(x)
 
 # holds the cluster id and the images { id: [images] }
@@ -133,7 +133,8 @@ def safeCluster(cluster, inPath, outPath):
 count = 0
 for cluster in groups:
     clusterPath = os.path.join(outPath,"cluster"+str(count))
-    os.mkdir(clusterPath)
+    if  not os.path.exists(clusterPath):
+        os.mkdir(clusterPath)
     safeCluster(cluster, path, clusterPath)
     count+=1
 
