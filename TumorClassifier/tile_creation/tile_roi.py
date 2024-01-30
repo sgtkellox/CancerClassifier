@@ -1,10 +1,13 @@
+from genericpath import isfile
 import json
 from re import S
 from openslide import OpenSlide
 import os
 from shapely.geometry import Polygon
+import matplotlib.pyplot as plt
 
 import cv2
+import numpy as np
 
 import argparse
 
@@ -23,13 +26,11 @@ def extractNNumberFromTile(tile):
 def getSLidePath(json, pathToSlides):
     fileName = json.split(".")[0]
     slidePath = os.path.join(pathToSlides,fileName+".svs")
-    #print("now processing: " + fileName)
     return slidePath
 
 def getJsonPath(slide,pathToJson):
     fileName = slide.split(".")[0]
     jsonPath = os.path.join(pathToJson,fileName+".geojson")
-    print("now processing: " + fileName)
     return jsonPath
     
 
@@ -48,6 +49,16 @@ def getProcessedImages(pathOut):
         
     return list(images)
 
+def geoJsonExists(slide,jsonFolder):
+    jsonPath = getJsonPath(slide,jsonFolder)
+    if os.path.isfile(jsonPath):
+        print("Json found for : " + slide)
+        return True
+    else:
+        return False
+    return jsonPath
+    
+
 def tileAnnotatedArea(slidePath,geojson, tilePath, tileSize, level):
     
 
@@ -55,39 +66,70 @@ def tileAnnotatedArea(slidePath,geojson, tilePath, tileSize, level):
         geojson_data = json.load(f)
 
     # Extract the coordinates of the ROI
-    coordinates = geojson_data['features'][0]['geometry']['coordinates'][0]
-
-    # Create a polygon from the coordinates using the shapely library
-    roi_polygon = Polygon(coordinates)
-
-    # Open the whole-slide image using OpenSlide
     
-    slide = OpenSlide(slidePath)
+    for entry in geojson_data['features']:
+        coordinates = entry['geometry']['coordinates'][0]
 
-    # Define the size of the tiles to be extracted
-    tile_size = (tileSize, tileSize)
+        # Create a polygon from the coordinates using the shapely library
+        roi_polygon = Polygon(coordinates)
 
+        # Open the whole-slide image using OpenSlide
+    
+        slide = OpenSlide(slidePath)
 
-    # Create the output directory if it doesn't exist
-    os.makedirs(tilePath, exist_ok=True)
+        # Define the size of the tiles to be extracted
+        tile_size = (tileSize, tileSize)
+    
+    
+        if level == 0:
+            factor = 1
+        elif level == 1:
+            factor = 4
+        elif level == 2:
+            factor = 8
+        
+        grow = factor*  tileSize
+    
+        w0 = int(slide.properties["openslide.level[0].width"])
+        h0 = int(slide.properties["openslide.level[0].height"])
+    
+        print(w0)
+        print(h0)
+    
+   
 
-    # Iterate through the slide to extract tiles
-    for y in range(0, slide.level_dimensions[level][1], tile_size[1]):
-        for x in range(0, slide.level_dimensions[level][0], tile_size[0]):
-            # Read a region of the slide at the specified level and tile size
-            tile = slide.read_region((x, y), level, tile_size)
+        # Create the output directory if it doesn't exist
+        os.makedirs(tilePath, exist_ok=True)
 
-            # Create a bounding box for the tile
-            tile_bbox = Polygon(
-                [(x, y), (x + tile_size[0], y), (x + tile_size[0], y + tile_size[1]), (x, y + tile_size[1])]
-            )
+        # Iterate through the slide to extract tiles
+        for x in range(0, w0-grow,grow ):
+            for y in range(0, h0-grow, grow):
+                # Read a region of the slide at the specified level and tile size
+                tile = slide.read_region((x, y), level, tile_size)
+            
 
-            # Check if the tile intersects with the Region of Interest (ROI) polygon: add it to the list
-            if tile_bbox.intersects(roi_polygon):
-               slideName = getSlideName(slidePath)
-               safePath = os.path.join(tilePath,slideName+"_"+str(x)+"_"+str(y)+".jpg")
-               tile = cv2.cvtColor(tile, cv2.COLOR_BGR2RGB)
-               cv2.imwrite(safePath,tile)
+                # Create a bounding box for the tile
+                tile_bbox = Polygon(
+                    [(x, y), (x + tile_size[0]*factor, y), (x + tile_size[0]*factor, y + tile_size[1]*factor), (x, y + tile_size[1]*factor)]
+                )
+                
+                intersect = roi_polygon.intersection(tile_bbox).area
+                
+                percentage = intersect/tile_bbox.area
+                
+                print(percentage)
+                    
+                
+
+                # Check if the tile intersects with the Region of Interest (ROI) polygon: add it to the list
+                if tile_bbox.intersects(roi_polygon):
+                   slideName = getSlideName(slidePath)
+                   safePath = os.path.join(tilePath,slideName+"_"+str(int(x/factor))+"_"+str(int(y/factor))+".jpg")
+                   tileRGB = tile.convert('RGB')
+           
+                   tileNP = np.array(tileRGB)
+                   tileNP = cv2.cvtColor(tileNP, cv2.COLOR_BGR2RGB)
+                   cv2.imwrite(safePath,tileNP)
            
 
     
