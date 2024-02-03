@@ -9,6 +9,10 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
+import multiprocessing
+
+from make_tiles import make_tiles
+
 import argparse
 
 def extractNNumberFromJason(json):
@@ -56,50 +60,55 @@ def geoJsonExists(slide,jsonFolder):
         return True
     else:
         return False
-    return jsonPath
+    
     
 
 def tileAnnotatedArea(slidePath,geojson, tilePath, tileSize, level):
     
 
+    slideName = getSlideName(slidePath)
+    
     with open(geojson) as f:
         geojson_data = json.load(f)
 
-    # Extract the coordinates of the ROI
+    slide = OpenSlide(slidePath)
+
+    # Define the size of the tiles to be extracted
+    tile_size = (tileSize, tileSize)
+    
+    
+    if level == 0:
+        factor = 1
+    elif level == 1:
+        factor = 4
+    elif level == 2:
+        factor = 8
+        
+    grow = factor*  tileSize
+    
+    w0 = int(slide.properties["openslide.level[0].width"])
+    h0 = int(slide.properties["openslide.level[0].height"])
+    
+    # Create the output directory if it doesn't exist
+    os.makedirs(tilePath, exist_ok=True)
+    
+    print(f"Slide w0 dimensions are {w0}x{h0}.", flush=True)
+    print("Tiling...", flush=True)
+    print("-----")
     
     for entry in geojson_data['features']:
+        
+        if entry['geometry']["type"] != "Polygon":
+            continue
         coordinates = entry['geometry']['coordinates'][0]
+        
+        
 
         # Create a polygon from the coordinates using the shapely library
         roi_polygon = Polygon(coordinates)
 
         # Open the whole-slide image using OpenSlide
     
-        slide = OpenSlide(slidePath)
-
-        # Define the size of the tiles to be extracted
-        tile_size = (tileSize, tileSize)
-    
-    
-        if level == 0:
-            factor = 1
-        elif level == 1:
-            factor = 4
-        elif level == 2:
-            factor = 8
-        
-        grow = factor*  tileSize
-    
-        w0 = int(slide.properties["openslide.level[0].width"])
-        h0 = int(slide.properties["openslide.level[0].height"])
-    
-        print(w0)
-        print(h0)
-    
-   
-
-        # Create the output directory if it doesn't exist
-        os.makedirs(tilePath, exist_ok=True)
 
         # Iterate through the slide to extract tiles
         for x in range(0, w0-grow,grow ):
@@ -117,13 +126,9 @@ def tileAnnotatedArea(slidePath,geojson, tilePath, tileSize, level):
                 
                 percentage = intersect/tile_bbox.area
                 
-                print(percentage)
-                    
-                
-
                 # Check if the tile intersects with the Region of Interest (ROI) polygon: add it to the list
-                if tile_bbox.intersects(roi_polygon):
-                   slideName = getSlideName(slidePath)
+                if percentage>0.5:
+                   
                    safePath = os.path.join(tilePath,slideName+"_"+str(int(x/factor))+"_"+str(int(y/factor))+".jpg")
                    tileRGB = tile.convert('RGB')
            
@@ -134,6 +139,12 @@ def tileAnnotatedArea(slidePath,geojson, tilePath, tileSize, level):
 
     
     slide.close()
+    
+def printInfo(subSet):
+    print("started processing subset" +str(i)+ " of " + str(cpus)+"\n")
+    print(" tiling subset with:")
+    for slide in subSet:
+        print("slideName " + slide)
     
 def tileAllJsons(slidePath, tilePath, jsonPath,tileSize):
     processedImages = getProcessedImages(tilePath)
@@ -150,25 +161,38 @@ def tileAllJsons(slidePath, tilePath, jsonPath,tileSize):
 
     # Load the GeoJSON file
 
-def tileKryos(slidePath, tilePath, jsonPath,tileSize, level, includedDiags):
+def tileKryos(slidePath, tilePath, jsonPath,tileSize, level):
     for slide in os.listdir(slidePath):       
+        split = slide.split(".")[0].split("-")              
+        if split[3] =="K":            
+            if geoJsonExists(slide,jsonPath):
+                json = getJsonPath(slide,jsonPath)
+                filePath = os.path.join(slidePath,slide)
+                tileAnnotatedArea(filePath,json, tilePath, tileSize,level)
+            elif not geoJsonExists(slide,jsonPath) and split[4]=="Q2":
+                filePath = os.path.join(slidePath,slide)
+                make_tiles(filePath, tilePath, tileSize, level)
+                    
+                    
+                    
+
+def tileKryosSubset(slidePath, tilePath, jsonPath,tileSize, level, subset):
+     for slide in subset:       
         split = slide.split(".")[0].split("-")      
-        if split[0] in includedDiags:
-            
-            if split[3] =="K":
-                
-                if split[4]=="G":
-                    json = getJsonPath(slide,jsonPath)
+           
+        if split[3] =="K":                       
+            if geoJsonExists(slide,jsonPath):
+                json = getJsonPath(slide,jsonPath)
+                filePath = os.path.join(slidePath,slide)
+                tileAnnotatedArea(filePath,json, tilePath, tileSize,level)
+            else: 
+                if split[4]=="Q2":
                     filePath = os.path.join(slidePath,slide)
-                    tileAnnotatedArea(filePath,json, tilePath, tileSize,level)
-
-
-
-
-
-
-
-
+                    make_tiles(filePath, tilePath, tileSize, level)
+    
+                
+                 
+             
 
 if __name__ == '__main__':
     
@@ -188,6 +212,33 @@ if __name__ == '__main__':
     tileSize  = args.size
     level = args.level
 
-    diags = ["MET", "MEL", "MEN"]
+    diags = ['MB',"LYM" 'MEL', "MEN" ,'MET' ,"PIT","SCHW"]
+    
+    cpus = multiprocessing.cpu_count()-4
 
-    tileKryos(slides, tiles, jsons,tileSize, level, diags)
+    print("Number of cpu : ", cpus)
+
+    images = os.listdir(slides)
+    filteredImages = [image for image in images if image.split("-")[0] in diags]
+
+    numImages = len(filteredImages)
+
+    procs = []
+    cpus = int(cpus)
+
+
+    for i in range(1,cpus+1):
+        subSet = filteredImages[int((i-1)*numImages/cpus):int(i*numImages/cpus)]
+        printInfo(subSet)
+        tilingProc = multiprocessing.Process(target=tileKryosSubset,args=(slides, tiles, jsons,tileSize, level, subSet))
+        procs.append(tilingProc)
+        tilingProc.start()
+        
+
+    for process in procs:
+        process.join()
+    print("folder finished")
+    
+
+
+    

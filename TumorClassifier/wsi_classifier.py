@@ -17,7 +17,7 @@ from tile_creation.tile_utils import calcPixelPosition
 
 from modell_training.simpleNet.model import CNNModel
 
-labels = ['Astro', 'GBM', 'Oligo']
+labels = ['MB',"LYM" 'MEL', "MEN" ,'MET',"SCHW" ,"PIT"]
 
 
 
@@ -37,6 +37,58 @@ def sortTilesByWSI(path):
     print("finished sorting by wsi")
     return wsis
 
+
+
+def extractTileCoordinates(image):
+
+    splitP1 = image.split("_")
+    x = int(splitP1[1])
+    y = int(splitP1[2].split(".")[0])
+    return x , y
+
+def extractXCoordinate(tile):
+    splitP1 = tile.split("_")
+    x = int(splitP1[1])
+    return x
+
+def findWidhHeight(images):
+    minX = 100000
+    maxX = 0
+    minY = 100000
+    maxY = 0
+    for image in images:
+   
+        x,y = extractTileCoordinates(image)
+
+        minX = min(minX,x)
+        maxX = max(maxX,x)
+        minY = min(minY,y)
+        maxY = max(maxY,y)
+
+    
+    if minX == 0:
+        xshift = 0
+    else:
+        xshift = minX-tileSize
+    if minY == 0:
+        yShift = 0
+    else:
+        yShift = minY-tileSize
+
+    
+    width = maxX+1000-minX
+    height = maxY + 1000 - minY
+
+    
+
+    print("width " +str(width))
+    print("height " +str(height))
+
+    print("maxX " +str(maxX-xshift))
+    print("maxY " +str(maxY-yShift))
+
+    return width, height , xshift, yShift
+
 def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, transform,showImages=False):
 
     tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
@@ -47,6 +99,8 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
         gt_class_name = "GBM"
     elif imgs[0].split("-")[0].startswith("O"):
         gt_class_name = "Oligo"
+    else:
+        gt_class_name = imgs[0].split("-")[0]
 
    
     right = 0;
@@ -117,6 +171,8 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight, model, t
     return tileMap, acc
 
 
+
+      
 def getWsiDimensions(nNumber, slidePath, lvl=0):
     slides = os.listdir(slidePath)
    
@@ -141,44 +197,62 @@ def getWsiDimensions(nNumber, slidePath, lvl=0):
     return 0, 0
 
 
+
+
+
+
                   
 def drawResultImage(resultsArray, slideWidth, slideHeight):
      result = np.zeros((slideHeight*10, slideWidth*10, 3), np.uint8)
      result.fill(255)
-
-     numAstro=0
-     numGBM = 0
-     numOligo= 0
+     
+     labels = ['MB',"LYM" 'MEL', "MEN" ,'MET' ,"PIT","SCHW"]
+     nums = []
 
      for x in range(len(resultsArray)):
          for y in range(len(resultsArray[0])):
              
              if resultsArray[x][y]==1:
-                numAstro +=1
+                nums[1] +=1
                 result[x*10:x*10+10,y*10:y*10+10] = [255, 0, 0]
              elif resultsArray[x][y]==2:
-                numGBM +=1
+                nums[2] +=1
                 result[x*10:x*10+10,y*10:y*10+10] = [0, 255, 0]
              elif resultsArray[x][y]==3:
-                numOligo +=1
+                nums[3] +=1
                 result[x*10:x*10+10,y*10:y*10+10] = [0, 0, 255]
+             elif resultsArray[x][y]==4:
+                nums[4] +=1
+                result[x*10:x*10+10,y*10:y*10+10] = [100, 100, 100]
+             elif resultsArray[x][y]==5:
+                nums[5] +=1
+                result[x*10:x*10+10,y*10:y*10+10] = [245, 185, 66]
+             elif resultsArray[x][y]==6:
+                nums[6] +=1
+                result[x*10:x*10+10,y*10:y*10+10] = [242, 31, 137]
+             elif resultsArray[x][y]==7:
+                nums[7] +=1
+                result[x*10:x*10+10,y*10:y*10+10] = [230, 204, 217]
+               
 
-     cv2.putText(
-        result, "Astro " + str(numAstro),
-        (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
-        1.0, (255, 0, 0), 2, lineType=cv2.LINE_AA
-     )
-    # Annotate the image with prediction.
-     cv2.putText(
-        result, "GBM " + str(numGBM),
-        (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
-        1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
-     )
-     cv2.putText(
-        result, "Oligo " + str(numOligo),
-        (10, 75), cv2.FONT_HERSHEY_SIMPLEX,
-        1.0, (0, 0, 255), 2, lineType=cv2.LINE_AA
-      ) 
+     for diag in labels:
+
+            cv2.putText(
+            result, diag + nums[labels.index(diag)],
+            (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
+            1.0, (255, 0, 0), 2, lineType=cv2.LINE_AA
+            )
+        # Annotate the image with prediction.
+            cv2.putText(
+            result, "GBM " + str(numGBM),
+            (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
+            1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
+            )
+            cv2.putText(
+            result, "Oligo " + str(numOligo),
+            (10, 75), cv2.FONT_HERSHEY_SIMPLEX,
+            1.0, (0, 0, 255), 2, lineType=cv2.LINE_AA
+            ) 
     
      
      return result
@@ -220,10 +294,13 @@ if __name__ == '__main__':
 
      slidePath =r"F:\slides\kryoQ2"
 
-     outPath = r"C:\Users\felix\Desktop\reNet\maps"
+     outPath = r"C:\Users\felix\Desktop\reNet"
 
 
-     imagesOutPath = r"C:\Users\felix\Desktop\reNet\images"
+     
+     
+     mapsPath = os.path.join(outPath,"maps") 
+     imagesPath = os.path.join(outPath,"images")
 
 
      tileSize = 224
@@ -236,15 +313,15 @@ if __name__ == '__main__':
         transforms.Resize(224),
         transforms.ToTensor(),
         transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5]
             )
     ])
 
-     model = build_model(pretrained=True, fine_tune=True, num_classes=3)
+     model = build_model(pretrained=True, fine_tune=True, num_classes=7)
      
      
-     checkpoint = torch.load(r'C:\Users\felix\Desktop\EffNetRes\model_23_pretrained.pth', map_location=device)
+     checkpoint = torch.load(r'D:\non_glial\v1_448_10x\model9.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      

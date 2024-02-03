@@ -24,6 +24,8 @@ def getGroupByLabel(tile, label):
             return "GBM"
         elif tile.startswith("O"):
             return "Oligo"
+        else:
+            return tile.split("-")[0]
         
     elif label == "grade":
         diagPart = tile.split("-")[0]
@@ -70,8 +72,6 @@ def getGroupByLabel(tile, label):
         
     
         
-    
-
 
 
 def sortTilesByWSI(path):
@@ -216,6 +216,47 @@ def sortByDiagnosis(wsis):
     
     return result
 
+def sortByDiag(wsis):
+    mb = []
+    lym = []
+    met = []
+    mel = []
+    men = []
+    schw = []
+    pit = []
+    
+    result = []
+    
+    for slide in wsis:
+        if slide.startswith("MB"):
+            mb.append(slide)
+        elif slide.startswith("LYM"):
+            lym.append(slide)
+        elif slide.startswith("MET"):
+            met.append(slide)
+        elif slide.startswith("MEL"):
+            mel.append(slide)
+        elif slide.startswith("MEN"):
+            men.append(slide)
+        elif slide.startswith("SCHW"):
+            schw.append(slide)
+        elif slide.startswith("PIT"):
+            pit.append(slide)
+            
+    result.append(mb)
+    result.append(lym)
+    result.append(met)
+    result.append(mel)
+    result.append(men)
+    result.append(schw)
+    result.append(pit)
+    
+    return result
+    
+    
+    
+    
+
 
 def sortByGrade(wsis):
     
@@ -266,7 +307,6 @@ def sortByRoughGrade(wsis):
     
     return result
     
-
 
 def sortByDifferentiation(wsis):
     
@@ -344,21 +384,21 @@ def copyTiles(inPath, outPath, label, trainSet, valSet, testSet, wsis):
         for image in wsis[item]:
             srcPath = os.path.join(inPath,image)
             destPath = os.path.join(itemPath,image)
-            shutil.move(srcPath,destPath)
+            shutil.copy(srcPath,destPath)
     for item in valSet:       
         itemLabel = getGroupByLabel(item,label)
         itemPath = os.path.join(valPath,itemLabel)
         for image in wsis[item]:
             srcPath = os.path.join(inPath,image)
             destPath = os.path.join(itemPath,image)
-            shutil.move(srcPath,destPath)
+            shutil.copy(srcPath,destPath)
     for item in testSet:       
         itemLabel = getGroupByLabel(item,label)
         itemPath = os.path.join(testPath,itemLabel)
         for image in wsis[item]:
             srcPath = os.path.join(inPath,image)
             destPath = os.path.join(itemPath,image)
-            shutil.move(srcPath,destPath)
+            shutil.copy(srcPath,destPath)
             
             
     
@@ -371,17 +411,13 @@ def printResult(result):
             print(file)
             
 
- 
-
-
-
 if __name__ == '__main__':
 
     argParser = argparse.ArgumentParser()
 
-    argParser.add_argument("-i", "--inPath", help="The path to the folder containing the slides split")
-    argParser.add_argument("-o", "--outPath", help="The path to where the new folder is supposed to go")
-    argParser.add_argument("-a", "--attribute", help="The path to the folder containing the slides split")
+    argParser.add_argument("-i", "--inPath", help="The path to the folder containing the slides")
+    argParser.add_argument("-o", "--outPath", help="The path to where the split is supposed to go")
+    argParser.add_argument("-a", "--attribute", help="The Atrribute to split by")
     
     
     
@@ -393,9 +429,6 @@ if __name__ == '__main__':
     
     outPath = args.outPath
     
-    
-    
-    
     wsis = sortTilesByWSI(inPath)
     
     exampleSlide = list(wsis.keys())[0]
@@ -403,13 +436,12 @@ if __name__ == '__main__':
     prep = getPreparation(exampleSlide)
     
     
-    
-    
-
+    diagList = ["MB", "MET", "LYM", "MEL" ,"MEN" , "SCHW", "PIT"]
+   
     
     if attr == "diag":
-        result = sortByDiagnosis(wsis)
-        folders = {"Astro","GBM","Oligo"}
+        result = sortByDiag(wsis)
+        folders = diagList
         
     elif attr == "idh":
         result = sortByIDHstatus(wsis)
@@ -431,10 +463,8 @@ if __name__ == '__main__':
         folders = {"glial","non-glial"}
         
              
-
-    
-    
-    trainSet , valSet, testSet = split(result,0.7 ,0.2,0.1)
+ 
+    trainSet , valSet, testSet = split(result,0.6 ,0.3,0.1)
     
     makeFolderStructure(outPath,folders)
     

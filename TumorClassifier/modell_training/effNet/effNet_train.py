@@ -7,6 +7,7 @@ from tqdm.auto import tqdm
 from effNet_model import build_model
 from effNet_datasets import get_datasets, get_data_loaders
 from effNet_utils import save_model, save_plots
+
 # construct the argument parser
 parser = argparse.ArgumentParser()
 parser.add_argument(

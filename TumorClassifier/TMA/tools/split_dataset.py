@@ -127,7 +127,7 @@ if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
 
     argParser.add_argument("-i", "--inPath", help="The path to the folder containing the slides split")
-    argParser.add_argument("-f", "--filePath", help="The path to where the new folder is supposed to go")
+    argParser.add_argument("-f", "--filePath", help="The path wtih the split file")
     argParser.add_argument("-o", "--outPath", help="The path to where the new folder is supposed to go")
 
     args = argParser.parse_args()   
