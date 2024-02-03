@@ -151,7 +151,7 @@ if __name__ == '__main__':
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     # Loss function.
 
-    pos_weight = torch.FloatTensor ([4.0]).to(device) 
+    pos_weight = torch.FloatTensor ([4.5]).to(device) 
    
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(

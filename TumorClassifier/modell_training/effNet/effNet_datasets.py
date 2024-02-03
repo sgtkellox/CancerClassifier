@@ -52,7 +52,7 @@ def get_datasets(pretrained):
     Returns the training and validation datasets along 
     with the class names.
     """
-    dataPath = r"/mnt/projects/neuropath_hd/data/splits/448_40x_ar_sn/kryo"
+    dataPath = r"/mnt/projects/neuropath_hd/data/splits/non_glial/448_10x/kryo"
 
     train_dataset = datasets.ImageFolder(
         root=os.path.join(dataPath,"train"),

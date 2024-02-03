@@ -21,8 +21,10 @@ from sklearn.metrics import accuracy_score,classification_report
     
 
 if __name__ == '__main__':
-    path = r"/mnt/projects/neuropath_hd/data/splits/448_40x_ar/kryo"
-    safePath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/mobileNetV3/448_40x_ar"
+    
+
+    path = r"/mnt/projects/neuropath_hd/data/splits/non_glial/448_10x/kryo"
+    safePath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/mobileNetV3/non_glial/448_10x"
 
     test_path = os.path.join(path,'test')
     train_path = os.path.join(path,'train')
@@ -129,7 +131,7 @@ if __name__ == '__main__':
         nn.Linear(in_features=4096, out_features=4096, bias=True),
         nn.ReLU(inplace=True),
         nn.Dropout(p=0.5, inplace=False),
-        nn.Linear(in_features=4096, out_features=3, bias=True)
+        nn.Linear(in_features=4096, out_features=7, bias=True)
       )
     model.to(device)
 

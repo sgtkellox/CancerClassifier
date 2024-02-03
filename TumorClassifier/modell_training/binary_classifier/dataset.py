@@ -6,7 +6,7 @@ import os
 # batch size
 BATCH_SIZE = 45
 
-dataPath = r"C:\Users\felix\Desktop\greySplit"
+dataPath = r"C:\Users\felix\Desktop\tmaSplit"
 
 # the training transforms
 train_transform = transforms.Compose([
@@ -14,6 +14,7 @@ train_transform = transforms.Compose([
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomVerticalFlip(p=0.5),
     #transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
+    transforms.ColorJitter(brightness=(0.5,1.5),contrast=(1),saturation=(0.5,1.5),hue=(-0.1,0.1)),
     transforms.RandomRotation(degrees=(30, 70)),
     transforms.ToTensor(),
     transforms.Normalize(
