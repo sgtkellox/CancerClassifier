@@ -158,10 +158,10 @@ if __name__ == '__main__':
                     model.eval()   # Set model to evaluate mode
                 running_loss = 0.0
                 running_corrects = 0
-                train_bar = tqdm(dataloaders[phase], file=sys.stdout)
+                #train_bar = tqdm(dataloaders[phase], file=sys.stdout)
             
             
-                for step,data in enumerate(train_bar):
+                for step,data in enumerate(dataloaders[phase]):
                     optimizer.zero_grad()
                     X,y_true = data
                     with torch.set_grad_enabled(phase == 'train'):
@@ -189,10 +189,11 @@ if __name__ == '__main__':
                 print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
             
             
-                if phase == 'val' and epoch_acc > best_acc:
-                    best_acc = epoch_acc
-                    best_model_wts = copy.deepcopy(model.state_dict())
-                    torch.save(model.state_dict(),os.path.join(safePath,"best.pth"))
+                if phase == 'val':
+                    if epoch_acc > best_acc:
+                        best_acc = epoch_acc
+                        best_model_wts = copy.deepcopy(model.state_dict())
+                    torch.save(model.state_dict(),os.path.join(safePath,"model"+str(epoch)+".pth"))
                 
     print('Best val Acc: {:4f}'.format(best_acc)) 
 

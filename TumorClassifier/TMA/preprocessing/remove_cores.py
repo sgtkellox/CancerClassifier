@@ -8,8 +8,7 @@ def getSlideName(slide):
     slideName = slideName.split(".")[0]
     return slideName
 
-def lookUpFolder(path, coreMap, thresh):
-   
+def lookUpFolder(path, coreMap, thresh): 
     for folder in os.listdir(path):
         print("looking up" + folder)
         identifier = folder.split("-")[2]
@@ -50,6 +49,11 @@ def readFile(filePath):
             
     print(coresMap)
     return coresMap
+
+def removeBadCores(tablePath,slides,binPath):
+    coreMap = readFile(tablePath)
+    lookUpFolder(slides,coreMap,binPath )
+    
     
 
             

@@ -65,7 +65,6 @@ def geoJsonExists(slide,jsonFolder):
 
 def tileAnnotatedArea(slidePath,geojson, tilePath, tileSize, level):
     
-
     slideName = getSlideName(slidePath)
     
     with open(geojson) as f:
@@ -89,9 +88,6 @@ def tileAnnotatedArea(slidePath,geojson, tilePath, tileSize, level):
     w0 = int(slide.properties["openslide.level[0].width"])
     h0 = int(slide.properties["openslide.level[0].height"])
     
-    # Create the output directory if it doesn't exist
-    os.makedirs(tilePath, exist_ok=True)
-    
     print(f"Slide w0 dimensions are {w0}x{h0}.", flush=True)
     print("Tiling...", flush=True)
     print("-----")
@@ -106,9 +102,6 @@ def tileAnnotatedArea(slidePath,geojson, tilePath, tileSize, level):
 
         # Create a polygon from the coordinates using the shapely library
         roi_polygon = Polygon(coordinates)
-
-        # Open the whole-slide image using OpenSlide
-    
 
         # Iterate through the slide to extract tiles
         for x in range(0, w0-grow,grow ):
@@ -212,7 +205,7 @@ if __name__ == '__main__':
     tileSize  = args.size
     level = args.level
 
-    diags = ['MB',"LYM" 'MEL', "MEN" ,'MET' ,"PIT","SCHW"]
+    diags = ["LYM","MB", "MEL", "MEN" ,"MET" ,"PIT","SCHW"]
     
     cpus = multiprocessing.cpu_count()-4
 
@@ -225,6 +218,8 @@ if __name__ == '__main__':
 
     procs = []
     cpus = int(cpus)
+    
+    
 
 
     for i in range(1,cpus+1):

@@ -6,7 +6,7 @@ import os
 # batch size
 BATCH_SIZE = 45
 
-dataPath = r"C:\Users\felix\Desktop\tmaSplit"
+dataPath = r"D:\split"
 
 # the training transforms
 train_transform = transforms.Compose([

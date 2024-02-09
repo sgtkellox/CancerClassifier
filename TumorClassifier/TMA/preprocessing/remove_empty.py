@@ -25,6 +25,8 @@ def thresholdGrey(imagePath, threshold):
 			os.remove(imPath)
 		
 			print("image "+ file + " removed since avg is only " + str(avg))
+			
+
 	
      
 

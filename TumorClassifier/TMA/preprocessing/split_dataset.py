@@ -118,6 +118,17 @@ def copyTiles(inPath, destPath, lines):
         
         if os.path.isfile(srcPath):
             shutil.copy(srcPath,safePath)
+            
+def split(inPath,filePath, outPath):
+    lines = readFile(filePath)
+    makeSplitFolderStructure(outPath)
+    
+    trainSet, valSet ,testSet = makeSplit(lines, 0.6, 0.3, 0.1)
+    
+    copyTiles(inPath, os.path.join(outPath,"train"), trainSet)
+    copyTiles(inPath, os.path.join(outPath,"val"), valSet)
+    copyTiles(inPath, os.path.join(outPath,"test"), testSet)
+    
         
 
        
@@ -145,9 +156,7 @@ if __name__ == '__main__':
     copyTiles(inPath, os.path.join(outPath,"val"), valSet)
     copyTiles(inPath, os.path.join(outPath,"test"), testSet)
 
-    print(str(len(trainSet)))
-    print(str(len(valSet)))
-    print(str(len(testSet)))
+   
     
     
     

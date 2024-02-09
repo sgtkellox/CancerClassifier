@@ -10,6 +10,11 @@ import argparse
 
 import os
 
+from remove_cores import removeBadCores
+from remove_empty import thresholdGrey
+
+from split_dataset import split
+
 
 
 
@@ -18,8 +23,17 @@ def getSlideName(slide):
     slideName = slide.split("\\")[-1]
     slideName = slideName.split(".")[0]
     return slideName
-    
 
+
+def centerCrop(file,outpath):
+    image = cv2.imread(file)
+    width = image.shape[1]
+    height =  image.shape[0]
+    
+    crop = image[int(height*0.2):int(height*0.8),int(width*0.2):int(width*0.8)]
+    return crop
+    
+    
 
 def processFile(file, pathOut, pathResized):
     
@@ -106,6 +120,28 @@ def testMask(file, pathOut):
     
     cv2.imwrite(safePath,result)
     
+def mixImages(pathIn, pathOut):
+    
+    bwPath = os.path.join(pathOut,"grey")
+    rgbPathOut = os.path.join(pathOut,"rgb")
+    
+    os.mkdir(bwPath)
+    os.mkdir(rgbPathOut)
+   
+    for folder in os.listdir(pathIn):
+        print("looking up" + folder)
+        identifier = folder.split("-")[2]        
+        folderPath = os.path.join(pathIn,folder)
+        for file in os.listdir(folderPath):
+            if not file.endswith(".tif"):
+                continue
+            else:
+                newFileName = os.path.join(rgbPathOut, str(identifier)+"-"+getSlideName(file)+".jpg")
+                filePath = os.path.join(folderPath,file)
+                greyPath = os.path.join(bwPath,str(identifier)+"-"+getSlideName(file)+".jpg")
+                print(greyPath)
+                processFile(filePath,newFileName,greyPath)
+    
 
 
 def processFolder(pathIn, pathOut):
@@ -113,6 +149,10 @@ def processFolder(pathIn, pathOut):
         if not file.endswith(".tif"):
             continue
         filePath = os.path.join(pathIn,file)
+        outPath = os.path.join(pathOut,file)
+        
+        crop = centerCrop(filePath,outPath)
+        
         processFile(filePath, pathOut)
         
 
@@ -121,6 +161,7 @@ def processAllFolders(pathIn, pathOut):
         print("------------------------------")
         folderpath = os.path.join(pathIn,folder)
         safePath = os.path.join(pathOut,folder)
+        removeBadCores(pathIn)
         if not os.path.isdir(safePath):
             os.mkdir(safePath)
         if os.path.isfile(folderpath):
@@ -129,10 +170,20 @@ def processAllFolders(pathIn, pathOut):
         
 
 if __name__ == '__main__':
-    pathIn = r"F:\coresTiff"
-    pathOut = r"F:\maskedCores2"
+    pathIn = r"D:\crop"
+    pathOut = r"D:\mix"
+    badCores = r"C:\Users\felix\Downloads\not_representative_cores.txt"
+    binPath = r"D:\bin"
+    labelFile = r"D:\label.txt"
+    splitPath = r"D:\split"
+    removeBadCores(badCores,pathIn,binPath)
+    mixImages(pathIn, pathOut)
+    greyPath = os.path.join(pathOut,"grey")
+    thresholdGrey(greyPath, 254.8)
+    split(greyPath,labelFile,splitPath)
     
-    processAllFolders(pathIn,pathOut)
+    
+    
     
     
         

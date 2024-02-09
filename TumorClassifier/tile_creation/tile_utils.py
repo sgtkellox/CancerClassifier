@@ -32,3 +32,6 @@ def extractIndetifierFromSlide(slide):
 
     return identifier
 
+
+    
+

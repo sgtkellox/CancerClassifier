@@ -6,7 +6,7 @@ from sklearn.metrics import f1_score
 import os
 matplotlib.style.use('ggplot')
 
-outPath = r"C:\Users\felix\Desktop\tmaModels"
+outPath = r"D:\tmaModel"
 def save_model(epoch, model, optimizer, criterion):
     
     safePath = os.path.join(outPath,str(epoch)+".pth")

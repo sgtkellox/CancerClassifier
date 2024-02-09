@@ -13,7 +13,7 @@ NUM_WORKERS = 10 # Number of parallel processes for data preparation.
 # Training transforms
 def get_train_transform(IMAGE_SIZE, pretrained):
     train_transform = transforms.Compose([
-        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+        #transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
         #transforms.ColorJitter(brightness=(0.5,1.5), contrast=(1), saturation=(0.5,1.5), hue=(-0.1,0.1)),
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
@@ -26,7 +26,7 @@ def get_train_transform(IMAGE_SIZE, pretrained):
 # Validation transforms
 def get_valid_transform(IMAGE_SIZE, pretrained):
     valid_transform = transforms.Compose([
-        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+        #transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
         transforms.ToTensor(),
         normalize_transform(pretrained)
     ])
@@ -52,7 +52,7 @@ def get_datasets(pretrained):
     Returns the training and validation datasets along 
     with the class names.
     """
-    dataPath = r"/mnt/projects/neuropath_hd/data/splits/non_glial/448_10x/kryo"
+    dataPath = r"/mnt/projects/neuropath_hd/data/splits/non_glial/224_10x/kryo"
 
     train_dataset = datasets.ImageFolder(
         root=os.path.join(dataPath,"train"),
