@@ -23,8 +23,8 @@ from sklearn.metrics import accuracy_score,classification_report
 if __name__ == '__main__':
     
 
-    path = r"/mnt/projects/neuropath_hd/data/splits/non_glial/448_10x/kryo"
-    safePath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/mobileNetV3/non_glial/448_10x"
+    path = r"/mnt/projects/neuropath_hd/data/splits/non_glial/224_10x/kryo"
+    safePath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/mobileNetV3/non_glial/224_10x"
 
     test_path = os.path.join(path,'test')
     train_path = os.path.join(path,'train')
@@ -33,14 +33,14 @@ if __name__ == '__main__':
 
     data_transforms = {
             "train": transforms.Compose([
-                transforms.Resize((224,224)), 
+                #transforms.Resize((224,224)), 
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomRotation(degrees=(-3,3)),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
                                         ]),
             "val": transforms.Compose([
-                transforms.Resize((224,224)),          
+                #transforms.Resize((224,224)),          
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406],[0.229, 0.224, 0.225])
                                        ]),

@@ -205,7 +205,7 @@ if __name__ == '__main__':
     tileSize  = args.size
     level = args.level
 
-    diags = ["LYM","MB", "MEL", "MEN" ,"MET" ,"PIT","SCHW"]
+    diags = ["A","EPN","EPNM","EPNS","GBM","H3","O", "PA", "PXA"]
     
     cpus = multiprocessing.cpu_count()-4
 

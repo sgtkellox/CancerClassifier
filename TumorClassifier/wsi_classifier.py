@@ -10,7 +10,7 @@ import torchvision.transforms as transforms
 import numpy as np
 
 from modell_training.effNet_v2.effNet_model import build_model
-from sklearn.metrics import confusion_matrix
+from sklearn  import metrics
 from sklearn.metrics import ConfusionMatrixDisplay
 
 from tile_creation.tile_utils import calcPixelPosition
@@ -37,7 +37,7 @@ def sortTilesByWSI(path):
         else:
             wsis[wsiName] = []
             wsis[wsiName].append(img)
-    print("finished sorting by wsi")
+    #print("finished sorting by wsi")
     return wsis
 
 
@@ -148,7 +148,7 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight,tileSize,
                 1.0, (100, 100, 225), 2, lineType=cv2.LINE_AA
             ) 
             safepath = os.path.join(imagesOutPath,img)
-            print("safepath "+safepath)
+            #print("safepath "+safepath)
             orig_image = cv2.cvtColor(orig_image, cv2.COLOR_BGR2RGB)
             cv2.imwrite(safepath, orig_image)
         
@@ -168,7 +168,7 @@ def getWsiDimensions(nNumber, slidePath, lvl=0):
 
         wsiNumber = wsiSplit[0] + "-" + wsiSplit[1] + "-" + wsiSplit[2] + "-" + wsiSplit[3] + "-" + wsiSplit[4]
 
-        print("slide from slide folder "+ wsiNumber)
+        #print("slide from slide folder "+ wsiNumber)
 
       
         
@@ -293,16 +293,17 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
         total += len(files)
     processed = 0
         
-    pbar = tqdm(desc = "slides processed", total = total)
-    for folder in os.listdir(tilePath):
-        if os.path.isfile(folder):
-            continue
+    #pbar = tqdm(desc = "slides processed", total = total)
+    for folder in os.listdir(tilePath):       
         folderPath = os.path.join(tilePath,folder)
+        if os.path.isfile(folderPath):
+            continue
         wsis = sortTilesByWSI(folderPath)
         for slide in wsis:
-            print("slide from tileName: "+ slide)
-            diagNR = getDiagFromSlide(slide)
-            gts.append(diagNR)
+            
+            diagName = getDiagFromSlide(slide)
+            diagNR = getIndexFromLabel(diagName)
+            gts.append(diagName)
             width, height , xshift, yShift = findWidhHeight(wsis[slide])
             
         
@@ -326,27 +327,32 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
             res = res[1:]
             
              
-            classNr = np.where(res == max(res))[0]
+            classNr = np.where(res == max(res))[0][0]
+            print("classNr " + str(classNr))
             
-            results.append(classNr)
+            results.append(labels[classNr])
             
             
-            print(res)
+            
+            #print(res)
             resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
 
             safePath = os.path.join(outPath,slide+".jpg")
 
-            print(slide + str(acc))
+            #print(slide + str(acc))
 
             resultImg = cv2.cvtColor(resultImg, cv2.COLOR_BGR2RGB)
 
             cv2.imwrite(safePath, resultImg)
             processed+=1
-            pbar.update(processed)
+            #pbar.update(processed)
+
+            print(results)
+            print(gts)
             
             
 
-    confusion_matrix = confusion_matrix(gts, results, labels)
+    confusion_matrix = metrics.confusion_matrix(gts, results, labels=labels)
     cm_display = ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = labels) 
     cm_display.plot()
     confMatrixPath = os.path.join(outPath,"confMatrix.jpg")
@@ -390,7 +396,7 @@ if __name__ == '__main__':
      model = build_model(pretrained=True, fine_tune=True, num_classes=7)
      
      
-     checkpoint = torch.load(r'D:\non_glial\v2_384_10x\model_60.pth', map_location=device)
+     checkpoint = torch.load(r'D:\non_glial\non_glial\v2_384_10x\model_60.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      
