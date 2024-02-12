@@ -10,7 +10,7 @@ from label_folder_structure import makeFolderStructure
 
 from image_utils.tile_utils import getPreparation
 
-glialList = ["A", "O", "GBM" , "PXA" , "PA", "H3"]
+glialList = ["A", "O", "GBM" , "PXA" , "PA", "H3","EPN", "EPNM","EPNS"]
 non_glialList = ["MB", "MET", "LYM", "MEL" ,"MEN" , "SCHW", "PIT"]
 
 
@@ -19,11 +19,13 @@ def getGroupByLabel(tile, label):
     
     if label == "diag":
         if tile.startswith("A"):
-            return "Astro"
+            return "A"
         elif tile.startswith("GBM"):
             return "GBM"
         elif tile.startswith("O"):
-            return "Oligo"
+            return "O"
+        elif tile.startswith("EPN"):
+            return "EPN"
         else:
             return tile.split("-")[0]
         
@@ -224,6 +226,13 @@ def sortByDiag(wsis):
     men = []
     schw = []
     pit = []
+    epn = []
+    a = []
+    o = []
+    gbm = []
+    pxa = []
+    pa = []
+    h3 = []
     
     result = []
     
@@ -242,6 +251,20 @@ def sortByDiag(wsis):
             schw.append(slide)
         elif slide.startswith("PIT"):
             pit.append(slide)
+        elif slide.startswith("A"):
+            a.append(slide)
+        elif slide.startswith("O"):
+            o.append(slide)
+        elif slide.startswith("GBM"):
+            gbm.append(slide)
+        elif slide.startswith("PA"):
+            pa.append(slide)
+        elif slide.startswith("PXA"):
+            pxa.append(slide)
+        elif slide.startswith("H3"):
+            h3.append(slide)
+        elif slide.startswith("EPN"):
+            epn.append(slide)
             
     result.append(mb)
     result.append(lym)
@@ -250,8 +273,17 @@ def sortByDiag(wsis):
     result.append(men)
     result.append(schw)
     result.append(pit)
+    result.append(a)
+    result.append(o)
+    result.append(gbm)
+    result.append(pxa)
+    result.append(pa)
+    result.append(epn)
+    result.append(h3)
     
-    return result
+    filtered_res = [s for s in result if len(s)>0]
+    
+    return filtered_res
     
     
     
@@ -436,7 +468,7 @@ if __name__ == '__main__':
     prep = getPreparation(exampleSlide)
     
     
-    diagList = ["MB", "MET", "LYM", "MEL" ,"MEN" , "SCHW", "PIT"]
+    diagList = glialList
    
     
     if attr == "diag":
