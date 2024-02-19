@@ -20,7 +20,7 @@ from modell_training.simpleNet.model import CNNModel
 
 from tqdm import tqdm
 
-labels = ["LYM","MB", "MEL", "MEN" ,"MET" ,"PIT","SCHW"]
+labels = ["A","EPN", "GBM", "H3" ,"O" ,"PA","PXA"]
 
 
 
@@ -91,11 +91,13 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight,tileSize,
     tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
 
     if imgs[0].split("-")[0].startswith("A"):
-        gt_class_name = "Astro"
+        gt_class_name = "A"
     elif imgs[0].split("-")[0].startswith("G"):
         gt_class_name = "GBM"
     elif imgs[0].split("-")[0].startswith("O"):
-        gt_class_name = "Oligo"
+        gt_class_name = "O"
+    elif imgs[0].split("-")[0].startswith("EPN"):
+        gt_class_name = "EPN"
     else:
         gt_class_name = imgs[0].split("-")[0]
 
@@ -222,6 +224,64 @@ def glialResultImage(resultsArray, slideWidth, slideHeight):
         )
            
     return result
+
+def drawGLialResultImage(resultsArray, slideWidth, slideHeight):
+    result = np.zeros((slideHeight*20+200, slideWidth*20+350, 3), np.uint8)
+    result.fill(255)
+
+    constX = 100
+    constY = 50    
+    labels = ["A","EPN", "GBM", "H3" ,"O" ,"PA","PXA"]
+    nums = [0] * 8
+     
+    diagColorMap = {
+        }
+    diagColorMap["A"] = [255,0,0]
+    diagColorMap["EPN"] = [0, 255, 0]
+    diagColorMap["GBM"] = [0, 0, 255]
+    diagColorMap["H3"] = [100, 100, 100]
+    diagColorMap["O"] = [245, 185, 66]
+    diagColorMap["PA"] = [242, 31, 137]
+    diagColorMap["PXA"] = [230, 204, 217]
+     
+     
+
+    for x in range(len(resultsArray)):
+        for y in range(len(resultsArray[0])):
+             
+            if resultsArray[x][y]==1:
+                nums[1] +=1
+                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["A"]
+            elif resultsArray[x][y]==2:
+                nums[2] +=1
+                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["EPN"]
+            elif resultsArray[x][y]==3:
+                nums[3] +=1
+                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["GBM"]
+            elif resultsArray[x][y]==4:
+                nums[4] +=1
+                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["H3"]
+            elif resultsArray[x][y]==5:
+                nums[5] +=1
+                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["O"]
+            elif resultsArray[x][y]==6:
+                nums[6] +=1
+                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["PA"]
+            elif resultsArray[x][y]==7:
+                nums[7] +=1
+                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["PXA"]
+               
+
+    for index, diag in enumerate(labels):
+
+        cv2.putText(
+        result, diag+  ": " + str(nums[labels.index(diag)+1]),
+        (index*100, 30), cv2.FONT_HERSHEY_SIMPLEX,
+        0.7, diagColorMap[diag], 2, lineType=cv2.LINE_AA
+        )
+           
+    return result
+    
     
 
 
@@ -302,7 +362,7 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
         for slide in wsis:
             
             diagName = getDiagFromSlide(slide)
-            diagNR = getIndexFromLabel(diagName)
+            #diagNR = getIndexFromLabel(diagName)
             gts.append(diagName)
             width, height , xshift, yShift = findWidhHeight(wsis[slide])
             
@@ -335,7 +395,7 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
             
             
             #print(res)
-            resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
+            resultImg = drawGLialResultImage(tileMap,slideWidth, slideHeight)
 
             safePath = os.path.join(outPath,slide+".jpg")
 
@@ -363,11 +423,11 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
 if __name__ == '__main__':
 
 
-     tilePath = r"D:\testSets\384_10x"
+     tilePath = r"E:\testSets\glial\384_10x\test"
 
      
 
-     outPath = r"D:\resultV2"
+     outPath = r"E:\resultV2G\100ON"
 
 
      
@@ -396,7 +456,7 @@ if __name__ == '__main__':
      model = build_model(pretrained=True, fine_tune=True, num_classes=7)
      
      
-     checkpoint = torch.load(r'D:\non_glial\non_glial\v2_384_10x\model_60.pth', map_location=device)
+     checkpoint = torch.load(r'E:\glial\v2_384_10x\model_100.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      
