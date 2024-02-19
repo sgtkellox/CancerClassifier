@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 matplotlib.style.use('ggplot')
 import os
 
-outPath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/effNet/non_glial/v2_384_10x"
+outPath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/effNet/glial/v2_768_40x"
 def save_model(epochs, model, optimizer, criterion, pretrained):
     """
     Function to save the trained model to disk.

@@ -423,11 +423,11 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
 if __name__ == '__main__':
 
 
-     tilePath = r"D:\testSets\glial\384_10x\test"
+     tilePath = r"E:\testSets\glial\384_10x\test"
 
      
 
-     outPath = r"D:\resultV2G\100"
+     outPath = r"E:\resultV2G\100ON"
 
 
      
@@ -456,7 +456,7 @@ if __name__ == '__main__':
      model = build_model(pretrained=True, fine_tune=True, num_classes=7)
      
      
-     checkpoint = torch.load(r'D:\glial\v2_384_10x\model_90.pth', map_location=device)
+     checkpoint = torch.load(r'E:\glial\v2_384_10x\model_100.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      
