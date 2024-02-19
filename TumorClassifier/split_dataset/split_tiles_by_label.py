@@ -468,12 +468,12 @@ if __name__ == '__main__':
     prep = getPreparation(exampleSlide)
     
     
-    diagList = glialList
+    diagList = ["A", "O", "GBM" , "PXA" , "PA", "H3","EPN", "EPNM","EPNS"]
    
     
     if attr == "diag":
         result = sortByDiag(wsis)
-        folders = diagList
+        folders = glialList
         
     elif attr == "idh":
         result = sortByIDHstatus(wsis)
