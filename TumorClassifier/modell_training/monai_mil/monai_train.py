@@ -490,7 +490,7 @@ def parse_args():
     parser.add_argument("--logdir", default="/mnt/projects/neuropath_hd/analysis/monai", help="path to log directory to store Tensorboard logs")
 
     parser.add_argument("--epochs", "--max_epochs", default=50, type=int, help="number of training epochs")
-    parser.add_argument("--batch_size", default=4, type=int, help="batch size, the number of WSI images per gpu")
+    parser.add_argument("--batch_size", default=1, type=int, help="batch size, the number of WSI images per gpu")
     parser.add_argument("--optim_lr", default=3e-5, type=float, help="initial learning rate")
 
     parser.add_argument("--weight_decay", default=0, type=float, help="optimizer weight decay")

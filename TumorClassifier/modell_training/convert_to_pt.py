@@ -19,7 +19,7 @@ model = build_model(
         num_classes=7
     )      # We now have an instance of the pretrained model
 
-model, start_epoch = load_ckp(r"D:\non_glial\non_glial\v2_384_10x\model_60.pth", model)
+model , start_epoch = load_ckp(r"D:\non_glial\non_glial\v2_384_10x\model_60.pth", model)
 r18_scripted = torch.jit.script(model)         # *** This is the TorchScript export
 dummy_input = torch.rand(1, 3, 384, 384)
 

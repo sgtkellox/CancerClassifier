@@ -31,52 +31,57 @@ test_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 
-# define training dataloader
-def get_training_dataloader(train_transform, batch_size=128, num_workers=0, shuffle=True):
-    """ return training dataloader
-    Args:
-        train_transform: transfroms for train dataset
-        path: path to cifar100 training python dataset
-        batch_size: dataloader batchsize
-        num_workers: dataloader num_works
-        shuffle: whether to shuffle 
-    Returns: train_data_loader:torch dataloader object
+def get_datasets(inPath, imageSize):
     """
+    Function to prepare the Datasets.
+    :param pretrained: Boolean, True or False.
+    Returns the training and validation datasets along 
+    with the class names.
+    """
+    
 
+    train_dataset = datasets.ImageFolder(
+        root=os.path.join(inPath,"train"),
+        transform=(train_transform(imageSize))
+    )
+# validation dataset
+    valid_dataset = datasets.ImageFolder(
+        root=os.path.join(inpath,"val"),
+        transform=(test_transform(imageSize))
+    )
+    
+
+    return train_dataset, valid_dataset, train_dataset.classes
+
+def get_training_dataloader(train_dataset,train_transform, batch_size=128, num_workers=8, shuffle=True):
+    
     transform_train = train_transform
-    cifar10_training = torchvision.datasets.CIFAR10(root='.', train=True, download=True, transform=transform_train)
-    cifar10_training_loader = DataLoader(
-        cifar10_training, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
 
-    return cifar10_training_loader
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, 
+        shuffle=True, num_workers=num_workers
+    )
+    
+    return train_loader 
+    
+
+    return dataLoader
 
 # define test dataloader
-def get_testing_dataloader(test_transform, batch_size=128, num_workers=0, shuffle=True):
-    """ return training dataloader
-    Args:
-        test_transform: transforms for test dataset
-        path: path to cifar100 test python dataset
-        batch_size: dataloader batchsize
-        num_workers: dataloader num_works
-        shuffle: whether to shuffle 
-    Returns: cifar100_test_loader:torch dataloader object
-    """
-
-    transform_test = test_transform
-    cifar10_test = torchvision.datasets.CIFAR10(root='.', train=False, download=True, transform=transform_test)
-    cifar10_test_loader = DataLoader(cifar10_test, shuffle=shuffle, num_workers=num_workers, batch_size=batch_size)
-
-    return cifar10_test_loader
+def get_testing_dataloader(valid_dataset,test_transform, batch_size=128, num_workers=8, shuffle=True):
+   valid_loader = DataLoader(
+        valid_dataset, batch_size=batch_size, 
+        shuffle=False, num_workers=num_workers
+    )
+   
+   return valid_loader
 
 
 
 
 # get dataloaders for training and testing datasets
 # don't forget to turn on internet in kernel's settings
-trainloader = get_training_dataloader(train_transform)
-testloader = get_testing_dataloader(test_transform)
 
-classes_dict = {0 : 'airplane', 1 : 'automobile', 2: 'bird', 3 : 'cat', 4 : 'deer', 5: 'dog', 6:'frog', 7 : 'horse', 8 : 'ship', 9 : 'truck'}
 
 #"""Bottleneck layers. Although each layer only produces k
 #output feature-maps, it typically has many more inputs. It
@@ -129,7 +134,7 @@ class Transition(nn.Module):
 #B stands for bottleneck layer(BN-RELU-CONV(1x1)-BN-RELU-CONV(3x3))
 #C stands for compression factor(0<=theta<=1)
 class DenseNet(nn.Module):
-    def __init__(self, block, nblocks, growth_rate=12, reduction=0.5, num_class=10):
+    def __init__(self, block, nblocks, growth_rate=12, reduction=0.5, num_class=7):
         super().__init__()
         self.growth_rate = growth_rate
 
@@ -193,139 +198,143 @@ def densenet201(activation = 'relu'):
 def densenet161(activation = 'relu'):
     return DenseNet(Bottleneck, [6,12,36,24], growth_rate=48)
 
-
-
-# number of epochs
-epochs = 50
-# learning rate
-learning_rate = 0.001
-# device to use
-# don't forget to turn on GPU on kernel's settings
-device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
-device
-
-
-
-model = densenet121()
-
-criterion = nn.CrossEntropyLoss()
-
-# set optimizer, only train the classifier parameters, feature parameters are frozen
-optimizer = Adam(model.parameters(), lr=learning_rate)
-
-
-
-train_stats = pd.DataFrame(columns = ['Epoch', 'Time per epoch', 'Avg time per step', 'Train loss', 'Train accuracy', 'Train top-3 accuracy','Test loss', 'Test accuracy', 'Test top-3 accuracy']) 
-
-#train the model
-model.to(device)
-
-steps = 0
-running_loss = 0
-for epoch in range(epochs):
+def save_model(epochs, model, optimizer, criterion):
+    """
+    Function to save the trained model to disk.
     
-    since = time.time()
-    
-    train_accuracy = 0
-    top3_train_accuracy = 0 
-    for inputs, labels in trainloader:
-        steps += 1
-        # Move input and label tensors to the default device
-        inputs, labels = inputs.to(device), labels.to(device)
-        
-        optimizer.zero_grad()
-        
-        logps = model.forward(inputs)
-        loss = criterion(logps, labels)
-        loss.backward()
-        optimizer.step()
+    """
+    path = os.path.join(outPath,"model_"+str(epochs)+".pth")
+    print("model safed to: " + path) 
+    torch.save({
+                'epoch': epochs,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': criterion,
+                }, path)
 
-        running_loss += loss.item()
-        
-        # calculate train top-1 accuracy
-        ps = torch.exp(logps)
-        top_p, top_class = ps.topk(1, dim=1)
-        equals = top_class == labels.view(*top_class.shape)
-        train_accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
-        
-        # Calculate train top-3 accuracy
-        np_top3_class = ps.topk(3, dim=1)[1].cpu().numpy()
-        target_numpy = labels.cpu().numpy()
-        top3_train_accuracy += np.mean([1 if target_numpy[i] in np_top3_class[i] else 0 for i in range(0, len(target_numpy))])
-        
-    time_elapsed = time.time() - since
+
+if __name__ == '__main__':
+
+
     
-    test_loss = 0
-    test_accuracy = 0
-    top3_test_accuracy = 0
-    model.eval()
-    with torch.no_grad():
-        for inputs, labels in testloader:
+
+    inpath = r""
+    outPath = r""
+    # number of epochs
+    epochs = 100
+    # learning rate
+    learning_rate = 0.0001
+    # device to use
+    # don't forget to turn on GPU on kernel's settings
+    device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
+
+    ImageSize = 384
+
+    inpath = r""
+    outPath = r""
+
+
+    trainloader = get_training_dataloader(train_transform)
+    testloader = get_testing_dataloader(test_transform)
+
+    classes_dict = {0 : 'Lym', 1 : 'MB', 2: 'MEL', 3 : 'MEN', 4 : 'MET', 5: 'PIT', 6:'SCHW' }
+
+
+
+    model = densenet121(weights="IMAGENET1K_V1")
+
+    criterion = nn.CrossEntropyLoss()
+
+    # set optimizer, only train the classifier parameters, feature parameters are frozen
+    optimizer = Adam(model.parameters(), lr=learning_rate)
+
+
+
+    train_stats = pd.DataFrame(columns = ['Epoch', 'Time per epoch', 'Avg time per step', 'Train loss', 'Train accuracy', 'Train top-3 accuracy','Test loss', 'Test accuracy', 'Test top-3 accuracy']) 
+
+    #train the model
+    model.to(device)
+
+    steps = 0
+    running_loss = 0
+    for epoch in range(epochs):
+    
+        since = time.time()
+    
+        train_accuracy = 0
+        top3_train_accuracy = 0 
+        for inputs, labels in trainloader:
+            steps += 1
+            # Move input and label tensors to the default device
             inputs, labels = inputs.to(device), labels.to(device)
+        
+            optimizer.zero_grad()
+        
             logps = model.forward(inputs)
-            batch_loss = criterion(logps, labels)
+            loss = criterion(logps, labels)
+            loss.backward()
+            optimizer.step()
 
-            test_loss += batch_loss.item()
-
-            # Calculate test top-1 accuracy
+            running_loss += loss.item()
+        
+            # calculate train top-1 accuracy
             ps = torch.exp(logps)
             top_p, top_class = ps.topk(1, dim=1)
             equals = top_class == labels.view(*top_class.shape)
-            test_accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
-            
-            # Calculate test top-3 accuracy
+            train_accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+        
+            # Calculate train top-3 accuracy
             np_top3_class = ps.topk(3, dim=1)[1].cpu().numpy()
             target_numpy = labels.cpu().numpy()
-            top3_test_accuracy += np.mean([1 if target_numpy[i] in np_top3_class[i] else 0 for i in range(0, len(target_numpy))])
+            top3_train_accuracy += np.mean([1 if target_numpy[i] in np_top3_class[i] else 0 for i in range(0, len(target_numpy))])
+        
+        time_elapsed = time.time() - since
+    
+        test_loss = 0
+        test_accuracy = 0
+        top3_test_accuracy = 0
+        model.eval()
+        with torch.no_grad():
+            for inputs, labels in testloader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                logps = model.forward(inputs)
+                batch_loss = criterion(logps, labels)
 
-    print(f"Epoch {epoch+1}/{epochs}.. "
-          f"Time per epoch: {time_elapsed:.4f}.. "
-          f"Average time per step: {time_elapsed/len(trainloader):.4f}.. "
-          f"Train loss: {running_loss/len(trainloader):.4f}.. "
-          f"Train accuracy: {train_accuracy/len(trainloader):.4f}.. "
-          f"Top-3 train accuracy: {top3_train_accuracy/len(trainloader):.4f}.. "
-          f"Test loss: {test_loss/len(testloader):.4f}.. "
-          f"Test accuracy: {test_accuracy/len(testloader):.4f}.. "
-          f"Top-3 test accuracy: {top3_test_accuracy/len(testloader):.4f}")
+                test_loss += batch_loss.item()
 
-    train_stats = train_stats.append({'Epoch': epoch, 'Time per epoch':time_elapsed, 'Avg time per step': time_elapsed/len(trainloader), 'Train loss' : running_loss/len(trainloader), 'Train accuracy': train_accuracy/len(trainloader), 'Train top-3 accuracy':top3_train_accuracy/len(trainloader),'Test loss' : test_loss/len(testloader), 'Test accuracy': test_accuracy/len(testloader), 'Test top-3 accuracy':top3_test_accuracy/len(testloader)}, ignore_index=True)
+                # Calculate test top-1 accuracy
+                ps = torch.exp(logps)
+                top_p, top_class = ps.topk(1, dim=1)
+                equals = top_class == labels.view(*top_class.shape)
+                test_accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+            
+                # Calculate test top-3 accuracy
+                np_top3_class = ps.topk(3, dim=1)[1].cpu().numpy()
+                target_numpy = labels.cpu().numpy()
+                top3_test_accuracy += np.mean([1 if target_numpy[i] in np_top3_class[i] else 0 for i in range(0, len(target_numpy))])
 
-    running_loss = 0
-    model.train()
+        print(f"Epoch {epoch+1}/{epochs}.. "
+              f"Time per epoch: {time_elapsed:.4f}.. "
+              f"Average time per step: {time_elapsed/len(trainloader):.4f}.. "
+              f"Train loss: {running_loss/len(trainloader):.4f}.. "
+              f"Train accuracy: {train_accuracy/len(trainloader):.4f}.. "
+              f"Top-3 train accuracy: {top3_train_accuracy/len(trainloader):.4f}.. "
+              f"Test loss: {test_loss/len(testloader):.4f}.. "
+              f"Test accuracy: {test_accuracy/len(testloader):.4f}.. "
+              f"Top-3 test accuracy: {top3_test_accuracy/len(testloader):.4f}")
+
+        train_stats = train_stats.append({'Epoch': epoch, 'Time per epoch':time_elapsed, 'Avg time per step': time_elapsed/len(trainloader), 'Train loss' : running_loss/len(trainloader), 'Train accuracy': train_accuracy/len(trainloader), 'Train top-3 accuracy':top3_train_accuracy/len(trainloader),'Test loss' : test_loss/len(testloader), 'Test accuracy': test_accuracy/len(testloader), 'Test top-3 accuracy':top3_test_accuracy/len(testloader)}, ignore_index=True)
+        save_model(epoch, model, optimizer, criterion)
+        running_loss = 0
+        model.train()
     
 
-train_stats.to_csv('train_log_DenseNet121.csv')
+    train_stats.to_csv(os.path.join(outPath,"stats.csv"));
 
 
 
 
-fig = plt.figure(figsize=(10,7))
-ax = plt.axes()
 
-plt.title("Loss")
-plt.xlabel("Epochs")
-plt.ylabel("Loss");
-
-x = range(1, len(train_stats['Train loss'].values) + 1)
-ax.plot(x, train_stats['Train loss'].values, '-g', label='train loss');
-ax.plot(x, train_stats['Test loss'].values, '-b', label='test loss');
-
-plt.legend()
-
-
-
-fig = plt.figure(figsize=(10,7))
-ax = plt.axes()
-
-plt.title("Accuracy")
-plt.xlabel("Epochs")
-plt.ylabel("Accuracy");
-
-x = range(1, len(train_stats['Train accuracy'].values) + 1)
-ax.plot(x, train_stats['Train accuracy'].values, '-g', label='train accuracy');
-ax.plot(x, train_stats['Test accuracy'].values, '-b', label='test accuracy');
-
-plt.legend()
 
 
     
