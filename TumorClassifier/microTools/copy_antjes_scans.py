@@ -12,7 +12,7 @@ import argparse
 
 
 
-def copySlides(path, outPath):
+def copySlides(path, outPath,dbPath):
     
     copiedPath = os.path.join(outPath,"copied.txt")
     if os.path.isfile(copiedPath):
@@ -27,12 +27,12 @@ def copySlides(path, outPath):
     for index, row in table.iterrows():
         
         slideName = ""
-        if not ("KI-Projekt" in row["original_file_name"] or "Ki-Projekt" in row["original_file_name"]):
+        if not ("KI-Projekt" in row["else"] or "Ki-Projekt" in row["else"]):
             continue
-        if (row["patho_id"] != "" or row["patho_id"]!= None ):
-            slideName = slideName + str(row["patho_id"]) +str(counter)
+        if (row["patho-nr"] != "" or row["patho-nr"]!= None ):
+            slideName = slideName + str(row["patho-nr"]) 
         else:
-            slideName = slideName+"nNumber" + str(counter)
+            slideName = slideName+"nNumber" 
         
         uuid  = row["uuid"]
         
@@ -40,27 +40,31 @@ def copySlides(path, outPath):
             print("file with uuid " + uuid + " is allready copied")
             continue
             
-        if not (row["staining_type"] == "" or row["staining_type"]== None ):
-            if row["staining_type"] == "HE":
+        if not (row["preparation"] == "" or row["preparation"]== None ):
+            if row["preparation"] == "HE":
                 prep = "K"
-            elif row["staining_type"] == "QUETSCH":
+            elif row["preparation"] == "QUETSCH":
                 prep = "Q"
-            elif row["staining_type"] == "TUPF":
+            elif row["preparation"] == "TUPF":
                 prep = "T"
             else:
                 prep = "wrong"
         else:
             prep = "unreadable"
             
-        slideName = slideName + "-"+prep +".svs"
+        fileName = slideName + "-"+prep +".svs"
         
-        safePath = os.path.join(outPath,slideName)
+        safePath = os.path.join(outPath,fileName)
+        
+        if os.path.isfile(safePath):
+            name = slideName + "-"+prep+str(counter) +".svs"
+            safePath = os.path.join(outPath,name)
         
           
          
-        filePath = row["file_location"] + uuid+ ".svs"
+        filePath = os.path.join(dbPath,uuid+".svs") 
         
-        
+        print(filePath)
         
         counter+=1
         
@@ -154,20 +158,16 @@ if __name__ == '__main__':
     outpath = args.outPath
     origPath = args.origPath
     
-    for table in os.listdir(tables):
-        print("----------------")
-        print("Processing table " + table)
+   
+            
+          
+            
+    
         
-        if table.endswith(".xlsx"):
+   
+    
             
-            tablePath = os.path.join(tables,table)       
-            
-            tableName = table.split(".")[0]
-        
-            tableFolder = os.path.join(outpath, tableName)
-            os.mkdir(tableFolder)
-            
-            copyScannedSlides(tablePath,tableFolder,origPath)
+    copySlides(tables,outpath,origPath)
              
         
     

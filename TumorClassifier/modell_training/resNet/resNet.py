@@ -18,34 +18,67 @@ from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
 from torchvision.models import resnet18, ResNet18_Weights
-
-
-
-
 import cv2
 
+def normalize_transform(pretrained):
+    if pretrained: # Normalization for pre-trained weights.
+        normalize = transforms.Normalize(
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5]
+            )
+    else: # Normalization when training from scratch.
+        normalize = transforms.Normalize(
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5]
+        )
+    return normalize
 
+def get_train_transform(IMAGE_SIZE, pretrained):
+    train_transform = transforms.Compose([
+        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+        #transforms.RandomRotation(10),
+        #transforms.ColorJitter(brightness=(0.5,1.5), contrast=(1), saturation=(0.5,1.5), hue=(-0.1,0.1)),
+        transforms.RandomHorizontalFlip(p=0.3),
+        transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
+        #transforms.RandomAdjustSharpness(sharpness_factor=2, p=0.5),
+        #transforms.Grayscale(3),
+        transforms.ToTensor(),
+        normalize_transform(pretrained)
+    ])
+    return train_transform
+# Validation transforms
+def get_valid_transform(IMAGE_SIZE, pretrained):
+    valid_transform = transforms.Compose([
+        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+        transforms.ToTensor(),
+        normalize_transform(pretrained)
+    ])
+    return valid_transform
 
 
 
 def trainResNet():
     
+    ImageSize = 224
+    batchSize = 250
+    learningRate  = 0.00001
+    
+    outPath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/resNet18/non-glial/v2_224_10x"
+    imagePath = r"/mnt/projects/neuropath_hd/data/splits/non_glial/224_10x/kryo"
+    trainPath = os.path.join(imagePath,"train")
+    valPath = os.path.join(imagePath,"val")
 
-
-    train_transforms = transforms.Compose([transforms.Resize(224),
-                                           transforms.ToTensor(),
-                                           ])    
-    test_transforms = transforms.Compose([transforms.Resize(224),
-                                          transforms.ToTensor(),
-                                          ])    
-    train_data = datasets.ImageFolder(r"C:\Users\felix\Desktop\kryoSplitSN\kryo\train",       
+    train_transforms =get_train_transform(ImageSize, False)  
+    test_transforms = get_valid_transform(ImageSize, False)
+    
+    train_data = datasets.ImageFolder(trainPath,       
                         transform=train_transforms)
-    test_data = datasets.ImageFolder(r"C:\Users\felix\Desktop\kryoSplitSN\kryo\val",
+    test_data = datasets.ImageFolder(valPath,
                         transform=test_transforms)    
     num_train = len(train_data)
 
-    trainloader = torch.utils.data.DataLoader(train_data, shuffle=True,num_workers=2, batch_size=50)
-    testloader = torch.utils.data.DataLoader(test_data,batch_size=50)
+    trainloader = torch.utils.data.DataLoader(train_data, shuffle=True,num_workers=8, batch_size=batchSize)
+    testloader = torch.utils.data.DataLoader(test_data,batch_size=batchSize)
  
 
 
@@ -68,11 +101,11 @@ def trainResNet():
     model.fc = nn.Sequential(nn.Linear(fc_inputs, 256),
                                      nn.ReLU(),
                                      nn.Dropout(0.5),
-                                     nn.Linear(256, 3),
+                                     nn.Linear(256, 7),
                                      nn.LogSoftmax(dim=1))
     criterion = nn.CrossEntropyLoss()
     print(model)
-    optimizer = optim.Adam(model.fc.parameters(), lr=0.0001)
+    optimizer = optim.Adam(model.fc.parameters(), lr=learningRate)
     model.to(device)
 
     epochs = 1000
@@ -115,12 +148,13 @@ def trainResNet():
                       f"Test accuracy: {accuracy/len(testloader):.3f}")
                 running_loss = 0
                 model.train()
-        modelPath = os.path.join(r'C:\Users\felix\Desktop\resNet\models',"model"+str(epoch) + ".pth")
+        modelPath = os.path.join(outPath,"model"+str(epoch) + ".pth")
         torch.save(model, modelPath)
         plt.plot(train_losses, label='Training loss')
         plt.plot(test_losses, label='Validation loss')
         plt.legend(frameon=False)
-        plt.savefig(r'C:\Users\felix\Desktop\resNet\loss.png', bbox_inches='tight')
+        plt.savefig(os.path.join(outPath,"loss.png"), bbox_inches='tight')
+        plt.close()
 
 def predict_image(image,test_transforms,device, model):
     image_tensor = test_transforms(image).float()

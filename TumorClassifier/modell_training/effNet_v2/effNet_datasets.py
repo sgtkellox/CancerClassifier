@@ -9,7 +9,7 @@ IMAGE_SIZE = 384 # Image size of resize when applying transforms.
 BATCH_SIZE = 40
 NUM_WORKERS = 10 # Number of parallel processes for data preparation.
 
-dataRoot = r"/mnt/projects/neuropath_hd/data/splits/glial/all/768_40x/kryo"
+dataRoot = r"/mnt/projects/neuropath_hd/data/splits/non_glial/384_10x_k1/kryo"
 
 # Training transforms
 def get_train_transform(IMAGE_SIZE, pretrained):
@@ -37,8 +37,8 @@ def get_valid_transform(IMAGE_SIZE, pretrained):
 def normalize_transform(pretrained):
     if pretrained: # Normalization for pre-trained weights.
         normalize = transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
+            mean=[0.5, 0.5, 0.5],
+            std=[0.5, 0.5, 0.5]
             )
     else: # Normalization when training from scratch.
         normalize = transforms.Normalize(

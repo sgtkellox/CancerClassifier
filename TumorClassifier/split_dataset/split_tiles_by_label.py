@@ -468,7 +468,7 @@ if __name__ == '__main__':
     prep = getPreparation(exampleSlide)
     
     
-    diagList = glialList
+    diagList = non_glialList
    
     
     if attr == "diag":

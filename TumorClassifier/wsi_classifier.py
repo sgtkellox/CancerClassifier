@@ -56,7 +56,7 @@ def extractXCoordinate(tile):
     x = int(splitP1[1])
     return x
 
-def findWidhHeight(images):
+def findWidhHeight(images,tileSize):
     minX = 100000
     maxX = 0
     minY = 100000
@@ -88,7 +88,7 @@ def findWidhHeight(images):
 
 def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight,tileSize, xshift, yshift, model, transform,showImages=False):
 
-    tileMap = np.zeros((slideHeight, slideWidth, 1), np.uint8)
+    tileMap = np.zeros((slideHeight+1, slideWidth+1, 1), np.uint8)
 
     if imgs[0].split("-")[0].startswith("A"):
         gt_class_name = "A"
@@ -364,7 +364,7 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
             diagName = getDiagFromSlide(slide)
             #diagNR = getIndexFromLabel(diagName)
             gts.append(diagName)
-            width, height , xshift, yShift = findWidhHeight(wsis[slide])
+            width, height , xshift, yShift = findWidhHeight(wsis[slide],tileSize)
             
         
             print("dims of slide " + slide + " with dimensions w: " + str(width) +" and "+ str(height))
@@ -423,11 +423,11 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
 if __name__ == '__main__':
 
 
-     tilePath = r"E:\testSets\glial\384_10x\test"
+     tilePath = r"E:\testSets\smear\glial\test"
 
      
 
-     outPath = r"E:\resultV2G\100ON"
+     outPath = r"E:\result\smear\glial\v2_384_10x_m20"
 
 
      
@@ -445,7 +445,7 @@ if __name__ == '__main__':
 
      transform = transforms.Compose([
         transforms.ToPILImage(),
-        #transforms.Resize(384),
+        #transforms.Resize((384,384)),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.5, 0.5, 0.5],
@@ -456,7 +456,7 @@ if __name__ == '__main__':
      model = build_model(pretrained=True, fine_tune=True, num_classes=7)
      
      
-     checkpoint = torch.load(r'E:\glial\v2_384_10x\model_100.pth', map_location=device)
+     checkpoint = torch.load(r'E:\smear\glial\v2_384_10x\model_20.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      

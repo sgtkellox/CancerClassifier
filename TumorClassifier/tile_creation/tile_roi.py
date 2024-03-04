@@ -165,6 +165,33 @@ def tileKryos(slidePath, tilePath, jsonPath,tileSize, level):
             elif not geoJsonExists(slide,jsonPath) and split[4]=="Q2":
                 filePath = os.path.join(slidePath,slide)
                 make_tiles(filePath, tilePath, tileSize, level)
+                
+def tileSmears(slidePath, tilePath, jsonPath,tileSize, level):
+    for slide in os.listdir(slidePath):       
+        split = slide.split(".")[0].split("-")              
+        if split[3] =="Q":            
+            if geoJsonExists(slide,jsonPath):
+                json = getJsonPath(slide,jsonPath)
+                filePath = os.path.join(slidePath,slide)
+                tileAnnotatedArea(filePath,json, tilePath, tileSize,level)
+            else:
+                filePath = os.path.join(slidePath,slide)
+                make_tiles(filePath, tilePath, tileSize, level)
+                
+def tileSmearSubset(slidePath, tilePath, jsonPath,tileSize, level, subset):
+     for slide in subset:       
+        split = slide.split(".")[0].split("-")      
+           
+        if split[3] =="Q":
+            jsonxists = geoJsonExists(slide,jsonPath)
+            if jsonxists:
+                json = getJsonPath(slide,jsonPath)
+                filePath = os.path.join(slidePath,slide)
+                tileAnnotatedArea(filePath,json, tilePath, tileSize,level)
+            elif not jsonxists and (len(split)<5 or split[4] == "Q2"): 
+                filePath = os.path.join(slidePath,slide)
+                print(filePath)
+                make_tiles(filePath, tilePath, tileSize, level)
                     
                     
                     
@@ -205,7 +232,7 @@ if __name__ == '__main__':
     tileSize  = args.size
     level = args.level
 
-    diags = ["A2","A3","A4","EPN","EPNM","EPNS","GBM","H3","O2","O3","PA", "PXA"]
+    diags = ["A","A2","A3","A4","EPN","EPNM","EPNS","GBM","H3","O","O2","O3","PA", "PXA"]
     
     cpus = multiprocessing.cpu_count()-4
 
@@ -225,7 +252,7 @@ if __name__ == '__main__':
     for i in range(1,cpus+1):
         subSet = filteredImages[int((i-1)*numImages/cpus):int(i*numImages/cpus)]
         printInfo(subSet)
-        tilingProc = multiprocessing.Process(target=tileKryosSubset,args=(slides, tiles, jsons,tileSize, level, subSet))
+        tilingProc = multiprocessing.Process(target=tileSmearSubset,args=(slides, tiles, jsons,tileSize, level, subSet))
         procs.append(tilingProc)
         tilingProc.start()
         
