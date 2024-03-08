@@ -70,6 +70,22 @@ def lookUp(table,wsi):
             
     return app
 
+def lookUp2(table,wsi):
+    nNumber = extractNNumberFromWsi(wsi)
+    prep = extraxtPrepInfo(wsi)
+    
+    for index, row in table.iterrows():
+        app = "fail"
+        if row["Patho-Nr."] == nNumber:
+            diag = row["Entity"]
+            app = diag
+           
+            name = app +"-" +nNumber
+            name = name + "-" +prep+".svs"
+            return name
+            
+    return app
+
 
 def lookUpWithUUid(uuid, table, counter):
     
@@ -133,13 +149,14 @@ def processFolder(path, table):
     notFound = []
     for wsi in os.listdir(path):
         if wsi.endswith(".svs"):     
-            fullName = lookUp(table,wsi)
+            fullName = lookUp2(table,wsi)
             
             if fullName == "fail":
                 notFound.append(wsi)
             else:
                 oldPath = os.path.join(path,wsi)
                 newPath = os.path.join(path,fullName)
+                print(newPath)
                 os.rename(oldPath,newPath)
     if len(notFound)!=0:
         notFoundPath = os.path.join(path,"notFound.txt")
@@ -186,9 +203,9 @@ if __name__ == '__main__':
     
     
 
-    correctName(path)
+    #correctName(path)
     
-    time.sleep(10)
+    #time.sleep(10)
 
     processFolder(path,table) 
    

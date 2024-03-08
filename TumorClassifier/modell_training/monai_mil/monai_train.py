@@ -23,7 +23,7 @@ import torch.multiprocessing as mp
 import torch.nn as nn
 from monai.config import KeysCollection
 from monai.data import Dataset, load_decathlon_datalist
-from monai.data.wsi_reader import WSIReader
+from monai.data.wsi_reader import WSIReader,OpenSlideWSIReader
 from monai.metrics import Cumulative, CumulativeAverage
 from monai.networks.nets import milmodel
 from monai.transforms import (
@@ -284,7 +284,7 @@ def main_worker(gpu, args):
 
     train_transform = Compose(
         [
-            LoadImaged(keys=["image"], reader=WSIReader, backend="cucim", dtype=np.uint8, level=1, image_only=True),
+            LoadImaged(keys=["image"], reader=WSIReader,backend="openslide", dtype=np.uint8, level=0, image_only=True),
             LabelEncodeIntegerGraded(keys=["label"], num_classes=args.num_classes),
             RandGridPatchd(
                 keys=["image"],
@@ -305,7 +305,7 @@ def main_worker(gpu, args):
 
     valid_transform = Compose(
         [
-            LoadImaged(keys=["image"], reader=WSIReader, backend="cucim", dtype=np.uint8, level=1, image_only=True),
+            LoadImaged(keys=["image"], reader=WSIReader, backend="openslide", dtype=np.uint8, level=0, image_only=True),
             LabelEncodeIntegerGraded(keys=["label"], num_classes=args.num_classes),
             GridPatchd(
                 keys=["image"],
@@ -471,7 +471,7 @@ def parse_args():
     parser.add_argument(
         "--data_root", default="/mnt/projects/neuropath_hd/data/slides/kryoQ2", help="path to root folder of images"
     )
-    parser.add_argument("--dataset_json", default="/mnt/projects/neuropath_hd/data/splits/monai/mil_split1.json", type=str, help="path to dataset json file")
+    parser.add_argument("--dataset_json", default="/mnt/projects/neuropath_hd/data/splits/glial/diff-gliomas/monai/mil_split1.json", type=str, help="path to dataset json file")
 
     parser.add_argument("--num_classes", default=3, type=int, help="number of output classes")
     parser.add_argument("--mil_mode", default="att_trans", help="MIL algorithm")
@@ -502,7 +502,7 @@ def parse_args():
         type=int,
         help="run validation after this number of epochs, default 1 to run every epoch",
     )
-    parser.add_argument("--workers", default=2, type=int, help="number of workers for data loading")
+    parser.add_argument("--workers", default=0, type=int, help="number of workers for data loading")
 
     # for multigpu
     parser.add_argument("--distributed", action="store_true", help="use multigpu training, recommended")

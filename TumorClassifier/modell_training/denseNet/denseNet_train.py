@@ -14,9 +14,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import SGD,Adam,lr_scheduler
-from torch.utils.data import random_split
+
 import torchvision
-from torchvision import transforms, datasets
+from torchvision import transforms, datasets,models 
 from torch.utils.data import DataLoader
 
 # define transformations for train
@@ -42,21 +42,19 @@ def get_datasets(inPath, imageSize):
 
     train_dataset = datasets.ImageFolder(
         root=os.path.join(inPath,"train"),
-        transform=(train_transform(imageSize))
+        transform=train_transform
     )
 # validation dataset
     valid_dataset = datasets.ImageFolder(
         root=os.path.join(inpath,"val"),
-        transform=(test_transform(imageSize))
+        transform=test_transform
     )
     
 
     return train_dataset, valid_dataset, train_dataset.classes
 
-def get_training_dataloader(train_dataset,train_transform, batch_size=128, num_workers=8, shuffle=True):
+def get_training_dataloader(train_dataset, batch_size=128, num_workers=8, shuffle=True):
     
-    transform_train = train_transform
-
     train_loader = DataLoader(
         train_dataset, batch_size=batch_size, 
         shuffle=True, num_workers=num_workers
@@ -65,10 +63,10 @@ def get_training_dataloader(train_dataset,train_transform, batch_size=128, num_w
     return train_loader 
     
 
-    return dataLoader
+    
 
 # define test dataloader
-def get_testing_dataloader(valid_dataset,test_transform, batch_size=128, num_workers=8, shuffle=True):
+def get_testing_dataloader(valid_dataset, batch_size=128, num_workers=8, shuffle=True):
    valid_loader = DataLoader(
         valid_dataset, batch_size=batch_size, 
         shuffle=False, num_workers=num_workers
@@ -77,126 +75,6 @@ def get_testing_dataloader(valid_dataset,test_transform, batch_size=128, num_wor
    return valid_loader
 
 
-
-
-# get dataloaders for training and testing datasets
-# don't forget to turn on internet in kernel's settings
-
-
-#"""Bottleneck layers. Although each layer only produces k
-#output feature-maps, it typically has many more inputs. It
-#has been noted in [37, 11] that a 1×1 convolution can be in-
-#troduced as bottleneck layer before each 3×3 convolution
-#to reduce the number of input feature-maps, and thus to
-#improve computational efficiency."""
-class Bottleneck(nn.Module):
-    def __init__(self, in_channels, growth_rate):
-        super().__init__()
-        #"""In  our experiments, we let each 1×1 convolution 
-        #produce 4k feature-maps."""
-        inner_channel = 4 * growth_rate
-
-        #"""We find this design especially effective for DenseNet and 
-        #we refer to our network with such a bottleneck layer, i.e., 
-        #to the BN-ReLU-Conv(1×1)-BN-ReLU-Conv(3×3) version of H ` , 
-        #as DenseNet-B."""
-        self.bottle_neck = nn.Sequential(
-            nn.BatchNorm2d(in_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels, inner_channel, kernel_size=1, bias=False),
-            nn.BatchNorm2d(inner_channel),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(inner_channel, growth_rate, kernel_size=3, padding=1, bias=False)
-        )
-
-    def forward(self, x):
-        return torch.cat([x, self.bottle_neck(x)], 1)
-
-#"""We refer to layers between blocks as transition
-#layers, which do convolution and pooling."""
-class Transition(nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super().__init__()
-        #"""The transition layers used in our experiments 
-        #consist of a batch normalization layer and an 1×1 
-        #convolutional layer followed by a 2×2 average pooling 
-        #layer""".
-        self.down_sample = nn.Sequential(
-            nn.BatchNorm2d(in_channels),
-            nn.Conv2d(in_channels, out_channels, 1, bias=False),
-            nn.AvgPool2d(2, stride=2)
-        )
-
-    def forward(self, x):
-        return self.down_sample(x)
-
-#DesneNet-BC
-#B stands for bottleneck layer(BN-RELU-CONV(1x1)-BN-RELU-CONV(3x3))
-#C stands for compression factor(0<=theta<=1)
-class DenseNet(nn.Module):
-    def __init__(self, block, nblocks, growth_rate=12, reduction=0.5, num_class=7):
-        super().__init__()
-        self.growth_rate = growth_rate
-
-        #"""Before entering the first dense block, a convolution 
-        #with 16 (or twice the growth rate for DenseNet-BC) 
-        #output channels is performed on the input images."""
-        inner_channels = 2 * growth_rate
-
-        #For convolutional layers with kernel size 3×3, each 
-        #side of the inputs is zero-padded by one pixel to keep 
-        #the feature-map size fixed.
-        self.conv1 = nn.Conv2d(3, inner_channels, kernel_size=3, padding=1, bias=False) 
-
-        self.features = nn.Sequential()
-
-        for index in range(len(nblocks) - 1):
-            self.features.add_module("dense_block_layer_{}".format(index), self._make_dense_layers(block, inner_channels, nblocks[index]))
-            inner_channels += growth_rate * nblocks[index]
-
-            #"""If a dense block contains m feature-maps, we let the 
-            #following transition layer generate θm output feature-
-            #maps, where 0 < θ ≤ 1 is referred to as the compression 
-            #fac-tor.
-            out_channels = int(reduction * inner_channels) # int() will automatic floor the value
-            self.features.add_module("transition_layer_{}".format(index), Transition(inner_channels, out_channels))
-            inner_channels = out_channels
-
-        self.features.add_module("dense_block{}".format(len(nblocks) - 1), self._make_dense_layers(block, inner_channels, nblocks[len(nblocks)-1]))
-        inner_channels += growth_rate * nblocks[len(nblocks) - 1]
-        self.features.add_module('bn', nn.BatchNorm2d(inner_channels))
-        self.features.add_module('activation', nn.ReLU(inplace=True))
-
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-
-        self.linear = nn.Linear(inner_channels, num_class)
-
-    def forward(self, x):
-        output = self.conv1(x)
-        output = self.features(output)
-        output = self.avgpool(output)
-        output = output.view(output.size()[0], -1)
-        output = self.linear(output)
-        return output
-
-    def _make_dense_layers(self, block, in_channels, nblocks):
-        dense_block = nn.Sequential()
-        for index in range(nblocks):
-            dense_block.add_module('bottle_neck_layer_{}'.format(index), block(in_channels, self.growth_rate))
-            in_channels += self.growth_rate
-        return dense_block
-
-def densenet121(activation = 'relu'):
-    return DenseNet(Bottleneck, [6,12,24,16], growth_rate=32)
-
-def densenet169(activation = 'relu'):
-    return DenseNet(Bottleneck, [6,12,32,32], growth_rate=32)
-
-def densenet201(activation = 'relu'):
-    return DenseNet(Bottleneck, [6,12,48,32], growth_rate=32)
-
-def densenet161(activation = 'relu'):
-    return DenseNet(Bottleneck, [6,12,36,24], growth_rate=48)
 
 def save_model(epochs, model, optimizer, criterion):
     """
@@ -218,8 +96,8 @@ if __name__ == '__main__':
 
     
 
-    inpath = r""
-    outPath = r""
+    inpath = r"/mnt/projects/neuropath_hd/data/splits/non_glial/256_10x/kryo"
+    outPath = r"/mnt/projects/neuropath_hd/data/modelCollection/kryo/denseNet/non-glial/256_10x"
     # number of epochs
     epochs = 100
     # learning rate
@@ -228,25 +106,38 @@ if __name__ == '__main__':
     # don't forget to turn on GPU on kernel's settings
     device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
 
-    ImageSize = 384
+    ImageSize = 256
 
-    inpath = r""
-    outPath = r""
+  
+    
+    trainSet, valSet, classes = get_datasets(inpath,ImageSize)
 
 
-    trainloader = get_training_dataloader(train_transform)
-    testloader = get_testing_dataloader(test_transform)
+    trainloader = get_training_dataloader(trainSet)
+    testloader = get_testing_dataloader(valSet)
 
     classes_dict = {0 : 'Lym', 1 : 'MB', 2: 'MEL', 3 : 'MEN', 4 : 'MET', 5: 'PIT', 6:'SCHW' }
 
 
 
-    model = densenet121(weights="IMAGENET1K_V1")
+    model = models.densenet121(weights="IMAGENET1K_V1")
+    for param in model.parameters():
+        param.require_grad = False
+    fc = nn.Sequential(
+        nn.Linear(1024, 460),
+        nn.ReLU(),
+        nn.Dropout(0.4),
+    
+        nn.Linear(460,7),
+        nn.LogSoftmax(dim=1)
+    
+    )
+    model.classifier = fc
 
     criterion = nn.CrossEntropyLoss()
 
     # set optimizer, only train the classifier parameters, feature parameters are frozen
-    optimizer = Adam(model.parameters(), lr=learning_rate)
+    optimizer = Adam(model.classifier.parameters(), lr=learning_rate)
 
 
 
@@ -323,13 +214,13 @@ if __name__ == '__main__':
               f"Test accuracy: {test_accuracy/len(testloader):.4f}.. "
               f"Top-3 test accuracy: {top3_test_accuracy/len(testloader):.4f}")
 
-        train_stats = train_stats.append({'Epoch': epoch, 'Time per epoch':time_elapsed, 'Avg time per step': time_elapsed/len(trainloader), 'Train loss' : running_loss/len(trainloader), 'Train accuracy': train_accuracy/len(trainloader), 'Train top-3 accuracy':top3_train_accuracy/len(trainloader),'Test loss' : test_loss/len(testloader), 'Test accuracy': test_accuracy/len(testloader), 'Test top-3 accuracy':top3_test_accuracy/len(testloader)}, ignore_index=True)
+        #train_stats = train_stats.append({'Epoch': epoch, 'Time per epoch':time_elapsed, 'Avg time per step': time_elapsed/len(trainloader), 'Train loss' : running_loss/len(trainloader), 'Train accuracy': train_accuracy/len(trainloader), 'Train top-3 accuracy':top3_train_accuracy/len(trainloader),'Test loss' : test_loss/len(testloader), 'Test accuracy': test_accuracy/len(testloader), 'Test top-3 accuracy':top3_test_accuracy/len(testloader)}, ignore_index=True)
         save_model(epoch, model, optimizer, criterion)
         running_loss = 0
         model.train()
     
 
-    train_stats.to_csv(os.path.join(outPath,"stats.csv"));
+    #train_stats.to_csv(os.path.join(outPath,"stats.csv"));
 
 
 
