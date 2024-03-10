@@ -502,7 +502,7 @@ def parse_args():
         type=int,
         help="run validation after this number of epochs, default 1 to run every epoch",
     )
-    parser.add_argument("--workers", default=0, type=int, help="number of workers for data loading")
+    parser.add_argument("--workers", default=1, type=int, help="number of workers for data loading")
 
     # for multigpu
     parser.add_argument("--distributed", action="store_true", help="use multigpu training, recommended")

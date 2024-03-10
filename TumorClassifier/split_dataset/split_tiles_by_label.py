@@ -473,7 +473,7 @@ if __name__ == '__main__':
     
     if attr == "diag":
         result = sortByDiag(wsis)
-        folders = glialList
+        folders = non_glialList
         
     elif attr == "idh":
         result = sortByIDHstatus(wsis)
