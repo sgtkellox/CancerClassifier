@@ -35,9 +35,8 @@ def train(model, trainloader, optimizer, criterion):
         # Forward pass.
         outputs = model(image)
         # Calculate the loss.
-
-        
-        loss = criterion(outputs, labels)
+        labels = labels.float()
+        loss = criterion(outputs, labels.view(-1, 1))
         train_running_loss += loss.item()
         # Calculate the accuracy.
         _, preds = torch.max(outputs.data, 1)
@@ -73,7 +72,8 @@ def validate(model, testloader, criterion):
             # Forward pass.
             outputs = model(image)
             # Calculate the loss.
-            loss = criterion(outputs, labels)
+            labels = labels.float()
+            loss = criterion(outputs, labels.view(-1, 1))
             valid_running_loss += loss.item()
             # Calculate the accuracy.
             _, preds = torch.max(outputs.data, 1)
