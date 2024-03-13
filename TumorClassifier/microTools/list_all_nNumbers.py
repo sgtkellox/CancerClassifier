@@ -3,6 +3,7 @@ import os
 import pandas as pd
 
 def extractNNumberFromWsi(wsi):
+    print(wsi)
     wsi = wsi.split(".")[0]
     split = wsi.split("-")
     nNumber = split[1]+"-"+split[2]
@@ -26,23 +27,30 @@ def listFromFolder(slidePath,safePath):
     
 
      with open(safePath, 'a') as doc:
+        
+        allreadyAdded = []
 
         for slide in os.listdir(slidePath):
-            nNumber = extractNNumberFromWsi(slide)
-            doc.write(nNumber)
-            doc.write('\n')
+            if slide.endswith(".svs"):
+                nNumber = extractNNumberFromWsi(slide)
+                if nNumber in allreadyAdded:
+                    continue
+                else:
+                    allreadyAdded.append(nNumber)
+                    doc.write(nNumber)
+                    doc.write('\n')
             
 
 if __name__ == '__main__':
-    tablePath = r"C:\Users\felix\Downloads\All_New_Cases_SS_11_entities(1).xlsx"
-    filesP1 = r"D:\slides\kryoQ1"
-    filesP2 = r"D:\slides\kryoQ2"
+    #tablePath = r"C:\Users\felix\Downloads\All_New_Cases_SS_11_entities(1).xlsx"
+    filesP1 = r"F:\newDownload"
+    #filesP2 = r"D:\slides\kryoQ2"
     
     safePath = r"C:\Users\felix\Desktop\list.txt"
     
-    listFromTable(tablePath,safePath)
+    #listFromTable(tablePath,safePath)
     listFromFolder(filesP1,safePath)
-    listFromFolder(filesP2,safePath)
+    #listFromFolder(filesP2,safePath)
         
     
 

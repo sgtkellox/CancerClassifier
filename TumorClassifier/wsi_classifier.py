@@ -20,7 +20,10 @@ from modell_training.simpleNet.model import CNNModel
 
 from tqdm import tqdm
 
-labels = ["A","EPN", "GBM", "H3" ,"O" ,"PA","PXA"]
+glial_labels = ["A","EPN", "GBM", "H3" ,"O" ,"PA","PXA"]
+ng_labels = ["LYM", "MB", "MEL", "MEN" ,"MET" , "PIT", "SCHW"]
+
+labels = ng_labels
 
 
 
@@ -231,7 +234,7 @@ def drawGLialResultImage(resultsArray, slideWidth, slideHeight):
 
     constX = 100
     constY = 50    
-    labels = ["A","EPN", "GBM", "H3" ,"O" ,"PA","PXA"]
+    labels = glial_labels
     nums = [0] * 8
      
     diagColorMap = {
@@ -293,7 +296,7 @@ def drawResultImage(resultsArray, slideWidth, slideHeight):
 
      constX = 100
      constY = 50    
-     labels = ["LYM","MB", "MEL", "MEN" ,"MET" ,"PIT","SCHW"]
+     labels = ng_labels
      nums = [0] * 8
      
      diagColorMap = {
@@ -395,7 +398,7 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
             
             
             #print(res)
-            resultImg = drawGLialResultImage(tileMap,slideWidth, slideHeight)
+            resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
 
             safePath = os.path.join(outPath,slide+".jpg")
 
@@ -423,11 +426,11 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
 if __name__ == '__main__':
 
 
-     tilePath = r"E:\testSets\smear\glial\test"
+     tilePath = r"E:\testSets\kryo\non-glial\384_10x"
 
      
 
-     outPath = r"E:\result\smear\glial\v2_384_10x_m20"
+     outPath = r"E:\resultV2\non-glial\384_10x_m60"
 
 
      
@@ -456,7 +459,7 @@ if __name__ == '__main__':
      model = build_model(pretrained=True, fine_tune=True, num_classes=7)
      
      
-     checkpoint = torch.load(r'E:\smear\glial\v2_384_10x\model_20.pth', map_location=device)
+     checkpoint = torch.load(r'E:\models\kryo\non-glial\v2_384_10x\model_60.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      
