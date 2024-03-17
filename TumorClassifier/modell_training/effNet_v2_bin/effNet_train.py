@@ -39,7 +39,7 @@ def train(model, trainloader, optimizer, criterion):
         loss = criterion(outputs, labels.view(-1, 1))
         train_running_loss += loss.item()
         # Calculate the accuracy.
-        _, preds = torch.max(outputs.data, 1)
+        preds = torch.argmax(outputs, 1)
         train_running_correct += (preds == labels).sum().item()
         # Backpropagation
         loss.backward()
@@ -66,6 +66,7 @@ def validate(model, testloader, criterion):
             if i%1000 == 0:
                 print("step " +str(i))
             
+
             image, labels = data
             image = image.to(device)
             labels = labels.to(device)
@@ -76,7 +77,7 @@ def validate(model, testloader, criterion):
             loss = criterion(outputs, labels.view(-1, 1))
             valid_running_loss += loss.item()
             # Calculate the accuracy.
-            _, preds = torch.max(outputs.data, 1)
+            preds = torch.argmax(outputs, 1)
             valid_running_correct += (preds == labels).sum().item()
         
     # Loss and accuracy for the complete epoch.

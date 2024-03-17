@@ -103,7 +103,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-lr', '--learning-rate', type=float,
-        dest='learning_rate', default=0.000001,
+        dest='learning_rate', default=0.0001,
         help='Learning rate for training the model'
     )
     args = vars(parser.parse_args())
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     model = build_model(
         pretrained=True, 
         fine_tune=True, 
-        num_classes=len(dataset_classes)
+        num_classes=2
     )
 
     #model = nn.DataParallel(model)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     # Optimizer.
     optimizer = optim.Adam(model.parameters(), lr=lr)
     # Loss function.
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.CrossEntropyLoss()
     # Lists to keep track of losses and accuracies.
     train_loss, valid_loss = [], []
     train_acc, valid_acc = [], []
