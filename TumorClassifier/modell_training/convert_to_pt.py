@@ -10,7 +10,7 @@ def load_ckp(modelPath, model):
     
     return model, checkpoint['epoch']
 
-modelPath=r""
+modelPath=r"E:\models\kryo\glial\v2_384_10x\model_100.pth"
 
 
 model = build_model(
@@ -19,7 +19,7 @@ model = build_model(
         num_classes=7
     )      # We now have an instance of the pretrained model
 
-model , start_epoch = load_ckp(r"E:\models\kryo\non-glial\v2_384_10x\model_60.pth", model)
+model , start_epoch = load_ckp(modelPath, model)
 model.eval()
 r18_scripted = torch.jit.script(model)         # *** This is the TorchScript export
 dummy_input = torch.rand(1, 3, 384, 384)
@@ -35,4 +35,4 @@ scripted_top5 = F.softmax(scripted_output, dim=1).topk(5).indices
 print('Python model top 5 results:\n  {}'.format(unscripted_top5))
 print('TorchScript model top 5 results:\n  {}'.format(scripted_top5))
 
-r18_scripted.save(r'E:\models\kryo\non-glial\384_10x_pt\model_60.pt')
+r18_scripted.save(r'E:\models\kryo\glial\v2_384_10x_pt\model_100.pt')

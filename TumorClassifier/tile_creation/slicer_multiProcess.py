@@ -10,11 +10,11 @@ import argparse
 from make_tiles import make_tiles
 
 
-def sliceSubset(pathIn, pathOut, slides,size):
+def sliceSubset(pathIn, pathOut, slides,size, level ):
     for slide in slides:
         if slide.endswith(".svs"):
              filePath = os.path.join(pathIn,slide)      
-             make_tiles(filePath, pathOut, size = size)
+             make_tiles(filePath, pathOut, size = size, level = level)
 
 def printInfo(subSet):
     print("started processing subset" +str(i)+ " of " + str(cpus)+"\n")
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     for i in range(1,cpus+1):
         subSet = images[int((i-1)*numImages/cpus):int(i*numImages/cpus)]
         printInfo(subSet)
-        tilingProc = multiprocessing.Process(target=sliceSubset,args=(pathIn,pathOut,subSet,size))
+        tilingProc = multiprocessing.Process(target=sliceSubset,args=(pathIn,pathOut,subSet,size, level))
         procs.append(tilingProc)
         tilingProc.start()
         

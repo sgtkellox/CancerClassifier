@@ -25,7 +25,7 @@ parser.add_argument(
 )
 args = vars(parser.parse_args())
 
-dataPath = r"C:\Users\felix\Desktop\split"
+#dataPath = r"C:\Users\felix\Desktop\split"
 
 
 # Training function.
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     
    
     # Learning_parameters. 
-    lr = 1e-3
+    lr = 1e-4
     epochs = 1000
     device = ('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Computation device: {device}")
@@ -151,9 +151,9 @@ if __name__ == '__main__':
     #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     # Loss function.
 
-    pos_weight = torch.FloatTensor ([4.5]).to(device) 
+    #pos_weight = torch.FloatTensor ([4.5]).to(device) 
    
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    criterion = nn.BCEWithLogitsLoss()
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer, 
         T_0=25, 

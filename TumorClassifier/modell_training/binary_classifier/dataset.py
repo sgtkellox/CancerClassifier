@@ -4,9 +4,9 @@ from torch.utils.data import DataLoader
 
 import os
 # batch size
-BATCH_SIZE = 45
+BATCH_SIZE = 128
 
-dataPath = r"D:\split"
+dataPath = r"/mnt/projects/neuropath_hd/data/splits/smear/other/smear/"
 
 # the training transforms
 train_transform = transforms.Compose([
@@ -45,11 +45,11 @@ valid_dataset = datasets.ImageFolder(
 # training data loaders
 train_loader = DataLoader(
     train_dataset, batch_size=BATCH_SIZE, shuffle=True,
-    num_workers=4, pin_memory=True
+    num_workers=8, pin_memory=True
 )
 # validation data loaders
 valid_loader = DataLoader(
     valid_dataset, batch_size=BATCH_SIZE, shuffle=False,
-    num_workers=4, pin_memory=True
+    num_workers=8, pin_memory=True
 )
 

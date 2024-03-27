@@ -14,7 +14,7 @@ from sklearn  import metrics
 from sklearn.metrics import ConfusionMatrixDisplay
 
 from tile_creation.tile_utils import calcPixelPosition
-from tile_creation.slide_utils import getDiagFromSlide
+
 
 from modell_training.simpleNet.model import CNNModel
 
@@ -23,8 +23,8 @@ from tqdm import tqdm
 glial_labels = ["A","EPN", "GBM", "H3" ,"O" ,"PA","PXA"]
 ng_labels = ["LYM", "MB", "MEL", "MEN" ,"MET" , "PIT", "SCHW"]
 
-labels = ng_labels
 
+labels = ["glial","non-glial"]
 
 
 def sortTilesByWSI(path):
@@ -42,6 +42,22 @@ def sortTilesByWSI(path):
             wsis[wsiName].append(img)
     #print("finished sorting by wsi")
     return wsis
+
+
+def getDiagFromSlide(slide):
+    if slide.split("-")[0].startswith("A"):
+        gt_class_name = "glial"
+    elif slide.split("-")[0].startswith("G"):
+        gt_class_name = "glial"
+    elif slide.split("-")[0].startswith("O"):
+        gt_class_name = "glial"
+    elif slide.split("-")[0].startswith("EPN"):
+        gt_class_name = "glial"
+    elif slide.split("-")[0] in ng_labels:
+        gt_class_name = "non-glial"
+    elif slide.split("-")[0] in glial_labels:
+        gt_class_name = "glial"
+    return gt_class_name
 
 
 def getIndexFromLabel(label):
@@ -94,15 +110,18 @@ def makeTileMap(tilePath, imgs, imagesOutPath ,slideWidth, slideHeight,tileSize,
     tileMap = np.zeros((slideHeight+1, slideWidth+1, 1), np.uint8)
 
     if imgs[0].split("-")[0].startswith("A"):
-        gt_class_name = "A"
+        gt_class_name = "glial"
     elif imgs[0].split("-")[0].startswith("G"):
-        gt_class_name = "GBM"
+        gt_class_name = "glial"
     elif imgs[0].split("-")[0].startswith("O"):
-        gt_class_name = "O"
+        gt_class_name = "glial"
     elif imgs[0].split("-")[0].startswith("EPN"):
-        gt_class_name = "EPN"
-    else:
-        gt_class_name = imgs[0].split("-")[0]
+        gt_class_name = "glial"
+    elif imgs[0].split("-")[0] in ng_labels:
+        gt_class_name = "non-glial"
+    elif imgs[0].split("-")[0] in glial_labels:
+        gt_class_name = "glial"
+        
 
    
     right = 0;
@@ -189,44 +208,7 @@ def getWsiDimensions(nNumber, slidePath, lvl=0):
     return 0, 0
 
 
-def glialResultImage(resultsArray, slideWidth, slideHeight):
-    result = np.zeros((slideHeight*20+200, slideWidth*20+350, 3), np.uint8)
-    result.fill(255)
 
-    constX = 100
-    constY = 50    
-    
-    nums = [0] * 4
-     
-    diagColorMap = {
-        }
-    diagColorMap["A"] = [255,0,0]
-    diagColorMap["GBM"] = [0, 255, 0]
-    diagColorMap["O"] = [0, 0, 255]
-    
-    for x in range(len(resultsArray)):
-        for y in range(len(resultsArray[0])):
-             
-            if resultsArray[x][y]==1:
-                nums[1] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["A"]
-            elif resultsArray[x][y]==2:
-                nums[2] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["GBM"]
-            elif resultsArray[x][y]==3:
-                nums[3] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["O"]
-               
-
-    for index, diag in enumerate(labels):
-
-        cv2.putText(
-        result, diag+  ": " + str(nums[labels.index(diag)+1]),
-        (index*100, 30), cv2.FONT_HERSHEY_SIMPLEX,
-        0.7, diagColorMap[diag], 2, lineType=cv2.LINE_AA
-        )
-           
-    return result
 
 def drawGLialResultImage(resultsArray, slideWidth, slideHeight):
     result = np.zeros((slideHeight*20+200, slideWidth*20+350, 3), np.uint8)
@@ -234,18 +216,14 @@ def drawGLialResultImage(resultsArray, slideWidth, slideHeight):
 
     constX = 100
     constY = 50    
-    labels = glial_labels
-    nums = [0] * 8
+    
+    nums = [0] * 3
      
     diagColorMap = {
         }
-    diagColorMap["A"] = [255,0,0]
-    diagColorMap["EPN"] = [0, 255, 0]
-    diagColorMap["GBM"] = [0, 0, 255]
-    diagColorMap["H3"] = [100, 100, 100]
-    diagColorMap["O"] = [245, 185, 66]
-    diagColorMap["PA"] = [242, 31, 137]
-    diagColorMap["PXA"] = [230, 204, 217]
+    diagColorMap["glial"] = [255,0,0]
+    diagColorMap["non-glial"] = [0, 255, 0]
+    
      
      
 
@@ -254,34 +232,14 @@ def drawGLialResultImage(resultsArray, slideWidth, slideHeight):
              
             if resultsArray[x][y]==1:
                 nums[1] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["A"]
+                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["glial"]
             elif resultsArray[x][y]==2:
                 nums[2] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["EPN"]
-            elif resultsArray[x][y]==3:
-                nums[3] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["GBM"]
-            elif resultsArray[x][y]==4:
-                nums[4] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["H3"]
-            elif resultsArray[x][y]==5:
-                nums[5] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["O"]
-            elif resultsArray[x][y]==6:
-                nums[6] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["PA"]
-            elif resultsArray[x][y]==7:
-                nums[7] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["PXA"]
+                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["non-glial"]
+            
                
 
-    for index, diag in enumerate(labels):
-
-        cv2.putText(
-        result, diag+  ": " + str(nums[labels.index(diag)+1]),
-        (index*100, 30), cv2.FONT_HERSHEY_SIMPLEX,
-        0.7, diagColorMap[diag], 2, lineType=cv2.LINE_AA
-        )
+    
            
     return result
     
@@ -289,63 +247,7 @@ def drawGLialResultImage(resultsArray, slideWidth, slideHeight):
 
 
                
-def drawResultImage(resultsArray, slideWidth, slideHeight):
-      
-     result = np.zeros((slideHeight*20+200, slideWidth*20+350, 3), np.uint8)
-     result.fill(255)
 
-     constX = 100
-     constY = 50    
-     labels = ng_labels
-     nums = [0] * 8
-     
-     diagColorMap = {
-         }
-     diagColorMap["LYM"] = [255,0,0]
-     diagColorMap["MB"] = [0, 255, 0]
-     diagColorMap["MEL"] = [0, 0, 255]
-     diagColorMap["MEN"] = [100, 100, 100]
-     diagColorMap["MET"] = [245, 185, 66]
-     diagColorMap["PIT"] = [242, 31, 137]
-     diagColorMap["SCHW"] = [230, 204, 217]
-     
-     
-
-     for x in range(len(resultsArray)):
-         for y in range(len(resultsArray[0])):
-             
-             if resultsArray[x][y]==1:
-                nums[1] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["LYM"]
-             elif resultsArray[x][y]==2:
-                nums[2] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["MB"]
-             elif resultsArray[x][y]==3:
-                nums[3] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["MEL"]
-             elif resultsArray[x][y]==4:
-                nums[4] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["MEN"]
-             elif resultsArray[x][y]==5:
-                nums[5] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["MET"]
-             elif resultsArray[x][y]==6:
-                nums[6] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["PIT"]
-             elif resultsArray[x][y]==7:
-                nums[7] +=1
-                result[x*20+constX:x*20+20+constX,y*20+constY:y*20+20+constY] = diagColorMap["SCHW"]
-               
-
-     for index, diag in enumerate(labels):
-
-            cv2.putText(
-            result, diag+  ": " + str(nums[labels.index(diag)+1]),
-            (index*100, 30), cv2.FONT_HERSHEY_SIMPLEX,
-            0.7, diagColorMap[diag], 2, lineType=cv2.LINE_AA
-            )
-           
-     return result
 
 
 def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, tileSize):
@@ -398,7 +300,7 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
             
             
             #print(res)
-            resultImg = drawResultImage(tileMap,slideWidth, slideHeight)
+            resultImg = drawGLialResultImage(tileMap,slideWidth, slideHeight)
 
             safePath = os.path.join(outPath,slide+".jpg")
 
@@ -426,11 +328,11 @@ def makeClassificationRun(tilePath, outPath, imagesOutPath, model, transform, ti
 if __name__ == '__main__':
 
 
-     tilePath = r"E:\testSets\smear\non-glial\384_10x\test"
+     tilePath = r"E:\testSets\smear\other\test"
 
      
 
-     outPath = r"E:\result\smear\non-glial\384_10x_m144"
+     outPath = r"E:\result\smear\other\384_10x"
 
 
      
@@ -456,10 +358,10 @@ if __name__ == '__main__':
             )
     ])
 
-     model = build_model(pretrained=True, fine_tune=True, num_classes=7)
+     model = build_model(pretrained=True, fine_tune=True, num_classes=2)
      
      
-     checkpoint = torch.load(r'E:\models\smear\non-glial\384_10x\v2_384_10x\model_144.pth', map_location=device)
+     checkpoint = torch.load(r'E:\models\smear\other\load\model_64.pth', map_location=device)
 
      model.load_state_dict(checkpoint['model_state_dict'])
      

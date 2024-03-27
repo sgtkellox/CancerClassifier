@@ -30,16 +30,19 @@ def train(model, trainloader, optimizer, criterion):
         
         image, labels = data
         image = image.to(device)
-        labels = labels.to(device)
+        
+        labels = labels.float().to(device)
+        
         optimizer.zero_grad()
         # Forward pass.
         outputs = model(image)
         # Calculate the loss.
-        labels = labels.float()
-        loss = criterion(outputs, labels.view(-1, 1))
+        
+        
+        loss = criterion(outputs, labels.unsqueeze(1))
         train_running_loss += loss.item()
         # Calculate the accuracy.
-        _, preds = torch.max(outputs.data, 1)
+        _, preds = torch.max(outputs.data)
         train_running_correct += (preds == labels).sum().item()
         # Backpropagation
         loss.backward()
@@ -68,12 +71,15 @@ def validate(model, testloader, criterion):
             
             image, labels = data
             image = image.to(device)
-            labels = labels.to(device)
+            
+            labels = labels.float().to(device)
+            
+                
             # Forward pass.
             outputs = model(image)
             # Calculate the loss.
-            labels = labels.float()
-            loss = criterion(outputs, labels.view(-1, 1))
+            
+            loss = criterion(outputs,labels.unsqueeze(1))
             valid_running_loss += loss.item()
             # Calculate the accuracy.
             _, preds = torch.max(outputs.data, 1)
@@ -129,7 +135,7 @@ if __name__ == '__main__':
     model = build_model(
         pretrained=True, 
         fine_tune=True, 
-        num_classes=len(dataset_classes)
+        num_classes=1
     )
 
     #model = nn.DataParallel(model)
