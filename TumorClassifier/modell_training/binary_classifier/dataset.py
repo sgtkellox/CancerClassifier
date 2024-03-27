@@ -11,8 +11,8 @@ dataPath = r"/mnt/projects/neuropath_hd/data/splits/smear/other/smear/"
 # the training transforms
 train_transform = transforms.Compose([
     transforms.Resize((224, 224)),
-    transforms.RandomHorizontalFlip(p=0.5),
-    transforms.RandomVerticalFlip(p=0.5),
+    #transforms.RandomHorizontalFlip(p=0.5),
+    #transforms.RandomVerticalFlip(p=0.5),
     #transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
     transforms.ColorJitter(brightness=(0.5,1.5),contrast=(1),saturation=(0.5,1.5),hue=(-0.1,0.1)),
     transforms.RandomRotation(degrees=(30, 70)),

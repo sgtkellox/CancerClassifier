@@ -103,7 +103,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-lr', '--learning-rate', type=float,
-        dest='learning_rate', default=0.000001,
+        dest='learning_rate', default=0.0001,
         help='Learning rate for training the model'
     )
     args = vars(parser.parse_args())
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     model = build_model(
         pretrained=True, 
         fine_tune=True, 
-        num_classes=7
+        num_classes=2
     )
 
     #model = nn.DataParallel(model)

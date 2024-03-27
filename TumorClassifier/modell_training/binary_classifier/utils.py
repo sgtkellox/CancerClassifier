@@ -6,7 +6,7 @@ from sklearn.metrics import f1_score
 import os
 matplotlib.style.use('ggplot')
 
-outPath = r"/mnt/projects/neuropath_hd/data/modelCollection/smear/simpleBin/384_10x"
+outPath = r"D:\tmaModel"
 def save_model(epoch, model, optimizer, criterion):
     
     safePath = os.path.join(outPath,str(epoch)+".pth")
